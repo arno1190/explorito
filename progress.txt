@@ -1,0 +1,26 @@
+# Progress Tracker
+
+## Current State: IN_PROGRESS
+
+## Mission: Deploy-Ready App (Polish + Content + Deploy)
+
+### Phase Status
+
+| Phase | Description | Status |
+|-------|-------------|--------|
+| 1 | Project Foundation (git, cleanup) | ⏳ TODO |
+| 2 | Bug Fixing & Verification | ⏳ TODO |
+| 3 | UX Polish (animations, sounds) | ⏳ TODO |
+| 4 | Content (Math + Decouverte) | ⏳ TODO |
+| 5 | Production Config (Scaleway deploy) | ⏳ TODO |
+
+### Previous Mission (COMPLETED 2026-02-02)
+- Role-based routing: DONE
+- Admin interface: DONE
+- Enhanced parent interface: DONE
+- Child interface (Duolingo-style): DONE
+- Bug fixes (403, Promise.all): DONE
+
+---
+
+## Iteration Log

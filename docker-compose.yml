@@ -1,0 +1,61 @@
+services:
+  # Base de données PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: explorito_postgres
+    environment:
+      POSTGRES_USER: explorito
+      POSTGRES_PASSWORD: explorito123
+      POSTGRES_DB: explorito
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U explorito"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend FastAPI
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: explorito_backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8005:8000"
+    environment:
+      DATABASE_URL: postgresql://explorito:explorito123@postgres:5432/explorito
+      SECRET_KEY: your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Frontend Next.js
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: explorito_frontend
+    command: pnpm dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3005:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8005
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: explorito_network
