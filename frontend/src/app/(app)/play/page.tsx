@@ -61,8 +61,39 @@ export default function PlayPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 p-4">
+        {/* Header skeleton */}
+        <div className="max-w-4xl mx-auto mb-8">
+          <div className="bg-white rounded-3xl shadow-lg p-6 flex items-center justify-between">
+            <div>
+              <div className="h-8 w-48 bg-gray-200 animate-pulse rounded-lg mb-2" />
+              <div className="h-5 w-64 bg-gray-200 animate-pulse rounded-lg" />
+            </div>
+            <div className="flex gap-4">
+              <div className="h-16 w-20 bg-yellow-100 animate-pulse rounded-2xl" />
+              <div className="h-16 w-20 bg-orange-100 animate-pulse rounded-2xl" />
+            </div>
+          </div>
+        </div>
+        {/* Mascot skeleton */}
+        <div className="max-w-4xl mx-auto mb-8">
+          <div className="bg-gradient-to-r from-purple-300 to-pink-300 rounded-3xl shadow-lg p-6 h-28 animate-pulse" />
+        </div>
+        {/* Subjects grid skeleton */}
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className="bg-white rounded-3xl shadow-lg p-8 animate-pulse"
+              >
+                <div className="h-14 w-14 bg-gray-200 rounded-full mx-auto mb-3" />
+                <div className="h-6 w-24 bg-gray-200 rounded-lg mx-auto mb-2" />
+                <div className="h-4 w-16 bg-gray-200 rounded-lg mx-auto" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

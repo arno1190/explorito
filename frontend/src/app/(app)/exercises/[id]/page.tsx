@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ExerciseRenderer } from "@/components/exercises/ExerciseRenderer";
 import { Confetti } from "@/components/gamification/Confetti";
+import { XPGain } from "@/components/gamification/XPGain";
+import { ExerciseFeedback } from "@/components/exercises/ExerciseFeedback";
+import { useSound } from "@/hooks/useSound";
 import { exercisesApi, lessonsApi } from "@/lib/api";
 import type {
   Exercise,
@@ -32,7 +35,9 @@ export default function ExercisePage() {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<ExerciseResult | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showXPGain, setShowXPGain] = useState(false);
   const [startTime] = useState(Date.now());
+  const { play } = useSound();
 
   // Determine the child ID - either from impersonation or the logged-in child user
   const childId =
@@ -151,6 +156,7 @@ export default function ExercisePage() {
 
       if (submissionResult.is_correct) {
         setShowConfetti(true);
+        setShowXPGain(true);
       }
     } catch (err) {
       setError("Impossible de soumettre la réponse");
@@ -260,53 +266,26 @@ export default function ExercisePage() {
       )}
 
       {result && (
-        <Card className="p-6 mb-6">
-          <div className="text-center">
-            {result.is_correct ? (
-              <div className="space-y-4">
-                <div className="flex justify-center">
-                  <div className="bg-green-100 p-6 rounded-full">
-                    <Trophy className="h-16 w-16 text-green-600" />
-                  </div>
-                </div>
-                <h2 className="text-3xl font-bold text-green-800">Bravo!</h2>
-                <p className="text-lg text-green-700">
-                  Excellente réponse! Continue comme ça!
-                </p>
-                <div className="flex items-center justify-center gap-6 text-lg">
-                  <div className="bg-yellow-100 px-4 py-2 rounded-full">
-                    <span className="font-bold text-yellow-800">
-                      +{exercise?.points || 10} points
-                    </span>
-                  </div>
-                  <div className="bg-blue-100 px-4 py-2 rounded-full">
-                    <span className="font-bold text-blue-800">
-                      +{exercise?.points || 10} XP
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold text-orange-800">
-                  Pas tout à fait!
-                </h2>
-                <p className="text-lg text-orange-700">
-                  Ce n&apos;est pas la bonne réponse. Essaie encore!
-                </p>
-                <Button
-                  onClick={() => {
+        <div className="mb-6">
+          <ExerciseFeedback
+            isCorrect={result.is_correct}
+            onNext={
+              result.is_correct
+                ? handleNextExercise
+                : () => {
                     setResult(null);
                     setAnswer(null);
-                  }}
-                  variant="outline"
-                >
-                  Réessayer
-                </Button>
-              </div>
-            )}
-          </div>
-        </Card>
+                  }
+            }
+          />
+        </div>
+      )}
+
+      {showXPGain && (
+        <XPGain
+          xp={exercise?.points || 10}
+          onComplete={() => setShowXPGain(false)}
+        />
       )}
 
       {result && result.is_correct && (
