@@ -2,9 +2,9 @@
 Schémas Pydantic pour l'authentification
 """
 
-from datetime import datetime, date
-from typing import Optional
+from datetime import date, datetime
 from uuid import UUID
+
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from app.models.user import UserRole
@@ -16,17 +16,11 @@ class UserRegister(BaseModel):
     """
 
     email: EmailStr = Field(..., description="Adresse email de l'utilisateur")
-    password: str = Field(
-        ..., min_length=8, description="Mot de passe (minimum 8 caractères)"
-    )
-    display_name: str = Field(
-        ..., min_length=2, max_length=100, description="Nom d'affichage"
-    )
-    role: UserRole = Field(default=UserRole.CHILD, description="Rôle de l'utilisateur")
-    date_of_birth: Optional[date] = Field(None, description="Date de naissance")
-    parent_email: Optional[EmailStr] = Field(
-        None, description="Email du parent (pour les enfants)"
-    )
+    password: str = Field(..., min_length=8, description="Mot de passe (minimum 8 caractères)")
+    display_name: str = Field(..., min_length=2, max_length=100, description="Nom d'affichage")
+    role: UserRole = Field(default=UserRole.PARENT, description="Rôle de l'utilisateur")
+    date_of_birth: date | None = Field(None, description="Date de naissance")
+    parent_email: EmailStr | None = Field(None, description="Email du parent (pour les enfants)")
 
     @field_validator("password")
     @classmethod
@@ -61,9 +55,7 @@ class UserLogin(BaseModel):
     password: str = Field(..., description="Mot de passe")
 
     class Config:
-        json_schema_extra = {
-            "example": {"email": "alice@example.com", "password": "SecurePass123"}
-        }
+        json_schema_extra = {"example": {"email": "alice@example.com", "password": "SecurePass123"}}
 
 
 class Token(BaseModel):
@@ -72,7 +64,7 @@ class Token(BaseModel):
     """
 
     access_token: str = Field(..., description="Token d'accès JWT")
-    refresh_token: Optional[str] = Field(None, description="Token de rafraîchissement")
+    refresh_token: str | None = Field(None, description="Token de rafraîchissement")
     token_type: str = Field(default="bearer", description="Type de token")
     expires_in: int = Field(..., description="Durée de validité en secondes")
 
@@ -104,8 +96,8 @@ class ProfileResponse(BaseModel):
 
     id: UUID
     display_name: str
-    avatar_url: Optional[str] = None
-    date_of_birth: Optional[date] = None
+    avatar_url: str | None = None
+    date_of_birth: date | None = None
     is_child: bool
     created_at: datetime
 
@@ -123,7 +115,7 @@ class UserResponse(BaseModel):
     role: UserRole
     is_active: bool
     created_at: datetime
-    profile: Optional[ProfileResponse] = None
+    profile: ProfileResponse | None = None
 
     class Config:
         from_attributes = True
@@ -154,6 +146,4 @@ class RefreshTokenRequest(BaseModel):
     refresh_token: str = Field(..., description="Token de rafraîchissement")
 
     class Config:
-        json_schema_extra = {
-            "example": {"refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}
-        }
+        json_schema_extra = {"example": {"refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}}
