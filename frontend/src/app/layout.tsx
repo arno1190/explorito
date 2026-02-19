@@ -1,21 +1,18 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Nunito } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const nunito = Nunito({
+  variable: "--font-nunito",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["400", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
-  title: "Explorito - Discover Age-Appropriate Activities",
-  description: "Find and track developmental activities for your children",
+  title: "Explorito - Apprends en t'amusant !",
+  description:
+    "Application éducative ludique pour les enfants du CP. Apprends le français, les maths et bien plus !",
 };
 
 export default function RootLayout({
@@ -24,10 +21,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html lang="fr">
+      <body className={`${nunito.variable} antialiased`}>
         <Providers>{children}</Providers>
       </body>
     </html>
