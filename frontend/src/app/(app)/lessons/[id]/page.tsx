@@ -104,7 +104,7 @@ export default function LessonDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="animate-[candy-spin-slow_1s_linear_infinite] rounded-full h-12 w-12 border-4 border-candy-purple-light border-t-candy-purple"></div>
       </div>
     );
   }
@@ -113,7 +113,7 @@ export default function LessonDetailPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <p className="text-red-600 font-semibold">
+          <p className="text-candy-red font-semibold">
             {error || "Leçon introuvable"}
           </p>
           <button
@@ -162,15 +162,17 @@ export default function LessonDetailPage() {
             {(lesson.order_index || 0) + 1}
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{lesson.name}</h1>
-            <p className="text-gray-500">{lesson.description}</p>
+            <h1 className="text-3xl font-bold text-candy-text">
+              {lesson.name}
+            </h1>
+            <p className="text-candy-text-muted">{lesson.description}</p>
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="bg-white rounded-xl p-4 border shadow-sm">
+        <div className="bg-candy-surface rounded-xl p-4 border border-candy-border candy-shadow">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-candy-text">
               Progression: {completedCount}/{totalExercises} exercices
             </span>
             <span
@@ -181,9 +183,9 @@ export default function LessonDetailPage() {
             </span>
           </div>
           <Progress value={progressPercent} className="h-3" />
-          <div className="flex items-center justify-between mt-3 text-sm text-gray-500">
+          <div className="flex items-center justify-between mt-3 text-sm text-candy-text-muted">
             <div className="flex items-center gap-1">
-              <Star className="h-4 w-4 text-yellow-500" />
+              <Star className="h-4 w-4 text-candy-yellow fill-candy-yellow" />
               <span>{totalPoints} points disponibles</span>
             </div>
             {lesson.estimated_duration && (
@@ -198,7 +200,7 @@ export default function LessonDetailPage() {
 
       {/* Exercises List */}
       <div className="space-y-4">
-        <h2 className="text-xl font-bold text-gray-900">
+        <h2 className="text-xl font-bold text-candy-text">
           Exercices ({exercises.length})
         </h2>
 
@@ -211,7 +213,7 @@ export default function LessonDetailPage() {
               key={exercise.id}
               className={`p-5 transition-all hover:shadow-lg cursor-pointer border-2 ${
                 isCompleted
-                  ? "bg-green-50 border-green-300"
+                  ? "bg-candy-green-light border-candy-green"
                   : "hover:border-primary"
               }`}
               onClick={() => router.push(`/exercises/${exercise.id}`)}
@@ -220,7 +222,7 @@ export default function LessonDetailPage() {
                 {/* Exercise Number / Status */}
                 <div
                   className={`flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg ${
-                    isCompleted ? "bg-green-500 text-white" : "text-white"
+                    isCompleted ? "bg-candy-green text-white" : "text-white"
                   }`}
                   style={!isCompleted ? { backgroundColor: subject.color } : {}}
                 >
@@ -236,7 +238,7 @@ export default function LessonDetailPage() {
                   <h3 className="text-lg font-bold mb-1 truncate">
                     {exercise.title || `Exercice ${index + 1}`}
                   </h3>
-                  <p className="text-gray-600 text-sm line-clamp-2">
+                  <p className="text-candy-text-muted text-sm line-clamp-2">
                     {exercise.question}
                   </p>
                 </div>
@@ -244,8 +246,8 @@ export default function LessonDetailPage() {
                 {/* Exercise Meta */}
                 <div className="flex-shrink-0 text-right">
                   <div className="flex items-center gap-1 justify-end mb-1">
-                    <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                    <span className="font-bold text-yellow-600">
+                    <Star className="h-4 w-4 text-candy-yellow fill-candy-yellow" />
+                    <span className="font-bold text-candy-yellow">
                       {points} pts
                     </span>
                   </div>
@@ -267,8 +269,8 @@ export default function LessonDetailPage() {
 
       {exercises.length === 0 && (
         <div className="text-center py-12">
-          <PlayCircle className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-600">
+          <PlayCircle className="h-16 w-16 text-candy-border mx-auto mb-4" />
+          <p className="text-candy-text-muted">
             Aucun exercice disponible pour le moment
           </p>
         </div>

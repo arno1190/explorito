@@ -192,7 +192,7 @@ export default function ExercisePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="animate-[candy-spin-slow_1s_linear_infinite] rounded-full h-12 w-12 border-4 border-candy-purple-light border-t-candy-purple"></div>
       </div>
     );
   }
@@ -201,7 +201,7 @@ export default function ExercisePage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <p className="text-red-600 font-semibold">
+          <p className="text-candy-red font-semibold">
             {error || "Exercice introuvable"}
           </p>
           <button
@@ -230,12 +230,12 @@ export default function ExercisePage() {
 
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-candy-text">
             {exercise.title || `Exercice ${(exercise.order_index || 0) + 1}`}
           </h1>
-          <div className="flex items-center gap-2 bg-yellow-100 px-4 py-2 rounded-full">
-            <Star className="h-5 w-5 text-yellow-600 fill-yellow-600" />
-            <span className="font-bold text-yellow-800">
+          <div className="flex items-center gap-2 bg-candy-yellow-light px-4 py-2 rounded-full">
+            <Star className="h-5 w-5 text-candy-yellow fill-candy-yellow" />
+            <span className="font-bold text-candy-text">
               {exercise.points || 10} pts
             </span>
           </div>

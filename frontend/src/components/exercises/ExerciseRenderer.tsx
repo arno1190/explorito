@@ -156,7 +156,7 @@ export function ExerciseRenderer({
     case "multiple_choice":
       if (!content.options) {
         return (
-          <div className="text-red-500 p-4 bg-red-50 rounded">
+          <div className="text-candy-red p-4 bg-candy-red-light rounded-xl">
             Configuration exercice invalide: options manquantes (type:{" "}
             {exercise.type})
           </div>
@@ -255,7 +255,7 @@ export function ExerciseRenderer({
     case "drag_and_drop":
       if (!content.items || !content.targets) {
         return (
-          <div className="text-red-500 p-4 bg-red-50 rounded">
+          <div className="text-candy-red p-4 bg-candy-red-light rounded-xl">
             Configuration exercice invalide: items ou targets manquants (type:{" "}
             {exercise.type})
           </div>
@@ -277,7 +277,7 @@ export function ExerciseRenderer({
     case "fill_blanks":
       if (!content.text || !content.blanks) {
         return (
-          <div className="text-red-500 p-4 bg-red-50 rounded">
+          <div className="text-candy-red p-4 bg-candy-red-light rounded-xl">
             Configuration exercice invalide: text ou blanks manquants (type:{" "}
             {exercise.type}, content: {JSON.stringify(content).slice(0, 100)}
             ...)
@@ -326,7 +326,7 @@ export function ExerciseRenderer({
     case "image_selection":
       if (!content.images) {
         return (
-          <div className="text-red-500 p-4 bg-red-50 rounded">
+          <div className="text-candy-red p-4 bg-candy-red-light rounded-xl">
             Configuration exercice invalide: images manquantes (type:{" "}
             {exercise.type})
           </div>
@@ -351,7 +351,7 @@ export function ExerciseRenderer({
 
     default:
       return (
-        <div className="text-orange-500 p-4 bg-orange-50 rounded">
+        <div className="text-candy-orange p-4 bg-candy-orange-light rounded-xl">
           Type d&apos;exercice non reconnu: &quot;{exercise.type}&quot;
         </div>
       );

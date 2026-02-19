@@ -34,12 +34,14 @@ export function StreakCelebration({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="animate-streak-pop rounded-3xl bg-gradient-to-b from-orange-400 to-red-500 p-8 text-center shadow-2xl">
-        <div className="animate-streak-fire mb-2 text-7xl">🔥</div>
+      <div className="rounded-3xl bg-gradient-to-b from-candy-orange to-candy-red p-8 text-center candy-shadow-lg animate-[candy-pop_0.5s_ease-out_forwards]">
+        <div className="mb-2 text-7xl animate-[candy-wiggle_0.8s_ease-in-out_infinite]">
+          🔥
+        </div>
         <h2 className="mb-2 text-4xl font-extrabold text-white drop-shadow-lg">
           {streakDays} jours !
         </h2>
-        <p className="text-lg font-semibold text-orange-100">
+        <p className="text-lg font-semibold text-candy-orange-light">
           Super série ! Continue comme ça !
         </p>
         <button
@@ -47,47 +49,11 @@ export function StreakCelebration({
             setVisible(false);
             onClose?.();
           }}
-          className="mt-4 rounded-full bg-white/20 px-6 py-2 text-sm font-bold text-white hover:bg-white/30"
+          className="mt-4 rounded-xl bg-white/20 px-6 py-2 text-sm font-bold text-white hover:bg-white/30"
         >
           Merci !
         </button>
       </div>
-      <style jsx>{`
-        @keyframes streak-pop {
-          0% {
-            opacity: 0;
-            transform: scale(0.5);
-          }
-          60% {
-            transform: scale(1.1);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        @keyframes streak-fire {
-          0%,
-          100% {
-            transform: scale(1) rotate(0deg);
-          }
-          25% {
-            transform: scale(1.15) rotate(-5deg);
-          }
-          50% {
-            transform: scale(1.05) rotate(5deg);
-          }
-          75% {
-            transform: scale(1.15) rotate(-3deg);
-          }
-        }
-        .animate-streak-pop {
-          animation: streak-pop 0.5s ease-out forwards;
-        }
-        .animate-streak-fire {
-          animation: streak-fire 0.8s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   );
 }

@@ -156,7 +156,7 @@ export default function DashboardPage() {
               </DialogHeader>
               <div className="space-y-4 py-4">
                 {error && (
-                  <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
+                  <div className="bg-candy-red-light text-candy-red p-3 rounded-xl text-sm">
                     {error}
                   </div>
                 )}
@@ -211,7 +211,7 @@ export default function DashboardPage() {
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <div className="animate-[candy-spin-slow_1s_linear_infinite] rounded-full h-12 w-12 border-4 border-candy-purple-light border-t-candy-purple"></div>
         </div>
       ) : children.length === 0 ? (
         <Card>
@@ -230,7 +230,7 @@ export default function DashboardPage() {
           {children.map((child) => {
             const stats = childrenStats[child.id];
             return (
-              <Card key={child.id} className="overflow-hidden">
+              <Card key={child.id} className="overflow-hidden candy-shadow">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-xl">{child.name}</CardTitle>
@@ -251,7 +251,7 @@ export default function DashboardPage() {
                   {stats && (
                     <div className="grid grid-cols-2 gap-2 py-3 px-2 bg-muted rounded-lg">
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-yellow-600">
+                        <div className="text-2xl font-bold text-candy-yellow">
                           ⚡ {stats.total_xp}
                         </div>
                         <div className="text-xs text-muted-foreground">
@@ -259,7 +259,7 @@ export default function DashboardPage() {
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-orange-600">
+                        <div className="text-2xl font-bold text-candy-orange">
                           🔥 {stats.current_streak}
                         </div>
                         <div className="text-xs text-muted-foreground">
@@ -278,9 +278,9 @@ export default function DashboardPage() {
                           {stats.current_level_xp} / {stats.next_level_xp} XP
                         </span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-candy-purple-light rounded-full h-2">
                         <div
-                          className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all"
+                          className="bg-gradient-to-r from-candy-purple to-candy-pink h-2 rounded-full transition-all"
                           style={{
                             width: `${(stats.current_level_xp / stats.next_level_xp) * 100}%`,
                           }}

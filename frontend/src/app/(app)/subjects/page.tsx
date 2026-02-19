@@ -49,7 +49,7 @@ export default function SubjectsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="animate-[candy-spin-slow_1s_linear_infinite] rounded-full h-12 w-12 border-4 border-candy-purple-light border-t-candy-purple"></div>
       </div>
     );
   }
@@ -58,7 +58,7 @@ export default function SubjectsPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <p className="text-red-600 font-semibold">{error}</p>
+          <p className="text-candy-red font-semibold">{error}</p>
           <button
             onClick={() => window.location.reload()}
             className="mt-4 text-primary hover:underline"
@@ -73,8 +73,8 @@ export default function SubjectsPage() {
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Matières</h1>
-        <p className="text-gray-600">
+        <h1 className="text-4xl font-bold text-candy-text mb-2">Matières</h1>
+        <p className="text-candy-text-muted">
           Choisis une matière pour commencer à apprendre
         </p>
       </div>
@@ -86,7 +86,7 @@ export default function SubjectsPage() {
           return (
             <Card
               key={subject.id}
-              className="p-6 cursor-pointer transition-all hover:shadow-xl hover:scale-[1.02] border-2"
+              className="p-6 cursor-pointer transition-all rounded-2xl candy-shadow hover:candy-shadow-lg hover:scale-[1.02] border-2"
               style={{ borderColor: subject.color }}
               onClick={() => router.push(`/subjects/${subject.id}`)}
             >
@@ -103,10 +103,12 @@ export default function SubjectsPage() {
 
                 <div>
                   <h2 className="text-2xl font-bold mb-2">{subject.name}</h2>
-                  <p className="text-gray-600 text-sm">{subject.description}</p>
+                  <p className="text-candy-text-muted text-sm">
+                    {subject.description}
+                  </p>
                 </div>
 
-                <div className="mt-2 px-4 py-2 bg-gray-100 rounded-full text-sm font-semibold text-gray-700">
+                <div className="mt-2 px-4 py-2 bg-candy-purple-light rounded-full text-sm font-semibold text-candy-purple">
                   {subject.lesson_count} leçon
                   {subject.lesson_count !== 1 ? "s" : ""}
                 </div>

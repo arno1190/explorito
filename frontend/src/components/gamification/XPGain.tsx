@@ -23,33 +23,14 @@ export function XPGain({ xp, onComplete }: XPGainProps) {
   return (
     <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
       <span
-        className="animate-xp-float text-4xl font-extrabold drop-shadow-lg"
+        className="text-4xl font-extrabold drop-shadow-lg animate-[candy-float_1.2s_ease-out_forwards]"
         style={{
-          color: "#f59e0b",
+          color: "var(--candy-yellow)",
           textShadow: "0 2px 8px rgba(245, 158, 11, 0.5)",
         }}
       >
         +{xp} XP
       </span>
-      <style jsx>{`
-        @keyframes xp-float {
-          0% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-          60% {
-            opacity: 1;
-            transform: translateY(-60px) scale(1.2);
-          }
-          100% {
-            opacity: 0;
-            transform: translateY(-120px) scale(0.9);
-          }
-        }
-        .animate-xp-float {
-          animation: xp-float 1.2s ease-out forwards;
-        }
-      `}</style>
     </div>
   );
 }

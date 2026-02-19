@@ -2,45 +2,45 @@
 
 :root {
   /* Candy Garden Palette */
-  --candy-purple: #7C3AED;
-  --candy-purple-light: #EDE9FE;
-  --candy-purple-dark: #5B21B6;
-  --candy-orange: #F97316;
-  --candy-orange-light: #FFF7ED;
-  --candy-green: #10B981;
-  --candy-green-light: #D1FAE5;
-  --candy-red: #EF4444;
-  --candy-red-light: #FEE2E2;
-  --candy-yellow: #F59E0B;
-  --candy-yellow-light: #FEF3C7;
-  --candy-pink: #EC4899;
-  --candy-pink-light: #FCE7F3;
-  --candy-surface: #FFFBF5;
-  --candy-card: #FFFFFF;
-  --candy-text: #1E1B4B;
-  --candy-text-muted: #6B7280;
-  --candy-border: #E5E1F5;
+  --candy-purple: #7c3aed;
+  --candy-purple-light: #ede9fe;
+  --candy-purple-dark: #5b21b6;
+  --candy-orange: #f97316;
+  --candy-orange-light: #fff7ed;
+  --candy-green: #10b981;
+  --candy-green-light: #d1fae5;
+  --candy-red: #ef4444;
+  --candy-red-light: #fee2e2;
+  --candy-yellow: #f59e0b;
+  --candy-yellow-light: #fef3c7;
+  --candy-pink: #ec4899;
+  --candy-pink-light: #fce7f3;
+  --candy-surface: #fffbf5;
+  --candy-card: #ffffff;
+  --candy-text: #1e1b4b;
+  --candy-text-muted: #6b7280;
+  --candy-border: #e5e1f5;
 
   /* shadcn/ui semantic tokens mapped to Candy Garden */
-  --background: #FFFBF5;
-  --foreground: #1E1B4B;
-  --card: #FFFFFF;
-  --card-foreground: #1E1B4B;
-  --popover: #FFFFFF;
-  --popover-foreground: #1E1B4B;
-  --primary: #7C3AED;
-  --primary-foreground: #FFFFFF;
-  --secondary: #EDE9FE;
-  --secondary-foreground: #5B21B6;
-  --muted: #F5F3FF;
-  --muted-foreground: #6B7280;
-  --accent: #FFF7ED;
-  --accent-foreground: #F97316;
-  --destructive: #EF4444;
-  --destructive-foreground: #FFFFFF;
-  --border: #E5E1F5;
-  --input: #E5E1F5;
-  --ring: #7C3AED;
+  --background: #fffbf5;
+  --foreground: #1e1b4b;
+  --card: #ffffff;
+  --card-foreground: #1e1b4b;
+  --popover: #ffffff;
+  --popover-foreground: #1e1b4b;
+  --primary: #7c3aed;
+  --primary-foreground: #ffffff;
+  --secondary: #ede9fe;
+  --secondary-foreground: #5b21b6;
+  --muted: #f5f3ff;
+  --muted-foreground: #6b7280;
+  --accent: #fff7ed;
+  --accent-foreground: #f97316;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e5e1f5;
+  --input: #e5e1f5;
+  --ring: #7c3aed;
   --radius: 1rem;
 }
 
@@ -71,23 +71,23 @@
   --radius-xl: calc(var(--radius) + 4px);
 
   /* Candy palette as Tailwind utilities */
-  --color-candy-purple: #7C3AED;
-  --color-candy-purple-light: #EDE9FE;
-  --color-candy-purple-dark: #5B21B6;
-  --color-candy-orange: #F97316;
-  --color-candy-orange-light: #FFF7ED;
-  --color-candy-green: #10B981;
-  --color-candy-green-light: #D1FAE5;
-  --color-candy-red: #EF4444;
-  --color-candy-red-light: #FEE2E2;
-  --color-candy-yellow: #F59E0B;
-  --color-candy-yellow-light: #FEF3C7;
-  --color-candy-pink: #EC4899;
-  --color-candy-pink-light: #FCE7F3;
-  --color-candy-surface: #FFFBF5;
-  --color-candy-text: #1E1B4B;
-  --color-candy-text-muted: #6B7280;
-  --color-candy-border: #E5E1F5;
+  --color-candy-purple: #7c3aed;
+  --color-candy-purple-light: #ede9fe;
+  --color-candy-purple-dark: #5b21b6;
+  --color-candy-orange: #f97316;
+  --color-candy-orange-light: #fff7ed;
+  --color-candy-green: #10b981;
+  --color-candy-green-light: #d1fae5;
+  --color-candy-red: #ef4444;
+  --color-candy-red-light: #fee2e2;
+  --color-candy-yellow: #f59e0b;
+  --color-candy-yellow-light: #fef3c7;
+  --color-candy-pink: #ec4899;
+  --color-candy-pink-light: #fce7f3;
+  --color-candy-surface: #fffbf5;
+  --color-candy-text: #1e1b4b;
+  --color-candy-text-muted: #6b7280;
+  --color-candy-border: #e5e1f5;
 }
 
 body {
@@ -98,64 +98,126 @@ body {
 
 /* Candy Garden global animations */
 @keyframes candy-bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
 @keyframes candy-wiggle {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-3deg); }
-  75% { transform: rotate(3deg); }
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-3deg);
+  }
+  75% {
+    transform: rotate(3deg);
+  }
 }
 
 @keyframes candy-pop {
-  0% { transform: scale(0.8); opacity: 0; }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes candy-glow {
-  0%, 100% { box-shadow: 0 0 8px rgba(124, 58, 237, 0.3); }
-  50% { box-shadow: 0 0 20px rgba(124, 58, 237, 0.5); }
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.5);
+  }
 }
 
 @keyframes candy-float {
-  0% { transform: translateY(0) scale(1); opacity: 1; }
-  100% { transform: translateY(-60px) scale(1.2); opacity: 0; }
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-60px) scale(1.2);
+    opacity: 0;
+  }
 }
 
 @keyframes candy-spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes candy-shake {
-  0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-6px); }
-  40%, 80% { transform: translateX(6px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
 }
 
 @keyframes confetti-fall {
-  0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  0% {
+    transform: translateY(-20px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
 }
 
 @keyframes feedback-slide-up {
-  from { transform: translateY(100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* Candy utility classes */
 .candy-shadow {
-  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 4px 14px rgba(124, 58, 237, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .candy-shadow-lg {
-  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 8px 24px rgba(124, 58, 237, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
 .candy-shadow-glow {
-  box-shadow: 0 0 20px rgba(124, 58, 237, 0.2), 0 4px 14px rgba(124, 58, 237, 0.1);
+  box-shadow:
+    0 0 20px rgba(124, 58, 237, 0.2),
+    0 4px 14px rgba(124, 58, 237, 0.1);
 }
 
 /* Scrollbar styling for kids */
