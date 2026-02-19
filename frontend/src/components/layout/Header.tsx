@@ -35,9 +35,8 @@ export function Header() {
 
   return (
     <>
-      {/* Impersonation Banner */}
       {impersonatedChild && (
-        <div className="bg-yellow-500 text-white px-4 py-2 text-center">
+        <div className="bg-candy-yellow-light text-candy-text px-4 py-2 text-center border-b-2 border-candy-yellow">
           <div className="container mx-auto flex items-center justify-center gap-4">
             <span className="font-semibold">
               Mode enfant: {impersonatedChild.name}
@@ -55,18 +54,18 @@ export function Header() {
         </div>
       )}
 
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold text-primary">
+      <header className="bg-white/80 backdrop-blur-sm border-b-2 border-candy-border sticky top-0 z-40">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <Link href="/" className="text-2xl font-extrabold text-candy-purple">
             Explorito
           </Link>
 
-          <nav className="flex items-center gap-6">
+          <nav className="flex items-center gap-4">
             {isAuthenticated ? (
               <>
                 <Link
                   href="/dashboard"
-                  className="text-sm font-medium hover:text-primary transition-colors"
+                  className="hidden md:block text-sm font-semibold text-candy-text hover:text-candy-purple transition-colors"
                 >
                   Dashboard
                 </Link>
@@ -78,7 +77,7 @@ export function Header() {
                       className="relative h-10 w-10 rounded-full"
                     >
                       <Avatar>
-                        <AvatarFallback>
+                        <AvatarFallback className="bg-candy-purple-light text-candy-purple font-bold">
                           {getInitials(user?.profile?.display_name)}
                         </AvatarFallback>
                       </Avatar>
@@ -98,12 +97,12 @@ export function Header() {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
                       <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
+                      <span>Profil</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={logout}>
                       <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
+                      <span>Déconnexion</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -111,10 +110,10 @@ export function Header() {
             ) : (
               <>
                 <Link href="/login">
-                  <Button variant="ghost">Login</Button>
+                  <Button variant="ghost">Connexion</Button>
                 </Link>
                 <Link href="/register">
-                  <Button>Sign up</Button>
+                  <Button>Inscription</Button>
                 </Link>
               </>
             )}

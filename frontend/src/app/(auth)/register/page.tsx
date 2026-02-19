@@ -29,12 +29,12 @@ export default function RegisterPage() {
     setError("");
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError("Les mots de passe ne correspondent pas");
       return;
     }
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters long");
+      setError("Le mot de passe doit contenir au moins 8 caractères");
       return;
     }
 
@@ -48,36 +48,37 @@ export default function RegisterPage() {
         role: "parent",
       });
     } catch (err: any) {
-      setError(
-        err.response?.data?.detail || "Registration failed. Please try again."
-      );
+      setError(err.response?.data?.detail || "Inscription échouée. Réessayez.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Sign up</CardTitle>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-candy-purple-light via-candy-surface to-candy-pink-light px-4">
+      <Card className="w-full max-w-md rounded-3xl candy-shadow-lg">
+        <CardHeader className="space-y-1 text-center">
+          <div className="text-5xl mb-2">🦉</div>
+          <CardTitle className="text-2xl font-extrabold text-candy-text">
+            Inscription
+          </CardTitle>
           <CardDescription>
-            Create an account to start exploring activities
+            Crée ton compte pour commencer l&apos;aventure
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             {error && (
-              <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
+              <div className="bg-candy-red-light text-candy-red p-3 rounded-xl text-sm border border-candy-red/20">
                 {error}
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
+              <Label htmlFor="fullName">Nom complet</Label>
               <Input
                 id="fullName"
                 type="text"
-                placeholder="John Doe"
+                placeholder="Jean Dupont"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
@@ -89,7 +90,7 @@ export default function RegisterPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder="toi@exemple.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -97,7 +98,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Mot de passe</Label>
               <Input
                 id="password"
                 type="password"
@@ -109,7 +110,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -122,15 +123,15 @@ export default function RegisterPage() {
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Creating account..." : "Sign up"}
+              {loading ? "Création du compte..." : "S'inscrire"}
             </Button>
             <div className="text-sm text-center text-muted-foreground">
-              Already have an account?{" "}
+              Déjà un compte ?{" "}
               <Link
                 href="/login"
-                className="text-primary hover:underline font-medium"
+                className="text-candy-purple hover:underline font-semibold"
               >
-                Login
+                Connexion
               </Link>
             </div>
           </CardFooter>
