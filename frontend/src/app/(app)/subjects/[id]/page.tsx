@@ -83,7 +83,7 @@ export default function SubjectDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="animate-[candy-spin-slow_1s_linear_infinite] rounded-full h-12 w-12 border-4 border-candy-purple-light border-t-candy-purple"></div>
       </div>
     );
   }
@@ -92,7 +92,7 @@ export default function SubjectDetailPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <p className="text-red-600 font-semibold">
+          <p className="text-candy-red font-semibold">
             {error || "Matière introuvable"}
           </p>
           <button
@@ -107,7 +107,7 @@ export default function SubjectDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 p-4">
+    <div className="min-h-screen bg-gradient-to-b from-candy-purple-light via-candy-surface to-candy-orange-light p-4">
       {/* Header */}
       <div className="max-w-3xl mx-auto mb-6">
         <Button
@@ -120,14 +120,14 @@ export default function SubjectDetailPage() {
           Retour
         </Button>
 
-        <div className="bg-white rounded-3xl shadow-lg p-6 mb-8">
+        <div className="bg-white rounded-3xl candy-shadow p-6 mb-8">
           <div className="flex items-center gap-4">
             <div className="text-6xl">{subject.icon}</div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-1">
+              <h1 className="text-3xl font-bold text-candy-text mb-1">
                 {subject.name}
               </h1>
-              <p className="text-gray-600">{subject.description}</p>
+              <p className="text-candy-text-muted">{subject.description}</p>
             </div>
           </div>
         </div>
@@ -153,7 +153,7 @@ export default function SubjectDetailPage() {
               {/* Connecting line to next lesson */}
               {index < lessons.length - 1 && (
                 <div
-                  className="absolute top-full left-1/2 w-1 h-12 -translate-x-1/2 bg-gradient-to-b from-purple-300 to-transparent"
+                  className="absolute top-full left-1/2 w-1 h-12 -translate-x-1/2 bg-gradient-to-b from-candy-purple/40 to-transparent"
                   style={{ zIndex: 0 }}
                 />
               )}
@@ -174,10 +174,10 @@ export default function SubjectDetailPage() {
                   <div
                     className={`w-24 h-24 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg transition-all ${
                       isLocked
-                        ? "bg-gray-400 cursor-not-allowed"
+                        ? "bg-candy-border cursor-not-allowed"
                         : isCompleted
-                          ? "bg-gradient-to-br from-green-400 to-green-600 hover:scale-110"
-                          : "bg-gradient-to-br from-purple-400 to-pink-500 hover:scale-110 animate-pulse"
+                          ? "bg-gradient-to-br from-candy-green to-emerald-400 hover:scale-110"
+                          : "bg-gradient-to-br from-candy-purple to-candy-pink hover:scale-110 animate-[candy-glow_2s_infinite]"
                     }`}
                   >
                     {isLocked ? (
@@ -202,18 +202,18 @@ export default function SubjectDetailPage() {
                 </button>
 
                 {/* Lesson Info */}
-                <div className="mt-4 bg-white rounded-2xl shadow-lg p-4 max-w-xs">
-                  <h3 className="text-xl font-bold text-center mb-2 text-gray-800">
+                <div className="mt-4 bg-white rounded-2xl candy-shadow p-4 max-w-xs">
+                  <h3 className="text-xl font-bold text-center mb-2 text-candy-text">
                     {lesson.name}
                   </h3>
-                  <p className="text-sm text-gray-600 text-center mb-3">
+                  <p className="text-sm text-candy-text-muted text-center mb-3">
                     {lesson.description}
                   </p>
 
                   {!isLocked && progress && progress.totalExercises > 0 && (
                     <div className="mb-3">
                       {/* Progress bar */}
-                      <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                      <div className="flex items-center justify-between text-xs text-candy-text-muted mb-1">
                         <span>
                           {progress.completedExercises}/
                           {progress.totalExercises} exercices
@@ -227,9 +227,9 @@ export default function SubjectDetailPage() {
                           %
                         </span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-candy-purple-light rounded-full h-2">
                         <div
-                          className="bg-green-500 h-2 rounded-full transition-all"
+                          className="bg-candy-green h-2 rounded-full transition-all"
                           style={{
                             width: `${(progress.completedExercises / progress.totalExercises) * 100}%`,
                           }}
@@ -239,7 +239,7 @@ export default function SubjectDetailPage() {
                   )}
 
                   {!isLocked && (
-                    <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
+                    <div className="flex items-center justify-center gap-4 text-sm text-candy-text-muted">
                       {lesson.xp_reward > 0 && (
                         <span className="flex items-center gap-1">
                           ⚡ +{lesson.xp_reward} XP
@@ -254,7 +254,7 @@ export default function SubjectDetailPage() {
                   )}
 
                   {isLocked && (
-                    <div className="text-center text-sm text-gray-500 mt-2">
+                    <div className="text-center text-sm text-candy-text-muted mt-2">
                       🔒 Termine la leçon précédente pour débloquer
                     </div>
                   )}
@@ -266,12 +266,14 @@ export default function SubjectDetailPage() {
       </div>
 
       {lessons.length === 0 && (
-        <div className="max-w-md mx-auto bg-white rounded-3xl shadow-lg p-12 text-center">
+        <div className="max-w-md mx-auto bg-white rounded-3xl candy-shadow p-12 text-center">
           <div className="text-6xl mb-4">📚</div>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-candy-text-muted">
             Aucune leçon disponible pour le moment
           </p>
-          <p className="text-sm text-gray-500 mt-2">Reviens plus tard!</p>
+          <p className="text-sm text-candy-text-muted mt-2">
+            Reviens plus tard!
+          </p>
         </div>
       )}
     </div>

@@ -71,17 +71,17 @@ export function FillBlanks({
             onChange={(e) => handleAnswerChange(index, e.target.value)}
             disabled={disabled}
             className={cn(
-              "w-32 h-10 text-center inline-block",
-              isCorrectAnswer && "border-green-500 bg-green-50",
-              isWrongAnswer && "border-red-500 bg-red-50"
+              "w-24 sm:w-32 h-10 text-center inline-block border-2 border-candy-purple/30 rounded-lg focus:border-candy-purple focus:ring-2 focus:ring-candy-purple/20",
+              isCorrectAnswer && "border-candy-green bg-candy-green-light",
+              isWrongAnswer && "border-candy-red bg-candy-red-light"
             )}
             placeholder="..."
           />
           {showResult && isCorrectAnswer && (
-            <Check className="h-4 w-4 text-green-600 ml-1" />
+            <Check className="h-4 w-4 text-candy-green ml-1" />
           )}
           {showResult && isWrongAnswer && (
-            <X className="h-4 w-4 text-red-600 ml-1" />
+            <X className="h-4 w-4 text-candy-red ml-1" />
           )}
         </span>
       );
@@ -99,9 +99,9 @@ export function FillBlanks({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">{question}</h2>
+      <h2 className="text-2xl font-bold text-candy-text">{question}</h2>
 
-      <div className="bg-white p-6 rounded-lg border-2 border-gray-200">
+      <div className="bg-white p-6 rounded-lg border-2 border-candy-border">
         <div className="text-lg leading-relaxed">{renderTextWithBlanks()}</div>
       </div>
 
@@ -110,8 +110,8 @@ export function FillBlanks({
           className={cn(
             "p-4 rounded-lg text-center font-semibold",
             isCorrect
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
+              ? "bg-candy-green-light text-candy-green"
+              : "bg-candy-red-light text-candy-red"
           )}
         >
           {isCorrect
@@ -121,13 +121,13 @@ export function FillBlanks({
       )}
 
       {showResult && !isCorrect && (
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <p className="font-semibold text-blue-900 mb-2">
+        <div className="bg-candy-purple-light p-4 rounded-lg">
+          <p className="font-semibold text-candy-text mb-2">
             Réponses correctes:
           </p>
           <ul className="list-disc list-inside space-y-1">
             {blanks.map((blank, index) => (
-              <li key={index} className="text-blue-800">
+              <li key={index} className="text-candy-text">
                 Position {index + 1}: {blank.answer}
               </li>
             ))}

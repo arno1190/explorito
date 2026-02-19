@@ -34,7 +34,7 @@ export function ImageSelection({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900 text-center">
+      <h2 className="text-2xl font-bold text-candy-text text-center">
         {question}
       </h2>
 
@@ -48,12 +48,15 @@ export function ImageSelection({
             <Card
               key={image.id}
               className={cn(
-                "relative overflow-hidden cursor-pointer transition-all border-4",
+                "relative overflow-hidden cursor-pointer transition-all border-2 rounded-2xl candy-shadow",
                 "hover:shadow-xl hover:scale-[1.05]",
-                !disabled && "hover:border-primary",
-                isSelected && !showResult && "border-primary",
-                isCorrectImage && "border-green-500",
-                isWrongSelection && "border-red-500",
+                !disabled && "hover:border-candy-purple/50",
+                !isSelected && !showResult && "border-candy-border",
+                isSelected &&
+                  !showResult &&
+                  "border-candy-purple ring-2 ring-candy-purple/30",
+                isCorrectImage && "border-candy-green",
+                isWrongSelection && "border-candy-red",
                 disabled && "cursor-not-allowed opacity-60"
               )}
               onClick={() => handleSelect(image.id)}
@@ -71,15 +74,15 @@ export function ImageSelection({
                   }}
                 />
                 {showResult && isCorrectImage && (
-                  <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center">
-                    <div className="bg-green-500 rounded-full p-3">
+                  <div className="absolute inset-0 bg-candy-green/20 flex items-center justify-center">
+                    <div className="bg-candy-green rounded-full p-3">
                       <Check className="h-8 w-8 text-white" />
                     </div>
                   </div>
                 )}
                 {showResult && isWrongSelection && (
-                  <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center">
-                    <div className="bg-red-500 rounded-full p-3">
+                  <div className="absolute inset-0 bg-candy-red/20 flex items-center justify-center">
+                    <div className="bg-candy-red rounded-full p-3">
                       <X className="h-8 w-8 text-white" />
                     </div>
                   </div>
@@ -95,8 +98,8 @@ export function ImageSelection({
           className={cn(
             "p-4 rounded-lg text-center font-semibold",
             isCorrect
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
+              ? "bg-candy-green-light text-candy-green"
+              : "bg-candy-red-light text-candy-red"
           )}
         >
           {isCorrect

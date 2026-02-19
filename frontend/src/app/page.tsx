@@ -18,44 +18,59 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center bg-candy-surface">
+        <div className="animate-[candy-spin-slow_1s_linear_infinite] rounded-full h-12 w-12 border-4 border-candy-purple-light border-t-candy-purple"></div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-primary">Explorito</h1>
-          <div className="flex gap-4">
+      <header className="bg-white/80 backdrop-blur-sm border-b-2 border-candy-border sticky top-0 z-40">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <h1 className="text-2xl font-extrabold text-candy-purple">
+            Explorito
+          </h1>
+          <div className="flex gap-3">
             <Link href="/login">
-              <Button variant="ghost">Login</Button>
+              <Button variant="ghost">Connexion</Button>
             </Link>
             <Link href="/register">
-              <Button>Sign up</Button>
+              <Button>Inscription</Button>
             </Link>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 flex items-center justify-center bg-gradient-to-b from-white to-gray-50">
-        <div className="container mx-auto px-4 py-20 text-center">
-          <h1 className="text-5xl font-bold mb-6">
-            Discover Age-Appropriate Activities for Your Children
+      <main className="flex-1 flex items-center justify-center bg-gradient-to-b from-candy-purple-light via-candy-surface to-candy-orange-light">
+        <div className="container mx-auto px-4 py-16 text-center">
+          <div
+            className="text-7xl mb-6 animate-[candy-bounce_2s_ease-in-out_infinite]"
+            role="img"
+            aria-label="Mascotte hibou"
+          >
+            🦉
+          </div>
+          <h1 className="text-4xl md:text-6xl font-extrabold text-candy-text mb-4">
+            Apprends en t&apos;amusant !
           </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Explorito helps parents find and track developmental activities
-            tailored to their children's ages and interests.
+          <p className="text-lg md:text-xl text-candy-text-muted mb-8 max-w-2xl mx-auto">
+            Explorito aide les enfants du CP à découvrir le français, les maths
+            et bien plus, de manière ludique et interactive.
           </p>
-          <div className="flex gap-4 justify-center">
+          <div className="flex gap-4 justify-center flex-col sm:flex-row">
             <Link href="/register">
-              <Button size="lg">Get Started Free</Button>
+              <Button size="lg" className="text-lg px-8 w-full sm:w-auto">
+                Commencer gratuitement
+              </Button>
             </Link>
             <Link href="/login">
-              <Button size="lg" variant="outline">
-                Sign In
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-lg px-8 w-full sm:w-auto"
+              >
+                Se connecter
               </Button>
             </Link>
           </div>
