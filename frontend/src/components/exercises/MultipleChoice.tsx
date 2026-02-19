@@ -75,10 +75,10 @@ export function MultipleChoice({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">{question}</h2>
+      <h2 className="text-2xl font-bold text-candy-text">{question}</h2>
 
       {allowMultiple && (
-        <p className="text-sm text-gray-500 italic">
+        <p className="text-sm text-candy-text-muted italic">
           Plusieurs réponses possibles - sélectionne toutes les bonnes réponses
         </p>
       )}
@@ -108,15 +108,15 @@ export function MultipleChoice({
                 // Default state
                 !isSelected &&
                   !showResult &&
-                  "border-gray-200 hover:border-blue-400",
+                  "border-candy-border hover:border-candy-purple/50",
                 // Selected state (not showing result yet)
                 isSelected &&
                   !showResult &&
-                  "border-blue-500 bg-blue-50 ring-2 ring-blue-200",
+                  "border-candy-purple bg-candy-purple-light ring-2 ring-candy-purple/30",
                 // Correct answer revealed
-                isCorrectOption && "border-green-500 bg-green-50",
+                isCorrectOption && "border-candy-green bg-candy-green-light",
                 // Wrong selection revealed
-                isWrongSelection && "border-red-500 bg-red-50",
+                isWrongSelection && "border-candy-red bg-candy-red-light",
                 // Disabled
                 disabled && "cursor-not-allowed"
               )}
@@ -128,13 +128,15 @@ export function MultipleChoice({
                   className={cn(
                     "w-14 flex items-center justify-center text-xl font-bold transition-all",
                     // Default
-                    !isSelected && !showResult && "bg-gray-100 text-gray-500",
+                    !isSelected &&
+                      !showResult &&
+                      "bg-candy-purple-light text-candy-purple",
                     // Selected
-                    isSelected && !showResult && "bg-blue-500 text-white",
+                    isSelected && !showResult && "bg-candy-purple text-white",
                     // Correct
-                    isCorrectOption && "bg-green-500 text-white",
+                    isCorrectOption && "bg-candy-green text-white",
                     // Wrong
-                    isWrongSelection && "bg-red-500 text-white"
+                    isWrongSelection && "bg-candy-red text-white"
                   )}
                 >
                   {showResult && isCorrectOption ? (
@@ -151,9 +153,9 @@ export function MultipleChoice({
                   <span
                     className={cn(
                       "text-lg font-medium",
-                      isSelected && !showResult && "text-blue-700",
-                      isCorrectOption && "text-green-700",
-                      isWrongSelection && "text-red-700"
+                      isSelected && !showResult && "text-candy-purple",
+                      isCorrectOption && "text-candy-green",
+                      isWrongSelection && "text-candy-red"
                     )}
                   >
                     {option}
@@ -162,7 +164,7 @@ export function MultipleChoice({
 
                 {/* Selection indicator on the right */}
                 {isSelected && !showResult && (
-                  <div className="w-12 flex items-center justify-center bg-blue-500">
+                  <div className="w-12 flex items-center justify-center bg-candy-purple">
                     <Check className="h-5 w-5 text-white" />
                   </div>
                 )}
@@ -177,8 +179,8 @@ export function MultipleChoice({
           className={cn(
             "p-4 rounded-lg text-center font-semibold",
             isCorrect
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
+              ? "bg-candy-green-light text-candy-green"
+              : "bg-candy-red-light text-candy-red"
           )}
         >
           {isCorrect

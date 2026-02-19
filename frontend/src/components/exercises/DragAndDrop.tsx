@@ -59,12 +59,12 @@ export function DragAndDrop({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">{question}</h2>
+      <h2 className="text-2xl font-bold text-candy-text">{question}</h2>
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Items Pool */}
-        <Card className="p-6 bg-blue-50">
-          <h3 className="font-semibold mb-4 text-blue-900">
+        <Card className="p-6 bg-candy-purple-light rounded-2xl">
+          <h3 className="font-semibold mb-4 text-candy-text">
             Éléments à déplacer
           </h3>
           <div className="space-y-2">
@@ -76,12 +76,12 @@ export function DragAndDrop({
                 className={cn(
                   "p-3 cursor-move transition-all",
                   "hover:shadow-md hover:scale-[1.02]",
-                  "bg-white border-2 border-blue-200",
+                  "bg-white border-candy-border rounded-xl candy-shadow",
                   disabled && "cursor-not-allowed opacity-60"
                 )}
               >
                 <div className="flex items-center gap-2">
-                  <GripVertical className="h-4 w-4 text-gray-400" />
+                  <GripVertical className="h-4 w-4 text-candy-text-muted" />
                   <span>{item.text}</span>
                 </div>
               </Card>
@@ -91,7 +91,7 @@ export function DragAndDrop({
 
         {/* Target Zones */}
         <div className="space-y-3">
-          <h3 className="font-semibold text-gray-900">Zones cibles</h3>
+          <h3 className="font-semibold text-candy-text">Zones cibles</h3>
           {targets.map((target) => {
             const itemsInTarget = getItemsForTarget(target.id);
             const isCorrectTarget =
@@ -113,14 +113,15 @@ export function DragAndDrop({
                 onDragOver={handleDragOver}
                 onDrop={() => handleDrop(target.id)}
                 className={cn(
-                  "p-4 min-h-[100px] border-2 border-dashed transition-all",
-                  "border-gray-300 bg-gray-50",
-                  !disabled && "hover:border-primary hover:bg-primary/5",
-                  isCorrectTarget && "border-green-500 bg-green-50",
-                  hasWrongItems && "border-red-500 bg-red-50"
+                  "p-4 min-h-[100px] border-2 border-dashed transition-all rounded-2xl",
+                  "border-candy-border bg-candy-surface",
+                  !disabled &&
+                    "hover:border-candy-purple hover:bg-candy-purple-light/50",
+                  isCorrectTarget && "border-candy-green bg-candy-green-light",
+                  hasWrongItems && "border-candy-red bg-candy-red-light"
                 )}
               >
-                <div className="font-medium text-sm text-gray-600 mb-2">
+                <div className="font-medium text-sm text-candy-text-muted mb-2">
                   {target.text}
                 </div>
                 <div className="space-y-2">
@@ -139,17 +140,17 @@ export function DragAndDrop({
                         key={item.id}
                         className={cn(
                           "p-2 bg-white border-2",
-                          isCorrectlyPlaced && "border-green-500",
-                          isWronglyPlaced && "border-red-500"
+                          isCorrectlyPlaced && "border-candy-green",
+                          isWronglyPlaced && "border-candy-red"
                         )}
                       >
                         <div className="flex items-center justify-between">
                           <span className="text-sm">{item.text}</span>
                           {isCorrectlyPlaced && (
-                            <Check className="h-4 w-4 text-green-600" />
+                            <Check className="h-4 w-4 text-candy-green" />
                           )}
                           {isWronglyPlaced && (
-                            <X className="h-4 w-4 text-red-600" />
+                            <X className="h-4 w-4 text-candy-red" />
                           )}
                         </div>
                       </Card>
@@ -167,8 +168,8 @@ export function DragAndDrop({
           className={cn(
             "p-4 rounded-lg text-center font-semibold",
             isCorrect
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
+              ? "bg-candy-green-light text-candy-green"
+              : "bg-candy-red-light text-candy-red"
           )}
         >
           {isCorrect

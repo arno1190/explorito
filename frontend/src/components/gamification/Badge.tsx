@@ -36,25 +36,25 @@ export function Badge({
             <Award className="h-8 w-8" style={{ color: achievement.color }} />
           </div>
         ) : (
-          <div className="p-4 rounded-full bg-gray-200">
-            <Lock className="h-8 w-8 text-gray-400" />
+          <div className="p-4 rounded-full bg-candy-purple-light">
+            <Lock className="h-8 w-8 text-candy-text-muted" />
           </div>
         )}
 
         <div className="text-center">
           <h3 className="font-bold text-lg">{achievement.name}</h3>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-sm text-candy-text-muted mt-1">
             {achievement.description}
           </p>
 
           {earned && earnedAt && (
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-candy-text-muted mt-2">
               Obtenu le {new Date(earnedAt).toLocaleDateString("fr-FR")}
             </p>
           )}
 
           {!earned && (
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-candy-text-muted mt-2">
               {achievement.requirement}
             </p>
           )}
@@ -64,8 +64,8 @@ export function Badge({
           className={cn(
             "px-3 py-1 rounded-full text-sm font-semibold",
             earned
-              ? "bg-yellow-100 text-yellow-800"
-              : "bg-gray-100 text-gray-600"
+              ? "bg-candy-yellow-light text-candy-text"
+              : "bg-candy-surface text-candy-text-muted"
           )}
         >
           {achievement.points} pts
