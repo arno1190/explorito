@@ -49,7 +49,7 @@ export default function SubjectsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-[candy-spin-slow_1s_linear_infinite] rounded-full h-12 w-12 border-4 border-candy-purple-light border-t-candy-purple"></div>
+        <div className="animate-[candy-spin-slow_1s_linear_infinite] rounded-full h-12 w-12 border-4 border-fun-green-light border-t-fun-green"></div>
       </div>
     );
   }
@@ -58,7 +58,7 @@ export default function SubjectsPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <p className="text-candy-red font-semibold">{error}</p>
+          <p className="text-fun-red font-semibold">{error}</p>
           <button
             onClick={() => window.location.reload()}
             className="mt-4 text-primary hover:underline"
@@ -73,8 +73,8 @@ export default function SubjectsPage() {
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-candy-text mb-2">Matières</h1>
-        <p className="text-candy-text-muted">
+        <h1 className="text-4xl font-bold text-fun-text mb-2">Matières</h1>
+        <p className="text-fun-text-muted">
           Choisis une matière pour commencer à apprendre
         </p>
       </div>
@@ -103,12 +103,12 @@ export default function SubjectsPage() {
 
                 <div>
                   <h2 className="text-2xl font-bold mb-2">{subject.name}</h2>
-                  <p className="text-candy-text-muted text-sm">
+                  <p className="text-fun-text-muted text-sm">
                     {subject.description}
                   </p>
                 </div>
 
-                <div className="mt-2 px-4 py-2 bg-candy-purple-light rounded-full text-sm font-semibold text-candy-purple">
+                <div className="mt-2 px-4 py-2 bg-fun-green-light rounded-full text-sm font-semibold text-fun-green">
                   {subject.lesson_count} leçon
                   {subject.lesson_count !== 1 ? "s" : ""}
                 </div>

@@ -55,11 +55,11 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-candy-purple-light via-candy-surface to-candy-pink-light px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-fun-sky-light via-white to-fun-violet-light px-4">
       <Card className="w-full max-w-md rounded-3xl candy-shadow-lg">
         <CardHeader className="space-y-1 text-center">
           <div className="text-5xl mb-2">🦉</div>
-          <CardTitle className="text-2xl font-extrabold text-candy-text">
+          <CardTitle className="text-2xl font-extrabold text-fun-text">
             Inscription
           </CardTitle>
           <CardDescription>
@@ -69,7 +69,7 @@ export default function RegisterPage() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             {error && (
-              <div className="bg-candy-red-light text-candy-red p-3 rounded-xl text-sm border border-candy-red/20">
+              <div className="bg-fun-red-light text-fun-red p-3 rounded-xl text-sm border border-fun-red/20">
                 {error}
               </div>
             )}
@@ -129,7 +129,7 @@ export default function RegisterPage() {
               Déjà un compte ?{" "}
               <Link
                 href="/login"
-                className="text-candy-purple hover:underline font-semibold"
+                className="text-fun-green hover:underline font-semibold"
               >
                 Connexion
               </Link>

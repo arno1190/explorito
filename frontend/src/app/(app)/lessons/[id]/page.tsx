@@ -104,7 +104,7 @@ export default function LessonDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-[candy-spin-slow_1s_linear_infinite] rounded-full h-12 w-12 border-4 border-candy-purple-light border-t-candy-purple"></div>
+        <div className="animate-[candy-spin-slow_1s_linear_infinite] rounded-full h-12 w-12 border-4 border-fun-green-light border-t-fun-green"></div>
       </div>
     );
   }
@@ -113,7 +113,7 @@ export default function LessonDetailPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <p className="text-candy-red font-semibold">
+          <p className="text-fun-red font-semibold">
             {error || "Leçon introuvable"}
           </p>
           <button
@@ -162,17 +162,15 @@ export default function LessonDetailPage() {
             {(lesson.order_index || 0) + 1}
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-candy-text">
-              {lesson.name}
-            </h1>
-            <p className="text-candy-text-muted">{lesson.description}</p>
+            <h1 className="text-3xl font-bold text-fun-text">{lesson.name}</h1>
+            <p className="text-fun-text-muted">{lesson.description}</p>
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="bg-candy-surface rounded-xl p-4 border border-candy-border candy-shadow">
+        <div className="bg-fun-surface rounded-xl p-4 border border-fun-border candy-shadow">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-candy-text">
+            <span className="text-sm font-medium text-fun-text">
               Progression: {completedCount}/{totalExercises} exercices
             </span>
             <span
@@ -183,9 +181,9 @@ export default function LessonDetailPage() {
             </span>
           </div>
           <Progress value={progressPercent} className="h-3" />
-          <div className="flex items-center justify-between mt-3 text-sm text-candy-text-muted">
+          <div className="flex items-center justify-between mt-3 text-sm text-fun-text-muted">
             <div className="flex items-center gap-1">
-              <Star className="h-4 w-4 text-candy-yellow fill-candy-yellow" />
+              <Star className="h-4 w-4 text-fun-sun fill-fun-sun" />
               <span>{totalPoints} points disponibles</span>
             </div>
             {lesson.estimated_duration && (
@@ -200,7 +198,7 @@ export default function LessonDetailPage() {
 
       {/* Exercises List */}
       <div className="space-y-4">
-        <h2 className="text-xl font-bold text-candy-text">
+        <h2 className="text-xl font-bold text-fun-text">
           Exercices ({exercises.length})
         </h2>
 
@@ -213,7 +211,7 @@ export default function LessonDetailPage() {
               key={exercise.id}
               className={`p-5 transition-all hover:shadow-lg cursor-pointer border-2 ${
                 isCompleted
-                  ? "bg-candy-green-light border-candy-green"
+                  ? "bg-fun-green-light border-fun-green"
                   : "hover:border-primary"
               }`}
               onClick={() => router.push(`/exercises/${exercise.id}`)}
@@ -222,7 +220,7 @@ export default function LessonDetailPage() {
                 {/* Exercise Number / Status */}
                 <div
                   className={`flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg ${
-                    isCompleted ? "bg-candy-green text-white" : "text-white"
+                    isCompleted ? "bg-fun-green text-white" : "text-white"
                   }`}
                   style={!isCompleted ? { backgroundColor: subject.color } : {}}
                 >
@@ -238,7 +236,7 @@ export default function LessonDetailPage() {
                   <h3 className="text-lg font-bold mb-1 truncate">
                     {exercise.title || `Exercice ${index + 1}`}
                   </h3>
-                  <p className="text-candy-text-muted text-sm line-clamp-2">
+                  <p className="text-fun-text-muted text-sm line-clamp-2">
                     {exercise.question}
                   </p>
                 </div>
@@ -246,10 +244,8 @@ export default function LessonDetailPage() {
                 {/* Exercise Meta */}
                 <div className="flex-shrink-0 text-right">
                   <div className="flex items-center gap-1 justify-end mb-1">
-                    <Star className="h-4 w-4 text-candy-yellow fill-candy-yellow" />
-                    <span className="font-bold text-candy-yellow">
-                      {points} pts
-                    </span>
+                    <Star className="h-4 w-4 text-fun-sun fill-fun-sun" />
+                    <span className="font-bold text-fun-sun">{points} pts</span>
                   </div>
                   <span
                     className="text-xs px-2 py-1 rounded-full"
@@ -269,8 +265,8 @@ export default function LessonDetailPage() {
 
       {exercises.length === 0 && (
         <div className="text-center py-12">
-          <PlayCircle className="h-16 w-16 text-candy-border mx-auto mb-4" />
-          <p className="text-candy-text-muted">
+          <PlayCircle className="h-16 w-16 text-fun-border mx-auto mb-4" />
+          <p className="text-fun-text-muted">
             Aucun exercice disponible pour le moment
           </p>
         </div>

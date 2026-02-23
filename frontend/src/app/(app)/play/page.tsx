@@ -61,23 +61,23 @@ export default function PlayPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-candy-purple-light via-candy-surface to-candy-orange-light p-4">
+      <div className="min-h-screen bg-gradient-to-b from-fun-sky-light via-white to-fun-violet-light p-4">
         {/* Header skeleton */}
         <div className="max-w-4xl mx-auto mb-8">
           <div className="bg-white rounded-3xl candy-shadow p-6 flex items-center justify-between">
             <div>
-              <div className="h-8 w-48 bg-candy-purple-light animate-pulse rounded-lg mb-2" />
-              <div className="h-5 w-64 bg-candy-purple-light animate-pulse rounded-lg" />
+              <div className="h-8 w-48 bg-fun-green-light animate-pulse rounded-lg mb-2" />
+              <div className="h-5 w-64 bg-fun-green-light animate-pulse rounded-lg" />
             </div>
             <div className="flex gap-4">
-              <div className="h-16 w-20 bg-candy-yellow-light animate-pulse rounded-2xl" />
-              <div className="h-16 w-20 bg-candy-orange-light animate-pulse rounded-2xl" />
+              <div className="h-16 w-20 bg-fun-sun-light animate-pulse rounded-2xl" />
+              <div className="h-16 w-20 bg-fun-sun-light animate-pulse rounded-2xl" />
             </div>
           </div>
         </div>
         {/* Mascot skeleton */}
         <div className="max-w-4xl mx-auto mb-8">
-          <div className="bg-gradient-to-r from-candy-purple to-candy-pink rounded-3xl candy-shadow p-6 h-28 animate-pulse" />
+          <div className="bg-gradient-to-r from-fun-green to-fun-sky rounded-3xl candy-shadow p-6 h-28 animate-pulse" />
         </div>
         {/* Subjects grid skeleton */}
         <div className="max-w-4xl mx-auto">
@@ -87,9 +87,9 @@ export default function PlayPage() {
                 key={i}
                 className="bg-white rounded-3xl candy-shadow p-8 animate-pulse"
               >
-                <div className="h-14 w-14 bg-candy-purple-light rounded-full mx-auto mb-3" />
-                <div className="h-6 w-24 bg-candy-purple-light rounded-lg mx-auto mb-2" />
-                <div className="h-4 w-16 bg-candy-purple-light rounded-lg mx-auto" />
+                <div className="h-14 w-14 bg-fun-green-light rounded-full mx-auto mb-3" />
+                <div className="h-6 w-24 bg-fun-green-light rounded-lg mx-auto mb-2" />
+                <div className="h-4 w-16 bg-fun-green-light rounded-lg mx-auto" />
               </div>
             ))}
           </div>
@@ -99,30 +99,30 @@ export default function PlayPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-candy-purple-light via-candy-surface to-candy-orange-light p-4">
+    <div className="min-h-screen bg-gradient-to-b from-fun-sky-light via-white to-fun-violet-light p-4">
       {/* Header with stats */}
       <div className="max-w-4xl mx-auto mb-8">
         <div className="bg-white rounded-3xl candy-shadow p-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-candy-text">
+            <h1 className="text-3xl font-bold text-fun-text">
               🌟 Bonjour {childName}!
             </h1>
-            <p className="text-candy-text-muted mt-1">
+            <p className="text-fun-text-muted mt-1">
               Prêt à apprendre aujourd&apos;hui?
             </p>
           </div>
           <div className="flex gap-4">
-            <div className="text-center bg-candy-yellow-light rounded-2xl px-4 py-2">
-              <div className="text-2xl font-bold text-candy-yellow">
+            <div className="text-center bg-fun-sun-light rounded-2xl px-4 py-2">
+              <div className="text-2xl font-bold text-fun-sun">
                 ⚡ {stats?.total_xp || 0}
               </div>
-              <div className="text-xs text-candy-text-muted">XP</div>
+              <div className="text-xs text-fun-text-muted">XP</div>
             </div>
-            <div className="text-center bg-candy-orange-light rounded-2xl px-4 py-2">
-              <div className="text-2xl font-bold text-candy-orange">
+            <div className="text-center bg-fun-sun-light rounded-2xl px-4 py-2">
+              <div className="text-2xl font-bold text-fun-sun">
                 🔥 {stats?.current_streak || 0}
               </div>
-              <div className="text-xs text-candy-text-muted">Jours</div>
+              <div className="text-xs text-fun-text-muted">Jours</div>
             </div>
           </div>
         </div>
@@ -130,7 +130,7 @@ export default function PlayPage() {
 
       {/* Mascot/Encouragement */}
       <div className="max-w-4xl mx-auto mb-8">
-        <div className="bg-gradient-to-r from-candy-purple to-candy-pink rounded-3xl candy-shadow p-6 text-center">
+        <div className="bg-gradient-to-r from-fun-green to-fun-sky rounded-3xl candy-shadow p-6 text-center">
           <div className="text-6xl mb-2">🦉</div>
           <p className="text-white text-xl font-semibold">
             Choisis une matière pour commencer!
@@ -149,7 +149,7 @@ export default function PlayPage() {
               style={{ borderColor: subject.color, borderWidth: 4 }}
             >
               <div className="text-6xl mb-3">{subject.icon}</div>
-              <h3 className="text-xl font-bold text-candy-text mb-2">
+              <h3 className="text-xl font-bold text-fun-text mb-2">
                 {subject.name}
               </h3>
               <div className="flex justify-center gap-1">
@@ -159,7 +159,7 @@ export default function PlayPage() {
                   </span>
                 ))}
               </div>
-              <p className="text-sm text-candy-text-muted mt-2">
+              <p className="text-sm text-fun-text-muted mt-2">
                 {subject.lesson_count} leçons
               </p>
             </button>
@@ -167,7 +167,7 @@ export default function PlayPage() {
         </div>
 
         {subjects.length === 0 && (
-          <div className="text-center text-candy-text-muted mt-8">
+          <div className="text-center text-fun-text-muted mt-8">
             <p className="text-xl">Aucune matière disponible pour le moment</p>
             <p className="text-sm mt-2">Reviens plus tard!</p>
           </div>
@@ -178,17 +178,17 @@ export default function PlayPage() {
       {stats && stats.achievements.length > 0 && (
         <div className="max-w-4xl mx-auto mt-8">
           <div className="bg-white rounded-3xl candy-shadow p-6">
-            <h2 className="text-2xl font-bold text-candy-text mb-4">
+            <h2 className="text-2xl font-bold text-fun-text mb-4">
               🏆 Badges récents
             </h2>
             <div className="flex gap-4 overflow-x-auto">
               {stats.achievements.slice(0, 5).map((ua) => (
                 <div
                   key={ua.id}
-                  className="flex-shrink-0 text-center bg-candy-yellow-light rounded-2xl p-4 min-w-[100px]"
+                  className="flex-shrink-0 text-center bg-fun-sun-light rounded-2xl p-4 min-w-[100px]"
                 >
                   <div className="text-4xl mb-2">{ua.achievement.icon}</div>
-                  <p className="text-xs font-semibold text-candy-text">
+                  <p className="text-xs font-semibold text-fun-text">
                     {ua.achievement.name}
                   </p>
                 </div>
