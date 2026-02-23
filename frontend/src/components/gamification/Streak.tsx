@@ -17,18 +17,18 @@ export function Streak({
   return (
     <div
       className={cn(
-        "flex items-center gap-3 p-4 bg-gradient-to-r from-candy-orange-light to-candy-red-light rounded-2xl",
+        "flex items-center gap-3 p-4 bg-gradient-to-r from-fun-sun-light to-fun-red-light rounded-2xl",
         className
       )}
     >
-      <div className="bg-candy-orange rounded-full p-3">
+      <div className="bg-fun-sun rounded-full p-3">
         <Flame className="h-6 w-6 text-white fill-white" />
       </div>
       <div>
-        <div className="font-bold text-2xl text-candy-text">
+        <div className="font-bold text-2xl text-fun-text">
           {currentStreak} jour{currentStreak !== 1 ? "s" : ""}
         </div>
-        <div className="text-sm text-candy-text-muted">
+        <div className="text-sm text-fun-text-muted">
           {longestStreak && (
             <span>
               Record: {longestStreak} jour{longestStreak !== 1 ? "s" : ""}

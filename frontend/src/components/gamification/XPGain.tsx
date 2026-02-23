@@ -25,8 +25,8 @@ export function XPGain({ xp, onComplete }: XPGainProps) {
       <span
         className="text-4xl font-extrabold drop-shadow-lg animate-[candy-float_1.2s_ease-out_forwards]"
         style={{
-          color: "var(--candy-yellow)",
-          textShadow: "0 2px 8px rgba(245, 158, 11, 0.5)",
+          color: "var(--fun-sun)",
+          textShadow: "0 2px 8px rgba(243, 195, 91, 0.5)",
         }}
       >
         +{xp} XP

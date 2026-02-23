@@ -35,11 +35,11 @@ export function LevelUp({ newLevel, onClose }: LevelUpProps) {
               left: `${Math.random() * 100}%`,
               animation: `confetti-fall ${1.5 + Math.random() * 1.5}s ease-in ${Math.random() * 1}s forwards`,
               backgroundColor: [
-                "#7C3AED",
-                "#EC4899",
-                "#F97316",
-                "#10B981",
-                "#F59E0B",
+                "#58CC02",
+                "#1CAFF6",
+                "#F28DEE",
+                "#F3C35B",
+                "#45A302",
               ][i % 5],
               width: `${8 + Math.random() * 8}px`,
               height: `${8 + Math.random() * 8}px`,
@@ -50,10 +50,10 @@ export function LevelUp({ newLevel, onClose }: LevelUpProps) {
       </div>
 
       {/* Star burst background */}
-      <div className="absolute h-64 w-64 rounded-full bg-candy-yellow/30 blur-3xl animate-[candy-glow_1s_ease-out_forwards]" />
+      <div className="absolute h-64 w-64 rounded-full bg-fun-sun/30 blur-3xl animate-[candy-glow_1s_ease-out_forwards]" />
 
       {/* Main card */}
-      <div className="relative rounded-3xl bg-gradient-to-b from-candy-yellow to-candy-orange p-10 text-center candy-shadow-lg animate-[candy-pop_0.6s_ease-out_forwards]">
+      <div className="relative rounded-3xl bg-gradient-to-b from-fun-sun to-fun-violet p-10 text-center candy-shadow-lg animate-[candy-pop_0.6s_ease-out_forwards]">
         <div className="mb-4 text-7xl animate-[candy-wiggle_1.5s_ease-in-out_infinite]">
           ⭐
         </div>
@@ -66,7 +66,7 @@ export function LevelUp({ newLevel, onClose }: LevelUpProps) {
         </p>
         <button
           onClick={handleClose}
-          className="rounded-xl bg-white px-8 py-3 text-lg font-bold text-candy-purple shadow-lg transition-transform hover:scale-105 active:scale-95"
+          className="rounded-xl bg-white px-8 py-3 text-lg font-bold text-fun-green shadow-lg transition-transform hover:scale-105 active:scale-95"
         >
           Continuer
         </button>

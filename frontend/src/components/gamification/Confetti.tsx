@@ -30,11 +30,11 @@ export function Confetti({ show, duration = 3000, onComplete }: ConfettiProps) {
     const animationDuration = 2 + Math.random() * 2;
     const animationDelay = Math.random() * 3;
     const colors = [
-      "bg-candy-purple",
-      "bg-candy-pink",
-      "bg-candy-orange",
-      "bg-candy-yellow",
-      "bg-candy-green",
+      "bg-fun-green",
+      "bg-fun-violet",
+      "bg-fun-sun",
+      "bg-fun-sky",
+      "bg-fun-green-dark",
     ];
     const color = colors[Math.floor(Math.random() * colors.length)];
 
