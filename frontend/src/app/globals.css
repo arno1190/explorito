@@ -1,46 +1,44 @@
 @import "tailwindcss";
 
 :root {
-  /* Candy Garden Palette */
-  --candy-purple: #7c3aed;
-  --candy-purple-light: #ede9fe;
-  --candy-purple-dark: #5b21b6;
-  --candy-orange: #f97316;
-  --candy-orange-light: #fff7ed;
-  --candy-green: #10b981;
-  --candy-green-light: #d1fae5;
-  --candy-red: #ef4444;
-  --candy-red-light: #fee2e2;
-  --candy-yellow: #f59e0b;
-  --candy-yellow-light: #fef3c7;
-  --candy-pink: #ec4899;
-  --candy-pink-light: #fce7f3;
-  --candy-surface: #fffbf5;
-  --candy-card: #ffffff;
-  --candy-text: #1e1b4b;
-  --candy-text-muted: #6b7280;
-  --candy-border: #e5e1f5;
+  /* Fun Palette */
+  --fun-green: #58cc02;
+  --fun-green-light: #e8f5d6;
+  --fun-green-dark: #45a302;
+  --fun-sky: #1caff6;
+  --fun-sky-light: #e0f4ff;
+  --fun-violet: #f28dee;
+  --fun-violet-light: #fce7fb;
+  --fun-sun: #f3c35b;
+  --fun-sun-light: #fef5e0;
+  --fun-red: #ef4444;
+  --fun-red-light: #fee2e2;
+  --fun-surface: #ffffff;
+  --fun-card: #ffffff;
+  --fun-text: #042c60;
+  --fun-text-muted: #64748b;
+  --fun-border: #e2e8f0;
 
-  /* shadcn/ui semantic tokens mapped to Candy Garden */
-  --background: #fffbf5;
-  --foreground: #1e1b4b;
+  /* shadcn/ui semantic tokens mapped to Fun palette */
+  --background: #ffffff;
+  --foreground: #042c60;
   --card: #ffffff;
-  --card-foreground: #1e1b4b;
+  --card-foreground: #042c60;
   --popover: #ffffff;
-  --popover-foreground: #1e1b4b;
-  --primary: #7c3aed;
+  --popover-foreground: #042c60;
+  --primary: #58cc02;
   --primary-foreground: #ffffff;
-  --secondary: #ede9fe;
-  --secondary-foreground: #5b21b6;
-  --muted: #f5f3ff;
-  --muted-foreground: #6b7280;
-  --accent: #fff7ed;
-  --accent-foreground: #f97316;
+  --secondary: #e0f4ff;
+  --secondary-foreground: #1caff6;
+  --muted: #e8f5d6;
+  --muted-foreground: #64748b;
+  --accent: #fce7fb;
+  --accent-foreground: #f28dee;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #e5e1f5;
-  --input: #e5e1f5;
-  --ring: #7c3aed;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #58cc02;
   --radius: 1rem;
 }
 
@@ -70,24 +68,22 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* Candy palette as Tailwind utilities */
-  --color-candy-purple: #7c3aed;
-  --color-candy-purple-light: #ede9fe;
-  --color-candy-purple-dark: #5b21b6;
-  --color-candy-orange: #f97316;
-  --color-candy-orange-light: #fff7ed;
-  --color-candy-green: #10b981;
-  --color-candy-green-light: #d1fae5;
-  --color-candy-red: #ef4444;
-  --color-candy-red-light: #fee2e2;
-  --color-candy-yellow: #f59e0b;
-  --color-candy-yellow-light: #fef3c7;
-  --color-candy-pink: #ec4899;
-  --color-candy-pink-light: #fce7f3;
-  --color-candy-surface: #fffbf5;
-  --color-candy-text: #1e1b4b;
-  --color-candy-text-muted: #6b7280;
-  --color-candy-border: #e5e1f5;
+  /* Fun palette as Tailwind utilities */
+  --color-fun-green: #58cc02;
+  --color-fun-green-light: #e8f5d6;
+  --color-fun-green-dark: #45a302;
+  --color-fun-sky: #1caff6;
+  --color-fun-sky-light: #e0f4ff;
+  --color-fun-violet: #f28dee;
+  --color-fun-violet-light: #fce7fb;
+  --color-fun-sun: #f3c35b;
+  --color-fun-sun-light: #fef5e0;
+  --color-fun-red: #ef4444;
+  --color-fun-red-light: #fee2e2;
+  --color-fun-surface: #ffffff;
+  --color-fun-text: #042c60;
+  --color-fun-text-muted: #64748b;
+  --color-fun-border: #e2e8f0;
 }
 
 body {
@@ -96,7 +92,7 @@ body {
   font-family: var(--font-nunito), system-ui, sans-serif;
 }
 
-/* Candy Garden global animations */
+/* Fun palette global animations */
 @keyframes candy-bounce {
   0%,
   100% {
@@ -137,10 +133,10 @@ body {
 @keyframes candy-glow {
   0%,
   100% {
-    box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
+    box-shadow: 0 0 8px rgba(88, 204, 2, 0.3);
   }
   50% {
-    box-shadow: 0 0 20px rgba(124, 58, 237, 0.5);
+    box-shadow: 0 0 20px rgba(88, 204, 2, 0.5);
   }
 }
 
@@ -201,23 +197,23 @@ body {
   }
 }
 
-/* Candy utility classes */
+/* Candy utility classes (neutral gray shadows) */
 .candy-shadow {
   box-shadow:
-    0 4px 14px rgba(124, 58, 237, 0.08),
+    0 4px 14px rgba(0, 0, 0, 0.06),
     0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .candy-shadow-lg {
   box-shadow:
-    0 8px 24px rgba(124, 58, 237, 0.12),
+    0 8px 24px rgba(0, 0, 0, 0.1),
     0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
 .candy-shadow-glow {
   box-shadow:
-    0 0 20px rgba(124, 58, 237, 0.2),
-    0 4px 14px rgba(124, 58, 237, 0.1);
+    0 0 20px rgba(88, 204, 2, 0.15),
+    0 4px 14px rgba(0, 0, 0, 0.06);
 }
 
 /* Scrollbar styling for kids */
@@ -226,15 +222,15 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--candy-purple-light);
+  background: var(--fun-green-light);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--candy-purple);
+  background: var(--fun-green);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--candy-purple-dark);
+  background: var(--fun-green-dark);
 }
