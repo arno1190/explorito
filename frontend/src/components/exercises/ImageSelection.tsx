@@ -34,7 +34,7 @@ export function ImageSelection({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-candy-text text-center">
+      <h2 className="text-2xl font-bold text-fun-text text-center">
         {question}
       </h2>
 
@@ -50,13 +50,13 @@ export function ImageSelection({
               className={cn(
                 "relative overflow-hidden cursor-pointer transition-all border-2 rounded-2xl candy-shadow",
                 "hover:shadow-xl hover:scale-[1.05]",
-                !disabled && "hover:border-candy-purple/50",
-                !isSelected && !showResult && "border-candy-border",
+                !disabled && "hover:border-fun-sky/50",
+                !isSelected && !showResult && "border-fun-border",
                 isSelected &&
                   !showResult &&
-                  "border-candy-purple ring-2 ring-candy-purple/30",
-                isCorrectImage && "border-candy-green",
-                isWrongSelection && "border-candy-red",
+                  "border-fun-sky ring-2 ring-fun-sky/30",
+                isCorrectImage && "border-fun-green",
+                isWrongSelection && "border-fun-red",
                 disabled && "cursor-not-allowed opacity-60"
               )}
               onClick={() => handleSelect(image.id)}
@@ -74,15 +74,15 @@ export function ImageSelection({
                   }}
                 />
                 {showResult && isCorrectImage && (
-                  <div className="absolute inset-0 bg-candy-green/20 flex items-center justify-center">
-                    <div className="bg-candy-green rounded-full p-3">
+                  <div className="absolute inset-0 bg-fun-green/20 flex items-center justify-center">
+                    <div className="bg-fun-green rounded-full p-3">
                       <Check className="h-8 w-8 text-white" />
                     </div>
                   </div>
                 )}
                 {showResult && isWrongSelection && (
-                  <div className="absolute inset-0 bg-candy-red/20 flex items-center justify-center">
-                    <div className="bg-candy-red rounded-full p-3">
+                  <div className="absolute inset-0 bg-fun-red/20 flex items-center justify-center">
+                    <div className="bg-fun-red rounded-full p-3">
                       <X className="h-8 w-8 text-white" />
                     </div>
                   </div>
@@ -98,8 +98,8 @@ export function ImageSelection({
           className={cn(
             "p-4 rounded-lg text-center font-semibold",
             isCorrect
-              ? "bg-candy-green-light text-candy-green"
-              : "bg-candy-red-light text-candy-red"
+              ? "bg-fun-green-light text-fun-green"
+              : "bg-fun-red-light text-fun-red"
           )}
         >
           {isCorrect

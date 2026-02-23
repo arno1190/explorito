@@ -49,8 +49,8 @@ export function ExerciseFeedback({
       className={cn(
         "animate-[feedback-slide-up_0.4s_ease-out] rounded-2xl p-6 text-center shadow-lg",
         isCorrect
-          ? "bg-candy-green-light border-4 border-candy-green"
-          : "bg-candy-orange-light border-4 border-candy-orange"
+          ? "bg-fun-green-light border-4 border-fun-green"
+          : "bg-fun-sun-light border-4 border-fun-sun"
       )}
     >
       <div
@@ -66,7 +66,7 @@ export function ExerciseFeedback({
       <h3
         className={cn(
           "text-2xl font-extrabold mb-2",
-          isCorrect ? "text-candy-green" : "text-candy-orange"
+          isCorrect ? "text-fun-green" : "text-fun-sun"
         )}
       >
         {isCorrect ? "Bravo !" : "Oups !"}
@@ -74,7 +74,7 @@ export function ExerciseFeedback({
       <p
         className={cn(
           "text-lg font-semibold mb-4",
-          isCorrect ? "text-candy-green" : "text-candy-orange"
+          isCorrect ? "text-fun-green" : "text-fun-sun"
         )}
       >
         {displayMessage}
@@ -84,8 +84,8 @@ export function ExerciseFeedback({
         className={cn(
           "rounded-xl px-8 py-3 text-lg font-bold text-white transition-transform hover:scale-105 active:scale-95 shadow-md",
           isCorrect
-            ? "bg-candy-green hover:bg-emerald-600"
-            : "bg-candy-orange hover:bg-orange-600"
+            ? "bg-fun-green hover:bg-emerald-600"
+            : "bg-fun-sun hover:bg-orange-600"
         )}
       >
         {isCorrect ? "Continuer" : "Reessayer"}
