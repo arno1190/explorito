@@ -194,28 +194,27 @@ docker compose exec postgres psql -U explorito explorito
 | Admin | admin@explorito.fr | admin123 |
 | Child | alice (login)    | alice123 |
 
-## Design System - Candy Garden
+## Design System - Fun Palette
 
 ### Color Palette
 
 | Token | Name | Hex | Tailwind Class | Usage |
 |-------|------|-----|---------------|-------|
-| Primary | Vivid Purple | `#7C3AED` | `candy-purple` | Main actions, active states, logo |
-| Primary Light | Soft Lavender | `#EDE9FE` | `candy-purple-light` | Backgrounds, highlights, skeleton loading |
-| Primary Dark | Deep Purple | `#5B21B6` | `candy-purple-dark` | Hover states |
-| Secondary | Coral Orange | `#F97316` | `candy-orange` | Gamification, streaks |
-| Secondary Light | Peach | `#FFF7ED` | `candy-orange-light` | Warm backgrounds |
-| Success | Emerald | `#10B981` | `candy-green` | Correct answers, completed items |
-| Success Light | Mint | `#D1FAE5` | `candy-green-light` | Success backgrounds |
-| Error | Strawberry | `#EF4444` | `candy-red` | Wrong answers |
-| Error Light | Rose | `#FEE2E2` | `candy-red-light` | Error backgrounds |
-| Reward | Sunshine | `#F59E0B` | `candy-yellow` | Stars, XP, rewards |
-| Reward Light | Lemon | `#FEF3C7` | `candy-yellow-light` | Reward backgrounds |
-| Accent | Cotton Candy | `#EC4899` | `candy-pink` | Fun accents |
-| Surface | Cream | `#FFFBF5` | `candy-surface` | Page backgrounds |
-| Text | Deep Indigo | `#1E1B4B` | `candy-text` | Primary text |
-| Text Muted | Warm Gray | `#6B7280` | `candy-text-muted` | Secondary text |
-| Border | Soft Lavender | `#E5E1F5` | `candy-border` | Borders, dividers |
+| Primary | Lime Green | `#58CC02` | `fun-green` | Main CTA buttons, active states, correct answers, logo |
+| Primary Light | Soft Lime | `#E8F5D6` | `fun-green-light` | Backgrounds, highlights, skeleton loading |
+| Primary Dark | Deep Lime | `#45A302` | `fun-green-dark` | Hover states on primary buttons |
+| Secondary | Fresh Sky | `#1CAFF6` | `fun-sky` | Secondary buttons, selected states, links |
+| Secondary Light | Pale Sky | `#E0F4FF` | `fun-sky-light` | Info backgrounds, selected backgrounds |
+| Accent | Violet | `#F28DEE` | `fun-violet` | Fun accents, badges, decorative elements |
+| Accent Light | Soft Violet | `#FCE7FB` | `fun-violet-light` | Accent backgrounds |
+| Reward | Tuscan Sun | `#F3C35B` | `fun-sun` | Stars, XP, streaks, rewards |
+| Reward Light | Pale Sun | `#FEF5E0` | `fun-sun-light` | Reward backgrounds |
+| Error | Strawberry | `#EF4444` | `fun-red` | Wrong answers |
+| Error Light | Rose | `#FEE2E2` | `fun-red-light` | Error backgrounds |
+| Surface | White | `#FFFFFF` | `fun-surface` | Page background base |
+| Text | Oxford Navy | `#042C60` | `fun-text` | Primary text, headings |
+| Text Muted | Slate | `#64748B` | `fun-text-muted` | Secondary text, labels |
+| Border | Light Gray | `#E2E8F0` | `fun-border` | Borders, dividers |
 
 ### Font
 - **Primary:** Nunito (loaded via `next/font/google`, variable `--font-nunito`)
@@ -229,16 +228,16 @@ docker compose exec postgres psql -U explorito explorito
 | Cards | `rounded-2xl candy-shadow` (or `rounded-3xl` for hero cards) |
 | Buttons | `rounded-xl`, min height `h-11`, `active:scale-95` for tap feedback |
 | Inputs | `rounded-xl h-12 border-2` |
-| Progress bars | `h-3 rounded-full`, track `bg-candy-purple-light`, fill gradient |
+| Progress bars | `h-3 rounded-full`, track `bg-fun-green-light`, fill `bg-fun-green` |
 | Dialogs | `rounded-2xl`, overlay `bg-black/40` |
 | Touch targets | Minimum `48px` height for all interactive elements (kids' fingers) |
 
-### Custom CSS Classes (defined in globals.css)
+### Shadows (Neutral Gray, defined in globals.css)
 
 ```
-candy-shadow      - Subtle purple-tinted shadow for cards
-candy-shadow-lg   - Larger shadow for hover states
-candy-shadow-glow - Glowing shadow for active/focus states
+candy-shadow      - Subtle neutral shadow for cards: rgba(0,0,0,0.06)
+candy-shadow-lg   - Larger shadow for hover states: rgba(0,0,0,0.10)
+candy-shadow-glow - Glowing green shadow for active/focus: rgba(88,204,2,0.15)
 ```
 
 ### Animations (defined as @keyframes in globals.css)
@@ -248,7 +247,7 @@ candy-shadow-glow - Glowing shadow for active/focus states
 | `candy-bounce` | Bouncing mascot/icons | `animate-[candy-bounce_2s_ease-in-out_infinite]` |
 | `candy-wiggle` | Playful wiggle | `animate-[candy-wiggle_1s_ease-in-out_infinite]` |
 | `candy-pop` | Entry/appear animation | `animate-[candy-pop_0.6s_ease-out]` |
-| `candy-glow` | Pulsing glow (active items) | `animate-[candy-glow_2s_infinite]` |
+| `candy-glow` | Pulsing green glow (active items) | `animate-[candy-glow_2s_infinite]` |
 | `candy-float` | Float up and fade (XP gain) | `animate-[candy-float_1.2s_ease-out_forwards]` |
 | `candy-spin-slow` | Loading spinner | `animate-[candy-spin-slow_1s_linear_infinite]` |
 | `candy-shake` | Wrong answer shake | `animate-[candy-shake_0.5s_ease-in-out]` |
@@ -257,7 +256,7 @@ candy-shadow-glow - Glowing shadow for active/focus states
 
 ### Loading Spinner Pattern
 ```html
-<div class="animate-[candy-spin-slow_1s_linear_infinite] rounded-full h-12 w-12 border-4 border-candy-purple-light border-t-candy-purple"></div>
+<div class="animate-[candy-spin-slow_1s_linear_infinite] rounded-full h-12 w-12 border-4 border-fun-green-light border-t-fun-green"></div>
 ```
 
 ### Mobile-First Responsive Patterns
@@ -267,26 +266,36 @@ candy-shadow-glow - Glowing shadow for active/focus states
 | Bottom tab bar | `<BottomNav />` component, hidden on `md:` and above |
 | Header nav | Desktop nav links hidden on mobile (`hidden md:flex`), shown in bottom nav instead |
 | Content padding | `pb-20 md:pb-6` to account for bottom nav |
-| Page backgrounds | Candy gradients: `from-candy-purple-light via-candy-surface to-candy-orange-light` |
+| Page backgrounds | Light gradients: `from-fun-sky-light via-white to-fun-violet-light` |
 | Grid layouts | `grid-cols-1 md:grid-cols-2 lg:grid-cols-3` |
 | CTA buttons | Stack on mobile: `flex-col sm:flex-row` |
+
+### Exercise State Colors
+
+| State | Color Token | Usage |
+|-------|------------|-------|
+| Selected (not validated) | `fun-sky` / `fun-sky-light` | Border, background, text for selected options |
+| Correct | `fun-green` / `fun-green-light` | Border, background, check marks |
+| Wrong | `fun-red` / `fun-red-light` | Border, background, X marks |
 
 ### Do's and Don'ts
 
 **Do:**
-- Use candy palette tokens (`text-candy-text`, `bg-candy-purple-light`) instead of raw Tailwind colors
+- Use fun palette tokens (`text-fun-text`, `bg-fun-green-light`) instead of raw Tailwind colors
 - Use `candy-shadow` / `candy-shadow-lg` instead of Tailwind `shadow` / `shadow-lg`
 - Use global animations from globals.css instead of component-scoped `<style jsx>`
 - Keep all interactive elements >= 48px tall
 - Use `rounded-xl` or larger for kid-facing elements
 - Test at 375px width for mobile
+- Use `fun-sky` for selected-but-not-validated states in exercises
 
 **Don't:**
-- Use raw gray/blue/green colors (`text-gray-600`, `bg-blue-50`) -- always use candy tokens
+- Use raw gray/blue/green colors (`text-gray-600`, `bg-blue-50`) -- always use fun tokens
 - Use `animate-spin` -- use `animate-[candy-spin-slow_1s_linear_infinite]`
 - Use `shadow` directly on Card -- it's already set to `candy-shadow` in the base component
 - Add dark mode styles -- the app is light-only for kids
 - Use font sizes smaller than `text-sm` in child-facing content
+- Use old `candy-*` color tokens -- they have been replaced with `fun-*`
 
 ## Error Handling
 
