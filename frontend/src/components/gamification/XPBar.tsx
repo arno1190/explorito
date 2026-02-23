@@ -23,7 +23,7 @@ export function XPBar({
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <div className="bg-fun-sun rounded-full p-2">
-            <Star className="h-5 w-5 text-candy-text fill-fun-sun" />
+            <Star className="h-5 w-5 text-fun-text fill-fun-sun" />
           </div>
           <span className="font-bold text-lg">Niveau {level}</span>
         </div>
