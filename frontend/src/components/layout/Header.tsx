@@ -36,7 +36,7 @@ export function Header() {
   return (
     <>
       {impersonatedChild && (
-        <div className="bg-candy-yellow-light text-candy-text px-4 py-2 text-center border-b-2 border-candy-yellow">
+        <div className="bg-fun-sun-light text-fun-text px-4 py-2 text-center border-b-2 border-fun-sun">
           <div className="container mx-auto flex items-center justify-center gap-4">
             <span className="font-semibold">
               Mode enfant: {impersonatedChild.name}
@@ -54,9 +54,9 @@ export function Header() {
         </div>
       )}
 
-      <header className="bg-white/80 backdrop-blur-sm border-b-2 border-candy-border sticky top-0 z-40">
+      <header className="bg-white/80 backdrop-blur-sm border-b-2 border-fun-border sticky top-0 z-40">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-extrabold text-candy-purple">
+          <Link href="/" className="text-2xl font-extrabold text-fun-green">
             Explorito
           </Link>
 
@@ -65,7 +65,7 @@ export function Header() {
               <>
                 <Link
                   href="/dashboard"
-                  className="hidden md:block text-sm font-semibold text-candy-text hover:text-candy-purple transition-colors"
+                  className="hidden md:block text-sm font-semibold text-fun-text hover:text-fun-green transition-colors"
                 >
                   Dashboard
                 </Link>
@@ -77,7 +77,7 @@ export function Header() {
                       className="relative h-10 w-10 rounded-full"
                     >
                       <Avatar>
-                        <AvatarFallback className="bg-candy-purple-light text-candy-purple font-bold">
+                        <AvatarFallback className="bg-fun-green-light text-fun-green font-bold">
                           {getInitials(user?.profile?.display_name)}
                         </AvatarFallback>
                       </Avatar>
