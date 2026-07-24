@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Sparkles, Star, Lock } from "lucide-react";
 
 import { Confetti } from "@/components/gamification/Confetti";
+import { PokemonCardModal } from "@/components/pokedex/PokemonCardModal";
 import { cn } from "@/lib/utils";
 import {
   useGetPokedexApiV1CollectionPokedexGet as usePokedex,
@@ -19,6 +20,7 @@ export default function PokedexPage() {
 
   const [celebrating, setCelebrating] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<PokedexGridEntry | null>(null);
 
   const balance = meQuery.data?.balance ?? 0;
   const ownedCount = meQuery.data?.unlocked_count ?? 0;
@@ -121,24 +123,43 @@ export default function PokedexPage() {
               <span className="self-start text-xs font-bold text-fun-text-muted">
                 #{String(p.id).padStart(3, "0")}
               </span>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={p.image_url}
-                alt={p.owned ? p.name_fr : "Pokémon mystère"}
-                loading="lazy"
-                className={cn(
-                  "h-24 w-24 object-contain transition-all",
-                  !p.owned && "opacity-40 [filter:grayscale(1)_brightness(0.6)]"
-                )}
-              />
-              <div className="mt-1 h-6 text-center text-sm font-bold text-fun-text">
-                {p.owned ? p.name_fr : "???"}
-              </div>
+              {p.owned ? (
+                <button
+                  type="button"
+                  onClick={() => setSelected(p)}
+                  className="flex flex-col items-center transition-transform active:scale-95"
+                  aria-label={`Voir la carte de ${p.name_fr}`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={p.image_url}
+                    alt={p.name_fr}
+                    loading="lazy"
+                    className="h-24 w-24 object-contain transition-all hover:scale-105"
+                  />
+                  <div className="mt-1 h-6 text-center text-sm font-bold text-fun-text">
+                    {p.name_fr}
+                  </div>
+                </button>
+              ) : (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={p.image_url}
+                    alt="Pokémon mystère"
+                    loading="lazy"
+                    className="h-24 w-24 object-contain opacity-40 [filter:grayscale(1)_brightness(0.6)]"
+                  />
+                  <div className="mt-1 h-6 text-center text-sm font-bold text-fun-text">
+                    ???
+                  </div>
+                </>
+              )}
 
               {p.owned ? (
                 <div className="mt-2 flex items-center gap-1 rounded-full bg-fun-green-light px-3 py-1 text-xs font-bold text-fun-green-dark">
                   <Star className="h-3 w-3 fill-fun-green text-fun-green" />
-                  Débloqué
+                  Voir la carte
                 </div>
               ) : (
                 <button
@@ -169,6 +190,14 @@ export default function PokedexPage() {
           );
         })}
       </div>
+
+      <PokemonCardModal
+        id={selected?.id ?? null}
+        nameFr={selected?.name_fr ?? ""}
+        imageUrl={selected?.image_url ?? ""}
+        open={selected !== null}
+        onClose={() => setSelected(null)}
+      />
     </div>
   );
 }

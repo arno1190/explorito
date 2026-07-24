@@ -16,7 +16,8 @@ from pathlib import Path
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import func
+from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models.collection import PokemonUnlock
@@ -46,6 +47,18 @@ def load_pokedex() -> dict[int, dict[str, Any]]:
     """Charge le catalogue Pokémon indexé par id (mis en cache)."""
     data = json.loads(POKEDEX_PATH.read_text(encoding="utf-8"))
     return {int(p["id"]): p for p in data}
+
+
+def _lock_user_purchases(user_id: UUID, db: Session) -> None:
+    """
+    Sérialise les achats d'un même utilisateur pour rendre le contrôle
+    "solde + doublon → insertion" atomique (évite double-dépense concurrente).
+
+    Utilise un verrou consultatif transactionnel Postgres (libéré au commit).
+    Sur SQLite (tests) il n'y a pas de concurrence à sérialiser : no-op.
+    """
+    if db.get_bind().dialect.name == "postgresql":
+        db.execute(select(func.pg_advisory_xact_lock(func.hashtext(str(user_id)))))
 
 
 def get_total_earned_xp(user_id: UUID, db: Session) -> int:
@@ -93,6 +106,10 @@ def purchase_pokemon(user_id: UUID, pokemon_id: int, db: Session) -> dict[str, A
     if entry is None:
         raise PokemonNotFoundError(f"Pokémon #{pokemon_id} inconnu")
 
+    # Sérialise les achats concurrents du même utilisateur : le contrôle
+    # doublon + solde et l'insertion deviennent atomiques (pas de double-dépense).
+    _lock_user_purchases(user_id, db)
+
     already = (
         db.query(PokemonUnlock)
         .filter(
@@ -115,5 +132,10 @@ def purchase_pokemon(user_id: UUID, pokemon_id: int, db: Session) -> dict[str, A
             price_paid=price,
         )
     )
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        # Filet de sécurité : course sur la contrainte unique (user, pokemon).
+        db.rollback()
+        raise AlreadyOwnedError(f"{entry['name_fr']} est déjà dans ta collection") from exc
     return entry
