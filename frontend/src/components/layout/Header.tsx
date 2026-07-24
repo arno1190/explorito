@@ -24,6 +24,7 @@ const NAV_LINKS: Record<ActingRole, { href: string; label: string }[]> = {
   child: [
     { href: "/play", label: "Jouer" },
     { href: "/subjects", label: "Matières" },
+    { href: "/pokedex", label: "Pokédex" },
   ],
   parent: [{ href: "/dashboard", label: "Tableau de bord" }],
   admin: [

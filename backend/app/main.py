@@ -22,6 +22,7 @@ from app.models import (  # noqa: F401
     LearningPath,
     Lesson,
     Media,
+    PokemonUnlock,
     Profile,
     ReviewQueue,
     Reward,
@@ -76,6 +77,7 @@ async def health():
 from app.api import (  # noqa: E402
     auth,
     children,
+    collection,
     exercises,
     gamification,
     lessons,
@@ -94,6 +96,11 @@ app.include_router(
     gamification.router,
     prefix=f"{settings.API_PREFIX}/gamification",
     tags=["gamification"],
+)
+app.include_router(
+    collection.router,
+    prefix=f"{settings.API_PREFIX}/collection",
+    tags=["collection"],
 )
 
 if __name__ == "__main__":

@@ -57,6 +57,7 @@ class User(Base):
     streak = relationship("Streak", back_populates="user", uselist=False, cascade="all, delete-orphan")
     rewards = relationship("Reward", back_populates="user", cascade="all, delete-orphan")
     review_queue = relationship("ReviewQueue", back_populates="user", cascade="all, delete-orphan")
+    pokemon_unlocks = relationship("PokemonUnlock", back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<User {self.email} ({self.role})>"

@@ -1,12 +1,13 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { Gamepad2, BookOpen, LayoutDashboard } from "lucide-react";
+import { Gamepad2, BookOpen, LayoutDashboard, BookMarked } from "lucide-react";
 import { useActingRole } from "@/lib/navigation";
 
 const CHILD_TABS = [
   { href: "/play", icon: Gamepad2, label: "Jouer" },
   { href: "/subjects", icon: BookOpen, label: "Matières" },
+  { href: "/pokedex", icon: BookMarked, label: "Pokédex" },
 ];
 
 const PARENT_TABS = [

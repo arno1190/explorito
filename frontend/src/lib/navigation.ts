@@ -10,7 +10,13 @@ import { useAuth } from "@/lib/auth";
  */
 export type ActingRole = "admin" | "parent" | "child";
 
-const CHILD_PREFIXES = ["/play", "/subjects", "/lessons", "/exercises"];
+const CHILD_PREFIXES = [
+  "/play",
+  "/subjects",
+  "/lessons",
+  "/exercises",
+  "/pokedex",
+];
 
 export function resolveActingRole(
   role: string | undefined,

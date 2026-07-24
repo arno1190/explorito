@@ -2,6 +2,7 @@
 Modèles SQLAlchemy pour l'application Explorito
 """
 
+from app.models.collection import PokemonUnlock
 from app.models.content import Exercise, LearningPath, Lesson, Media, Subject
 from app.models.gamification import (
     Achievement,
@@ -31,4 +32,5 @@ __all__ = [
     "Streak",
     "Reward",
     "ReviewQueue",
+    "PokemonUnlock",
 ]
