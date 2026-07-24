@@ -2,8 +2,10 @@ import axios, { AxiosError, AxiosRequestConfig } from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8005";
 
+// NB: the Orval-generated client already includes the full `/api/v1/...` path,
+// so the baseURL must be the bare host (no `/api/v1`) to avoid a double prefix.
 const instance = axios.create({
-  baseURL: `${API_URL}/api/v1`,
+  baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
   },
