@@ -10,6 +10,7 @@ import {
   getLessonApiV1LessonsLessonIdGet,
   getLessonExercisesApiV1LessonsLessonIdExercisesGet,
 } from "@/lib/api/generated/lessons/lessons";
+import { getSubjectLessonsApiV1SubjectsSubjectIdLessonsGet } from "@/lib/api/generated/subjects/subjects";
 import { getCompletedExercisesApiV1ProgressLessonsLessonIdCompletedExercisesGet } from "@/lib/api/generated/progress/progress";
 import type {
   ExerciseResponse,
@@ -32,6 +33,7 @@ export default function LessonDetailPage() {
 
   const [lesson, setLesson] = useState<LessonResponse | null>(null);
   const [subject, setSubject] = useState<SubjectResponse | null>(null);
+  const [nextLesson, setNextLesson] = useState<LessonResponse | null>(null);
   const [exercises, setExercises] = useState<ExerciseResponse[]>([]);
   const [completedExerciseIds, setCompletedExerciseIds] = useState<Set<string>>(
     new Set()
@@ -92,6 +94,28 @@ export default function LessonDetailPage() {
           is_active: true,
           lesson_count: 0,
         });
+
+        // Determine the next lesson in the same subject (for "Niveau suivant").
+        if (lessonData.subject_id) {
+          try {
+            const siblings =
+              await getSubjectLessonsApiV1SubjectsSubjectIdLessonsGet(
+                lessonData.subject_id
+              );
+            // Stay within the same learning path (e.g. CP), since CP and CE1
+            // lessons share the same order_index values.
+            const samePath = siblings
+              .filter((l) => l.path_id === lessonData.path_id)
+              .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0));
+            const idx = samePath.findIndex((l) => l.id === lessonData.id);
+            setNextLesson(
+              idx >= 0 && idx < samePath.length - 1 ? samePath[idx + 1] : null
+            );
+          } catch (siblingErr) {
+            console.warn("Could not load sibling lessons:", siblingErr);
+            setNextLesson(null);
+          }
+        }
       } catch (err) {
         setError("Impossible de charger la leçon");
         console.error(err);
@@ -233,7 +257,11 @@ export default function LessonDetailPage() {
                   className={`flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg ${
                     isCompleted ? "bg-fun-green text-white" : "text-white"
                   }`}
-                  style={!isCompleted ? { backgroundColor: subject.color ?? undefined } : {}}
+                  style={
+                    !isCompleted
+                      ? { backgroundColor: subject.color ?? undefined }
+                      : {}
+                  }
                 >
                   {isCompleted ? (
                     <CheckCircle2 className="h-7 w-7" />
@@ -283,23 +311,50 @@ export default function LessonDetailPage() {
         </div>
       )}
 
-      {/* Start Button */}
-      {exercises.length > 0 && (
-        <div className="mt-8 text-center">
-          <Button
-            size="lg"
-            className="px-8 py-6 text-lg"
-            style={{ backgroundColor: subject.color ?? undefined }}
-            onClick={() => router.push(`/exercises/${exercises[0].id}`)}
-          >
-            {completedCount === 0
-              ? "Commencer les exercices"
-              : completedCount < totalExercises
-                ? "Continuer"
-                : "Refaire les exercices"}
-          </Button>
-        </div>
-      )}
+      {/* Start / completion actions */}
+      {exercises.length > 0 &&
+        (completedCount >= totalExercises ? (
+          <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <Button
+              size="lg"
+              variant="outline"
+              className="px-8 py-6 text-lg"
+              onClick={() => router.push(`/exercises/${exercises[0].id}`)}
+            >
+              Refaire les exercices
+            </Button>
+            {nextLesson ? (
+              <Button
+                size="lg"
+                className="px-8 py-6 text-lg"
+                style={{ backgroundColor: subject.color ?? undefined }}
+                onClick={() => router.push(`/lessons/${nextLesson.id}`)}
+              >
+                Niveau suivant →
+              </Button>
+            ) : (
+              <Button
+                size="lg"
+                className="px-8 py-6 text-lg"
+                style={{ backgroundColor: subject.color ?? undefined }}
+                onClick={() => router.push("/subjects")}
+              >
+                Choisir une autre matière →
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="mt-8 text-center">
+            <Button
+              size="lg"
+              className="px-8 py-6 text-lg"
+              style={{ backgroundColor: subject.color ?? undefined }}
+              onClick={() => router.push(`/exercises/${exercises[0].id}`)}
+            >
+              {completedCount === 0 ? "Commencer les exercices" : "Continuer"}
+            </Button>
+          </div>
+        ))}
     </div>
   );
 }
