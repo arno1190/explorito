@@ -2,23 +2,24 @@
 Modèles de gamification
 """
 
+import enum
 import uuid
-from datetime import datetime, date
+from datetime import date, datetime
+
 from sqlalchemy import (
-    Column,
-    String,
-    DateTime,
-    Integer,
-    Boolean,
-    ForeignKey,
     JSON,
-    Enum,
+    Boolean,
+    Column,
     Date,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    String,
     UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-import enum
 
 from app.core.database import Base
 
@@ -50,9 +51,7 @@ class Achievement(Base):
     category = Column(String, nullable=True)  # 'reading', 'math', 'global'
 
     # Relations
-    user_achievements = relationship(
-        "UserAchievement", back_populates="achievement", cascade="all, delete-orphan"
-    )
+    user_achievements = relationship("UserAchievement", back_populates="achievement", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Achievement {self.name} ({self.rarity})>"
@@ -64,9 +63,7 @@ class UserAchievement(Base):
     """
 
     __tablename__ = "user_achievements"
-    __table_args__ = (
-        UniqueConstraint("user_id", "achievement_id", name="uq_user_achievement"),
-    )
+    __table_args__ = (UniqueConstraint("user_id", "achievement_id", name="uq_user_achievement"),)
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     user_id = Column(
@@ -88,9 +85,7 @@ class UserAchievement(Base):
     achievement = relationship("Achievement", back_populates="user_achievements")
 
     def __repr__(self):
-        return (
-            f"<UserAchievement user={self.user_id} achievement={self.achievement_id}>"
-        )
+        return f"<UserAchievement user={self.user_id} achievement={self.achievement_id}>"
 
 
 class DailyGoal(Base):

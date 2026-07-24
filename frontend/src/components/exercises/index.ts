@@ -1,6 +1,6 @@
 export { MultipleChoice } from "./MultipleChoice";
-export { DragAndDrop } from "./DragAndDrop";
 export { FillBlanks } from "./FillBlanks";
-export { TrueFalse } from "./TrueFalse";
-export { ImageSelection } from "./ImageSelection";
+export { Reveal } from "./Reveal";
+export { Pythagore } from "./Pythagore";
 export { ExerciseRenderer } from "./ExerciseRenderer";
+export { ExerciseFeedback } from "./ExerciseFeedback";

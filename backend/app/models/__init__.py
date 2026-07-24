@@ -2,18 +2,17 @@
 Modèles SQLAlchemy pour l'application Explorito
 """
 
-from app.models.user import User, Profile
-from app.models.content import Subject, LearningPath, Lesson, Exercise, Media
-from app.models.progress import UserProgress, ExerciseResult, SubjectProgress
+from app.models.content import Exercise, LearningPath, Lesson, Media, Subject
 from app.models.gamification import (
     Achievement,
-    UserAchievement,
     DailyGoal,
-    Streak,
     Reward,
+    Streak,
+    UserAchievement,
 )
-from app.models.family import FamilyGroup, FamilyMember
+from app.models.progress import ExerciseResult, SubjectProgress, UserProgress
 from app.models.review import ReviewQueue
+from app.models.user import Profile, User
 
 __all__ = [
     "User",
@@ -31,7 +30,5 @@ __all__ = [
     "DailyGoal",
     "Streak",
     "Reward",
-    "FamilyGroup",
-    "FamilyMember",
     "ReviewQueue",
 ]

@@ -2,131 +2,104 @@
 Endpoints de gestion des exercices
 """
 
-from typing import Annotated, List
-from uuid import UUID
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from typing import Annotated, Any, cast
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.core.database import get_db
-from app.models.user import User
-from app.models.content import Exercise, Lesson
-from app.models.progress import ExerciseResult
-from app.schemas.exercise import (
-    ExerciseCreate,
-    ExerciseUpdate,
-    ExerciseResponse,
-    ExerciseSubmit,
-    ExerciseResultResponse,
-)
 from app.api.auth import get_current_active_user
 from app.api.subjects import require_admin
+from app.core.database import get_db
+from app.models.content import Exercise, ExerciseType, Lesson
+from app.models.progress import ExerciseResult
+from app.models.user import User
+from app.schemas.exercise import (
+    ExerciseCreate,
+    ExerciseResponse,
+    ExerciseResultResponse,
+    ExerciseSubmit,
+    ExerciseSubmitResponse,
+    ExerciseUpdate,
+    UnlockedAchievement,
+)
+from app.services.gamification import process_exercise_result
 
 router = APIRouter()
 
 
-def check_answer_correctness(exercise: Exercise, user_answer: dict) -> bool:
+def check_answer_correctness(exercise: Exercise, user_answer: dict[str, Any]) -> bool:
     """
-    Vérifie si la réponse de l'utilisateur est correcte
+    Vérifie si la réponse de l'utilisateur est correcte.
+
+    Aligné sur le jeu de types canonique (:class:`ExerciseType`) et sur les
+    formes typées définies dans ``app.schemas.exercise``.
 
     Args:
-        exercise: Exercice concerné
-        user_answer: Réponse de l'utilisateur (dict)
+        exercise: Exercice concerné.
+        user_answer: Réponse de l'utilisateur (dict).
 
     Returns:
-        True si la réponse est correcte, False sinon
+        True si la réponse est correcte, False sinon. Les exercices ``reveal``
+        (blagues) sont toujours considérés corrects (étoile garantie).
     """
-    correct_answer = exercise.correct_answer
+    correct_answer = cast("dict[str, Any]", exercise.correct_answer) or {}
 
-    # Logique de vérification selon le type d'exercice
-    if exercise.type == "mcq":
-        # Choix multiple : support single and multiple answers
-        # Single: {"answer": "a"} or {"option_id": "a"}
-        # Multiple: {"answers": ["a", "c"]} or answer is array
-
-        # Get user answers (can be single or array)
-        user_answers = user_answer.get("answers") or user_answer.get("answer") or user_answer.get("option_id")
-        if not user_answers:
+    if exercise.type == ExerciseType.MULTIPLE_CHOICE.value:
+        # QCM : comparaison ensembliste des id d'options (réponse unique ou multiple)
+        user_ids = user_answer.get("option_ids")
+        if not isinstance(user_ids, list) or not user_ids:
             return False
-
-        # Normalize to list
-        if not isinstance(user_answers, list):
-            user_answers = [user_answers]
-
-        # Get correct answers (can be single or array)
-        correct_answers = correct_answer.get("answers") or correct_answer.get("answer") or correct_answer.get("option_id")
-        if not correct_answers:
+        correct_ids = correct_answer.get("option_ids")
+        if not isinstance(correct_ids, list) or not correct_ids:
             return False
-
-        # Normalize to list
-        if not isinstance(correct_answers, list):
-            correct_answers = [correct_answers]
-
-        # Normalize all values to lowercase strings
-        user_set = set(str(a).lower().strip() for a in user_answers)
-        correct_set = set(str(a).lower().strip() for a in correct_answers)
-
-        # Must match exactly (same answers, no extra, no missing)
+        user_set = {str(a).strip() for a in user_ids}
+        correct_set = {str(a).strip() for a in correct_ids}
         return user_set == correct_set
 
-    elif exercise.type == "fill_blanks":
-        # Remplir les blancs : comparer les réponses (insensible à la casse)
-        user_blanks = user_answer.get("blanks", [])
-        correct_blanks = correct_answer.get("blanks", {})
-
-        # Handle both list and dict format for correct_blanks
-        if isinstance(correct_blanks, dict):
-            # Format: {"1": "a", "2": "b"}
-            correct_values = list(correct_blanks.values())
-        else:
-            # Format: ["a", "b"]
-            correct_values = correct_blanks
-
-        if len(user_blanks) != len(correct_values):
+    if exercise.type == ExerciseType.FILL_BLANKS.value:
+        # Trous : comparaison ordonnée, insensible à la casse et aux espaces
+        user_blanks = user_answer.get("blanks")
+        correct_blanks = correct_answer.get("blanks")
+        if not isinstance(user_blanks, list) or not isinstance(correct_blanks, list):
+            return False
+        if len(user_blanks) != len(correct_blanks):
             return False
         return all(
-            str(u).strip().lower() == str(c).strip().lower()
-            for u, c in zip(user_blanks, correct_values)
+            str(u).strip().lower() == str(c).strip().lower() for u, c in zip(user_blanks, correct_blanks, strict=True)
         )
 
-    elif exercise.type == "drag_drop":
-        # Glisser-déposer : comparer les positions
-        return user_answer.get("positions") == correct_answer.get("positions")
+    if exercise.type == ExerciseType.REVEAL.value:
+        # Blague : pas de bonne réponse, on récompense toujours
+        return True
 
-    elif exercise.type == "true_false":
-        # Vrai/Faux - support both boolean and string
-        user_val = user_answer.get("answer")
-        correct_val = correct_answer.get("answer")
-        # Normalize to boolean
-        if isinstance(user_val, str):
-            user_val = user_val.lower() in ("true", "1", "yes", "vrai")
-        if isinstance(correct_val, str):
-            correct_val = correct_val.lower() in ("true", "1", "yes", "vrai")
-        return user_val == correct_val
+    if exercise.type == ExerciseType.PYTHAGORE.value:
+        # Mini-jeu : chaque case "AxB" doit valoir A*B ; toutes correctes -> gagné
+        cells = user_answer.get("cells")
+        if not isinstance(cells, dict) or not cells:
+            return False
+        for key, value in cells.items():
+            try:
+                a_str, b_str = str(key).lower().split("x")
+                expected = int(a_str) * int(b_str)
+                if int(value) != expected:
+                    return False
+            except (ValueError, AttributeError):
+                return False
+        return True
 
-    elif exercise.type == "image_selection":
-        # Selection d'image : comparer l'id sélectionné
-        user_sel = user_answer.get("selected") or user_answer.get("image_id")
-        correct_sel = correct_answer.get("selected") or correct_answer.get("image_id")
-        return user_sel == correct_sel
-
-    elif exercise.type == "matching":
-        # Associations : comparer les paires
-        return user_answer.get("pairs") == correct_answer.get("pairs")
-
-    # Par défaut, comparaison stricte
-    return user_answer == correct_answer
+    # Type inconnu : refus explicite plutôt que faux positif
+    return False
 
 
-@router.get("", response_model=List[ExerciseResponse])
+@router.get("", response_model=list[ExerciseResponse])
 async def list_exercises(
     db: Annotated[Session, Depends(get_db)],
     skip: int = Query(0, ge=0, description="Nombre d'éléments à ignorer"),
-    limit: int = Query(
-        100, ge=1, le=100, description="Nombre maximum d'éléments à retourner"
-    ),
+    limit: int = Query(100, ge=1, le=100, description="Nombre maximum d'éléments à retourner"),
     lesson_id: UUID | None = Query(None, description="Filtrer par leçon"),
-) -> List[Exercise]:
+) -> list[Exercise]:
     """
     Liste les exercices avec filtres optionnels
 
@@ -171,12 +144,12 @@ async def create_exercise(
     # Vérifier que la leçon existe
     lesson = db.query(Lesson).filter(Lesson.id == exercise_data.lesson_id).first()
     if not lesson:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée")
 
-    # Créer l'exercice
-    new_exercise = Exercise(**exercise_data.model_dump())
+    # Créer l'exercice (le type enum est stocké comme sa valeur string)
+    data = exercise_data.model_dump()
+    data["type"] = exercise_data.type.value
+    new_exercise = Exercise(**data)
     db.add(new_exercise)
     db.commit()
     db.refresh(new_exercise)
@@ -185,9 +158,7 @@ async def create_exercise(
 
 
 @router.get("/{exercise_id}", response_model=ExerciseResponse)
-async def get_exercise(
-    exercise_id: UUID, db: Annotated[Session, Depends(get_db)]
-) -> Exercise:
+async def get_exercise(exercise_id: UUID, db: Annotated[Session, Depends(get_db)]) -> Exercise:
     """
     Récupère les détails d'un exercice
 
@@ -203,9 +174,7 @@ async def get_exercise(
     """
     exercise = db.query(Exercise).filter(Exercise.id == exercise_id).first()
     if not exercise:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Exercice non trouvé"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Exercice non trouvé")
 
     return exercise
 
@@ -234,20 +203,18 @@ async def update_exercise(
     """
     exercise = db.query(Exercise).filter(Exercise.id == exercise_id).first()
     if not exercise:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Exercice non trouvé"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Exercice non trouvé")
 
     # Vérifier la leçon si modifiée
     if exercise_data.lesson_id and exercise_data.lesson_id != exercise.lesson_id:
         lesson = db.query(Lesson).filter(Lesson.id == exercise_data.lesson_id).first()
         if not lesson:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée")
 
-    # Mettre à jour les champs
+    # Mettre à jour les champs (le type enum est stocké comme sa valeur string)
     update_data = exercise_data.model_dump(exclude_unset=True)
+    if "type" in update_data and exercise_data.type is not None:
+        update_data["type"] = exercise_data.type.value
     for field, value in update_data.items():
         setattr(exercise, field, value)
 
@@ -279,9 +246,7 @@ async def delete_exercise(
     """
     exercise = db.query(Exercise).filter(Exercise.id == exercise_id).first()
     if not exercise:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Exercice non trouvé"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Exercice non trouvé")
 
     db.delete(exercise)
     db.commit()
@@ -289,7 +254,7 @@ async def delete_exercise(
 
 @router.post(
     "/{exercise_id}/submit",
-    response_model=ExerciseResultResponse,
+    response_model=ExerciseSubmitResponse,
     status_code=status.HTTP_201_CREATED,
 )
 async def submit_exercise(
@@ -297,7 +262,7 @@ async def submit_exercise(
     submission: ExerciseSubmit,
     db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_active_user)],
-) -> ExerciseResult:
+) -> ExerciseSubmitResponse:
     """
     Soumet une réponse pour un exercice
 
@@ -308,7 +273,8 @@ async def submit_exercise(
         current_user: Utilisateur authentifié
 
     Returns:
-        Résultat de l'exercice avec correction
+        Résultat de l'exercice avec correction et résumé de progression
+        (XP gagné, série, complétion de leçon, achievements débloqués).
 
     Raises:
         HTTPException: Si l'exercice n'existe pas
@@ -316,14 +282,13 @@ async def submit_exercise(
     # Vérifier que l'exercice existe
     exercise = db.query(Exercise).filter(Exercise.id == exercise_id).first()
     if not exercise:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Exercice non trouvé"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Exercice non trouvé")
 
     # Vérifier la réponse
     is_correct = check_answer_correctness(exercise, submission.answer)
 
-    # Créer le résultat
+    # Enregistrer le résultat AVANT le calcul de progression : la détection de
+    # complétion de leçon compte les ExerciseResult déjà persistés.
     result = ExerciseResult(
         user_id=current_user.id,
         exercise_id=exercise_id,
@@ -337,16 +302,36 @@ async def submit_exercise(
     db.commit()
     db.refresh(result)
 
-    return result
+    # Mettre à jour la progression (UserProgress), l'XP, la série, la complétion
+    # de la leçon et débloquer les achievements éligibles.
+    summary = process_exercise_result(
+        user_id=current_user.id,
+        exercise=exercise,
+        is_correct=is_correct,
+        time_taken=submission.time_taken,
+        db=db,
+    )
+
+    return ExerciseSubmitResponse(
+        result=ExerciseResultResponse.model_validate(result),
+        is_correct=is_correct,
+        xp_awarded=summary["xp_awarded"],
+        total_xp=summary["total_xp"],
+        current_streak=summary["current_streak"],
+        lesson_completed=summary["lesson_completed"],
+        lesson_score=summary["lesson_score"],
+        lesson_stars=summary["lesson_stars"],
+        new_achievements=[UnlockedAchievement.model_validate(a) for a in summary["new_achievements"]],
+    )
 
 
-@router.get("/{exercise_id}/results", response_model=List[ExerciseResultResponse])
+@router.get("/{exercise_id}/results", response_model=list[ExerciseResultResponse])
 async def get_exercise_results(
     exercise_id: UUID,
     db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_active_user)],
     limit: int = Query(10, ge=1, le=100, description="Nombre maximum de résultats"),
-) -> List[ExerciseResult]:
+) -> list[ExerciseResult]:
     """
     Récupère les résultats de l'utilisateur pour cet exercice
 
@@ -365,9 +350,7 @@ async def get_exercise_results(
     # Vérifier que l'exercice existe
     exercise = db.query(Exercise).filter(Exercise.id == exercise_id).first()
     if not exercise:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Exercice non trouvé"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Exercice non trouvé")
 
     # Récupérer les résultats de l'utilisateur
     results = (

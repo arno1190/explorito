@@ -3,7 +3,8 @@ Modèles pour le système de révision espacée (spaced repetition)
 """
 
 import uuid
-from sqlalchemy import Column, Integer, ForeignKey, Numeric, Date, UniqueConstraint
+
+from sqlalchemy import Column, Date, ForeignKey, Integer, Numeric, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -18,9 +19,7 @@ class ReviewQueue(Base):
     """
 
     __tablename__ = "review_queue"
-    __table_args__ = (
-        UniqueConstraint("user_id", "exercise_id", name="uq_user_exercise_review"),
-    )
+    __table_args__ = (UniqueConstraint("user_id", "exercise_id", name="uq_user_exercise_review"),)
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     user_id = Column(
@@ -37,12 +36,8 @@ class ReviewQueue(Base):
     )
     next_review_date = Column(Date, nullable=False, index=True)
     interval_days = Column(Integer, default=1)  # Intervalle avant prochaine révision
-    ease_factor = Column(
-        Numeric(3, 2), default=2.5
-    )  # Facteur de facilité (2.5 = valeur initiale)
-    repetitions = Column(
-        Integer, default=0
-    )  # Nombre de révisions réussies consécutives
+    ease_factor = Column(Numeric(3, 2), default=2.5)  # Facteur de facilité (2.5 = valeur initiale)
+    repetitions = Column(Integer, default=0)  # Nombre de révisions réussies consécutives
 
     # Relations
     user = relationship("User", back_populates="review_queue")

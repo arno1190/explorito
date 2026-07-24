@@ -3,8 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { subjectsApi, lessonsApi, exercisesApi, progressApi } from "@/lib/api";
-import type { Subject, Lesson } from "@/types";
+import {
+  getSubjectApiV1SubjectsSubjectIdGet,
+  getSubjectLessonsApiV1SubjectsSubjectIdLessonsGet,
+} from "@/lib/api/generated/subjects/subjects";
+import { getLessonExercisesApiV1LessonsLessonIdExercisesGet } from "@/lib/api/generated/lessons/lessons";
+import { getCompletedExercisesApiV1ProgressLessonsLessonIdCompletedExercisesGet } from "@/lib/api/generated/progress/progress";
+import type { LessonResponse, SubjectResponse } from "@/lib/api/model";
 import { ChevronLeft, BookOpen, CheckCircle, Lock } from "lucide-react";
 
 interface LessonProgress {
@@ -19,8 +24,8 @@ export default function SubjectDetailPage() {
   const params = useParams();
   const subjectId = params.id as string;
 
-  const [subject, setSubject] = useState<Subject | null>(null);
-  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [subject, setSubject] = useState<SubjectResponse | null>(null);
+  const [lessons, setLessons] = useState<LessonResponse[]>([]);
   const [lessonProgress, setLessonProgress] = useState<
     Map<string, LessonProgress>
   >(new Map());
@@ -32,8 +37,8 @@ export default function SubjectDetailPage() {
       try {
         setLoading(true);
         const [subjectData, lessonsData] = await Promise.all([
-          subjectsApi.getById(subjectId),
-          lessonsApi.getBySubject(subjectId),
+          getSubjectApiV1SubjectsSubjectIdGet(subjectId),
+          getSubjectLessonsApiV1SubjectsSubjectIdLessonsGet(subjectId),
         ]);
         setSubject(subjectData);
 
@@ -48,8 +53,10 @@ export default function SubjectDetailPage() {
         for (const lesson of sortedLessons) {
           try {
             const [exercises, completedIds] = await Promise.all([
-              exercisesApi.getByLesson(lesson.id),
-              progressApi.getCompletedExercises(lesson.id),
+              getLessonExercisesApiV1LessonsLessonIdExercisesGet(lesson.id),
+              getCompletedExercisesApiV1ProgressLessonsLessonIdCompletedExercisesGet(
+                lesson.id
+              ),
             ]);
             progressMap.set(lesson.id, {
               lessonId: lesson.id,
@@ -240,7 +247,7 @@ export default function SubjectDetailPage() {
 
                   {!isLocked && (
                     <div className="flex items-center justify-center gap-4 text-sm text-fun-text-muted">
-                      {lesson.xp_reward > 0 && (
+                      {(lesson.xp_reward ?? 0) > 0 && (
                         <span className="flex items-center gap-1">
                           ⚡ +{lesson.xp_reward} XP
                         </span>

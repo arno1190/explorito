@@ -2,9 +2,9 @@
 Schémas Pydantic pour la gamification
 """
 
-from datetime import datetime, date
-from typing import Optional
+from datetime import date, datetime
 from uuid import UUID
+
 from pydantic import BaseModel, Field
 
 from app.models.gamification import AchievementRarity
@@ -17,10 +17,10 @@ class AchievementResponse(BaseModel):
 
     id: UUID
     name: str
-    description: Optional[str] = None
-    icon: Optional[str] = None
+    description: str | None = None
+    icon: str | None = None
     rarity: AchievementRarity
-    category: Optional[str] = None
+    category: str | None = None
 
     class Config:
         from_attributes = True
@@ -72,7 +72,7 @@ class StreakResponse(BaseModel):
 
     current_streak: int = Field(..., ge=0, description="Série actuelle de jours")
     longest_streak: int = Field(..., ge=0, description="Plus longue série de jours")
-    last_activity_date: Optional[date] = None
+    last_activity_date: date | None = None
     freeze_used: int = Field(..., ge=0, description="Nombre de jokers utilisés")
 
     class Config:
@@ -97,13 +97,9 @@ class DailyGoalResponse(BaseModel):
     xp_target: int = Field(..., gt=0, description="XP à gagner aujourd'hui")
     xp_earned: int = Field(..., ge=0, description="XP gagné aujourd'hui")
     lessons_target: int = Field(..., gt=0, description="Leçons à compléter aujourd'hui")
-    lessons_completed: int = Field(
-        ..., ge=0, description="Leçons complétées aujourd'hui"
-    )
+    lessons_completed: int = Field(..., ge=0, description="Leçons complétées aujourd'hui")
     is_completed: bool = Field(..., description="Objectif complété")
-    progress_percentage: float = Field(
-        ..., ge=0, le=100, description="Pourcentage de progression"
-    )
+    progress_percentage: float = Field(..., ge=0, le=100, description="Pourcentage de progression")
 
     class Config:
         from_attributes = True
@@ -127,9 +123,7 @@ class DailyGoalCreate(BaseModel):
     """
 
     xp_target: int = Field(..., gt=0, le=500, description="XP à gagner (1-500)")
-    lessons_target: int = Field(
-        ..., gt=0, le=20, description="Leçons à compléter (1-20)"
-    )
+    lessons_target: int = Field(..., gt=0, le=20, description="Leçons à compléter (1-20)")
 
     class Config:
         json_schema_extra = {"example": {"xp_target": 50, "lessons_target": 3}}
@@ -141,11 +135,9 @@ class RewardResponse(BaseModel):
     """
 
     id: UUID
-    type: str = Field(
-        ..., description="Type de récompense: sticker, trophy, avatar, theme"
-    )
+    type: str = Field(..., description="Type de récompense: sticker, trophy, avatar, theme")
     name: str
-    image_url: Optional[str] = None
+    image_url: str | None = None
     unlocked_at: datetime
 
     class Config:
@@ -168,7 +160,7 @@ class LeaderboardEntry(BaseModel):
 
     user_id: UUID
     display_name: str
-    avatar_url: Optional[str] = None
+    avatar_url: str | None = None
     total_xp: int = Field(..., ge=0, description="XP total")
     level: int = Field(..., ge=1, description="Niveau")
     current_streak: int = Field(..., ge=0, description="Série actuelle")
@@ -188,3 +180,20 @@ class LeaderboardEntry(BaseModel):
                 "rank": 1,
             }
         }
+
+
+class ChildStatsResponse(BaseModel):
+    """Statistiques de gamification d'un enfant (tableau de bord parent/enfant)."""
+
+    child_id: UUID
+    total_xp: int
+    level: int
+    current_level_xp: int
+    next_level_xp: int
+    current_streak: int
+    longest_streak: int
+    total_exercises_completed: int
+    achievements: list[UserAchievementResponse] = Field(default_factory=list)
+
+    class Config:
+        from_attributes = True

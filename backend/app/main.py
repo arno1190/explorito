@@ -2,38 +2,36 @@
 Application FastAPI principale pour Explorito
 """
 
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-import os
 
 from app.core.config import settings
-from app.core.database import engine, Base
 
-# Import models BEFORE create_all so they're registered with Base.metadata
+# Le schéma est géré par les migrations Alembic (`alembic upgrade head`),
+# et non plus par `Base.metadata.create_all`. Voir alembic/ et le README.
+# L'import des modèles reste utile pour enregistrer les tables sur Base.metadata
+# (autogénération Alembic, tests).
 from app.models import (  # noqa: F401
-    User,
-    Profile,
-    Subject,
+    Achievement,
+    DailyGoal,
+    Exercise,
+    ExerciseResult,
     LearningPath,
     Lesson,
-    Exercise,
     Media,
-    UserProgress,
-    ExerciseResult,
-    SubjectProgress,
-    Achievement,
-    UserAchievement,
-    DailyGoal,
-    Streak,
-    Reward,
-    FamilyGroup,
-    FamilyMember,
+    Profile,
     ReviewQueue,
+    Reward,
+    Streak,
+    Subject,
+    SubjectProgress,
+    User,
+    UserAchievement,
+    UserProgress,
 )
-
-# Créer toutes les tables
-Base.metadata.create_all(bind=engine)
 
 # Créer l'application FastAPI
 app = FastAPI(
@@ -74,26 +72,24 @@ async def health():
     return {"status": "ok"}
 
 
-# Import des routers
-from app.api import auth, subjects, lessons, exercises, progress, gamification, children
+# Import des routers (après la config de l'app ; import tardif volontaire)
+from app.api import (  # noqa: E402
+    auth,
+    children,
+    exercises,
+    gamification,
+    lessons,
+    progress,
+    subjects,
+)
 
 # Enregistrer les routers
 app.include_router(auth.router, prefix=f"{settings.API_PREFIX}/auth", tags=["auth"])
-app.include_router(
-    children.router, prefix=f"{settings.API_PREFIX}/children", tags=["children"]
-)
-app.include_router(
-    subjects.router, prefix=f"{settings.API_PREFIX}/subjects", tags=["subjects"]
-)
-app.include_router(
-    lessons.router, prefix=f"{settings.API_PREFIX}/lessons", tags=["lessons"]
-)
-app.include_router(
-    exercises.router, prefix=f"{settings.API_PREFIX}/exercises", tags=["exercises"]
-)
-app.include_router(
-    progress.router, prefix=f"{settings.API_PREFIX}/progress", tags=["progress"]
-)
+app.include_router(children.router, prefix=f"{settings.API_PREFIX}/children", tags=["children"])
+app.include_router(subjects.router, prefix=f"{settings.API_PREFIX}/subjects", tags=["subjects"])
+app.include_router(lessons.router, prefix=f"{settings.API_PREFIX}/lessons", tags=["lessons"])
+app.include_router(exercises.router, prefix=f"{settings.API_PREFIX}/exercises", tags=["exercises"])
+app.include_router(progress.router, prefix=f"{settings.API_PREFIX}/progress", tags=["progress"])
 app.include_router(
     gamification.router,
     prefix=f"{settings.API_PREFIX}/gamification",

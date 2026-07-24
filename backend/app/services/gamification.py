@@ -5,13 +5,21 @@ Logique métier pour les achievements, XP, niveaux, et streaks
 """
 
 from datetime import date, datetime, timedelta
-from typing import List
+from typing import Any
 from uuid import UUID
-from sqlalchemy.orm import Session
-from sqlalchemy import func
 
-from app.models.gamification import Achievement, UserAchievement, Streak, DailyGoal
-from app.models.progress import SubjectProgress, UserProgress, ProgressStatus
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
+from app.core.config import settings
+from app.models.content import Exercise, Lesson
+from app.models.gamification import Achievement, DailyGoal, Streak, UserAchievement
+from app.models.progress import (
+    ExerciseResult,
+    ProgressStatus,
+    SubjectProgress,
+    UserProgress,
+)
 
 
 def calculate_level_from_xp(xp: int) -> int:
@@ -93,28 +101,20 @@ def award_xp(user_id: UUID, amount: int, subject_id: UUID | None, db: Session) -
             subject_progress.level = calculate_level_from_xp(subject_progress.total_xp)
             subject_progress.last_activity = datetime.utcnow()
 
+        # La session applicative utilise autoflush=False : on force le flush pour
+        # que l'agrégat SUM ci-dessous voie la modification qu'on vient de faire.
+        db.flush()
+
     # Calculer l'XP total de l'utilisateur à travers toutes les matières
-    total_xp = (
-        db.query(func.sum(SubjectProgress.total_xp))
-        .filter(SubjectProgress.user_id == user_id)
-        .scalar()
-        or 0
-    )
+    total_xp = db.query(func.sum(SubjectProgress.total_xp)).filter(SubjectProgress.user_id == user_id).scalar() or 0
 
     # Mettre à jour l'objectif quotidien
     today = date.today()
-    daily_goal = (
-        db.query(DailyGoal)
-        .filter(DailyGoal.user_id == user_id, DailyGoal.date == today)
-        .first()
-    )
+    daily_goal = db.query(DailyGoal).filter(DailyGoal.user_id == user_id, DailyGoal.date == today).first()
 
     if daily_goal:
         daily_goal.xp_earned += amount
-        if (
-            daily_goal.xp_earned >= daily_goal.xp_target
-            and daily_goal.lessons_completed >= daily_goal.lessons_target
-        ):
+        if daily_goal.xp_earned >= daily_goal.xp_target and daily_goal.lessons_completed >= daily_goal.lessons_target:
             daily_goal.is_completed = True
 
     db.commit()
@@ -166,7 +166,7 @@ def update_streak(user_id: UUID, db: Session) -> Streak:
     return streak
 
 
-def check_and_unlock_achievements(user_id: UUID, db: Session) -> List[Achievement]:
+def check_and_unlock_achievements(user_id: UUID, db: Session) -> list[Achievement]:
     """
     Vérifie et débloque les achievements pour un utilisateur
 
@@ -183,20 +183,12 @@ def check_and_unlock_achievements(user_id: UUID, db: Session) -> List[Achievemen
     all_achievements = db.query(Achievement).all()
 
     # Récupérer les achievements déjà débloqués
-    unlocked_ids = set(
-        ua.achievement_id
-        for ua in db.query(UserAchievement)
-        .filter(UserAchievement.user_id == user_id)
-        .all()
-    )
+    unlocked_ids = {
+        ua.achievement_id for ua in db.query(UserAchievement).filter(UserAchievement.user_id == user_id).all()
+    }
 
     # Récupérer les statistiques de l'utilisateur
-    total_xp = (
-        db.query(func.sum(SubjectProgress.total_xp))
-        .filter(SubjectProgress.user_id == user_id)
-        .scalar()
-        or 0
-    )
+    total_xp = db.query(func.sum(SubjectProgress.total_xp)).filter(SubjectProgress.user_id == user_id).scalar() or 0
 
     lessons_completed = (
         db.query(func.count(UserProgress.id))
@@ -274,11 +266,7 @@ def get_or_create_daily_goal(user_id: UUID, db: Session) -> DailyGoal:
     """
     today = date.today()
 
-    daily_goal = (
-        db.query(DailyGoal)
-        .filter(DailyGoal.user_id == user_id, DailyGoal.date == today)
-        .first()
-    )
+    daily_goal = db.query(DailyGoal).filter(DailyGoal.user_id == user_id, DailyGoal.date == today).first()
 
     if not daily_goal:
         daily_goal = DailyGoal(
@@ -322,10 +310,158 @@ def update_daily_goal_lesson_count(user_id: UUID, db: Session) -> None:
 
     daily_goal.lessons_completed = int(lessons_today)
 
-    if (
-        daily_goal.xp_earned >= daily_goal.xp_target
-        and daily_goal.lessons_completed >= daily_goal.lessons_target
-    ):
+    if daily_goal.xp_earned >= daily_goal.xp_target and daily_goal.lessons_completed >= daily_goal.lessons_target:
         daily_goal.is_completed = True
 
     db.commit()
+
+
+def _stars_from_score(score: int) -> int:
+    """Convertit un score (0-100) en nombre d'étoiles (1-3) pour une leçon terminée."""
+    if score >= 90:
+        return 3
+    if score >= 75:
+        return 2
+    return 1
+
+
+def process_exercise_result(
+    user_id: UUID,
+    exercise: Exercise,
+    is_correct: bool,
+    time_taken: int | None,
+    db: Session,
+) -> dict[str, Any]:
+    """
+    Orchestre la progression après la soumission d'un exercice.
+
+    Met à jour :class:`UserProgress` de la leçon (tentatives, temps, statut),
+    attribue l'XP et met à jour la série en cas de bonne réponse, détecte la
+    complétion de la leçon (tous les exercices réussis au moins une fois) et
+    débloque les achievements éligibles.
+
+    Args:
+        user_id: ID de l'utilisateur.
+        exercise: Exercice soumis (avec ``lesson`` chargeable).
+        is_correct: Résultat de la correction.
+        time_taken: Temps passé sur l'exercice (secondes), optionnel.
+        db: Session de base de données.
+
+    Returns:
+        Résumé de progression : xp attribué, xp total, série courante, complétion
+        de la leçon, score/étoiles éventuels et nouveaux achievements.
+    """
+    lesson: Lesson = exercise.lesson
+    subject_id: UUID = lesson.path.subject_id
+
+    # --- UserProgress de la leçon (créé au premier passage) ---
+    progress = (
+        db.query(UserProgress)
+        .filter(
+            UserProgress.user_id == user_id,
+            UserProgress.lesson_id == lesson.id,
+        )
+        .first()
+    )
+    now = datetime.utcnow()
+    if progress is None:
+        progress = UserProgress(
+            user_id=user_id,
+            lesson_id=lesson.id,
+            status=ProgressStatus.STARTED,
+            attempts=0,
+            time_spent=0,
+            started_at=now,
+        )
+        db.add(progress)
+
+    progress.attempts = (progress.attempts or 0) + 1
+    progress.time_spent = (progress.time_spent or 0) + (time_taken or 0)
+    if progress.status in (ProgressStatus.LOCKED, ProgressStatus.AVAILABLE):
+        progress.status = ProgressStatus.STARTED
+    if progress.started_at is None:
+        progress.started_at = now
+
+    xp_awarded = 0
+    total_xp = 0
+    current_streak = 0
+    lesson_completed = False
+    lesson_score: int | None = None
+    lesson_stars: int | None = None
+    new_achievements: list[Achievement] = []
+
+    if is_correct:
+        # XP par exercice réussi + mise à jour de la série
+        xp_awarded += settings.XP_PER_EXERCISE
+        total_xp = award_xp(user_id, settings.XP_PER_EXERCISE, subject_id, db)
+        streak = update_streak(user_id, db)
+        current_streak = int(streak.current_streak)
+
+        # --- Détection de complétion : chaque exercice de la leçon réussi ---
+        lesson_exercise_ids = db.query(Exercise.id).filter(Exercise.lesson_id == lesson.id).subquery()
+        total_exercises = db.query(func.count(Exercise.id)).filter(Exercise.lesson_id == lesson.id).scalar() or 0
+        correctly_answered = (
+            db.query(func.count(func.distinct(ExerciseResult.exercise_id)))
+            .filter(
+                ExerciseResult.user_id == user_id,
+                ExerciseResult.is_correct.is_(True),
+                ExerciseResult.exercise_id.in_(db.query(lesson_exercise_ids.c.id)),
+            )
+            .scalar()
+            or 0
+        )
+
+        already_completed = progress.status == ProgressStatus.COMPLETED
+        if total_exercises > 0 and correctly_answered >= total_exercises and not already_completed:
+            # Score = ratio de résultats corrects sur l'ensemble des tentatives
+            total_results = (
+                db.query(func.count(ExerciseResult.id))
+                .filter(
+                    ExerciseResult.user_id == user_id,
+                    ExerciseResult.exercise_id.in_(db.query(lesson_exercise_ids.c.id)),
+                )
+                .scalar()
+                or 0
+            )
+            correct_results = (
+                db.query(func.count(ExerciseResult.id))
+                .filter(
+                    ExerciseResult.user_id == user_id,
+                    ExerciseResult.is_correct.is_(True),
+                    ExerciseResult.exercise_id.in_(db.query(lesson_exercise_ids.c.id)),
+                )
+                .scalar()
+                or 0
+            )
+            score = round(100 * correct_results / total_results) if total_results else 0
+            progress.status = ProgressStatus.COMPLETED
+            progress.completed_at = now
+            progress.score = score
+            progress.stars = _stars_from_score(score)
+            lesson_completed = True
+            lesson_score = score
+            lesson_stars = int(progress.stars)
+            # autoflush=False : rendre la complétion visible pour le décompte des
+            # leçons du jour ci-dessous.
+            db.flush()
+
+            # Bonus XP de leçon + mise à jour de l'objectif quotidien
+            lesson_reward = int(lesson.xp_reward or 0)
+            if lesson_reward > 0:
+                xp_awarded += lesson_reward
+                total_xp = award_xp(user_id, lesson_reward, subject_id, db)
+            update_daily_goal_lesson_count(user_id, db)
+
+        new_achievements = check_and_unlock_achievements(user_id, db)
+
+    db.commit()
+
+    return {
+        "xp_awarded": xp_awarded,
+        "total_xp": int(total_xp),
+        "current_streak": current_streak,
+        "lesson_completed": lesson_completed,
+        "lesson_score": lesson_score,
+        "lesson_stars": lesson_stars,
+        "new_achievements": new_achievements,
+    }

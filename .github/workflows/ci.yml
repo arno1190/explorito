@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Backend (lint · types · tests)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --group dev
+
+      - name: Ruff lint
+        run: uv run ruff check app tests scripts
+
+      - name: Ruff format check
+        run: uv run ruff format --check app tests scripts
+
+      - name: Tests
+        run: uv run pytest -q
+
+      # mypy est informatif pour l'instant : les modèles utilisent l'ancien style
+      # `Column()` (non `Mapped[]`), ce qui génère de nombreux faux positifs sous
+      # `strict = true`. À rendre bloquant après migration des modèles vers
+      # `Mapped[...]` (dette technique connue).
+      - name: Mypy (non bloquant)
+        continue-on-error: true
+        run: uv run mypy -p app

@@ -2,42 +2,39 @@
 Endpoints de gestion des leçons
 """
 
-from typing import Annotated, List
-from uuid import UUID
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from typing import Annotated
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session, joinedload
 
-from app.core.database import get_db
-from app.models.user import User
-from app.models.content import Lesson, LearningPath, Exercise
-from app.models.progress import UserProgress, ProgressStatus
-from app.schemas.lesson import (
-    LessonCreate,
-    LessonUpdate,
-    LessonResponse,
-    LessonWithExercises,
-)
-from app.schemas.exercise import ExerciseResponse
 from app.api.auth import get_current_active_user
 from app.api.subjects import require_admin
+from app.core.database import get_db
+from app.models.content import Exercise, LearningPath, Lesson
+from app.models.progress import ProgressStatus, UserProgress
+from app.models.user import User
+from app.schemas.exercise import ExerciseResponse
+from app.schemas.lesson import (
+    LessonCreate,
+    LessonResponse,
+    LessonUpdate,
+    LessonWithExercises,
+)
 
 router = APIRouter()
 
 
-@router.get("", response_model=List[LessonResponse])
+@router.get("", response_model=list[LessonResponse])
 async def list_lessons(
     db: Annotated[Session, Depends(get_db)],
     skip: int = Query(0, ge=0, description="Nombre d'éléments à ignorer"),
-    limit: int = Query(
-        100, ge=1, le=100, description="Nombre maximum d'éléments à retourner"
-    ),
+    limit: int = Query(100, ge=1, le=100, description="Nombre maximum d'éléments à retourner"),
     subject_id: UUID | None = Query(None, description="Filtrer par matière"),
     path_id: UUID | None = Query(None, description="Filtrer par parcours"),
-    is_published: bool | None = Query(
-        None, description="Filtrer par statut de publication"
-    ),
-) -> List[Lesson]:
+    is_published: bool | None = Query(None, description="Filtrer par statut de publication"),
+) -> list[Lesson]:
     """
     Liste les leçons avec filtres optionnels
 
@@ -108,9 +105,7 @@ async def create_lesson(
 
 
 @router.get("/{lesson_id}", response_model=LessonWithExercises)
-async def get_lesson(
-    lesson_id: UUID, db: Annotated[Session, Depends(get_db)]
-) -> dict:
+async def get_lesson(lesson_id: UUID, db: Annotated[Session, Depends(get_db)]) -> dict:
     """
     Récupère les détails d'une leçon avec ses exercices
 
@@ -132,9 +127,7 @@ async def get_lesson(
     )
 
     if not lesson:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée")
 
     # Build response with subject_id from path (learning_path)
     response = {
@@ -179,17 +172,11 @@ async def update_lesson(
     """
     lesson = db.query(Lesson).filter(Lesson.id == lesson_id).first()
     if not lesson:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée")
 
     # Vérifier le parcours si modifié
     if lesson_data.path_id and lesson_data.path_id != lesson.path_id:
-        path = (
-            db.query(LearningPath)
-            .filter(LearningPath.id == lesson_data.path_id)
-            .first()
-        )
+        path = db.query(LearningPath).filter(LearningPath.id == lesson_data.path_id).first()
         if not path:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -229,17 +216,13 @@ async def delete_lesson(
     """
     lesson = db.query(Lesson).filter(Lesson.id == lesson_id).first()
     if not lesson:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée")
 
     db.delete(lesson)
     db.commit()
 
 
-@router.post(
-    "/{lesson_id}/start", response_model=dict, status_code=status.HTTP_201_CREATED
-)
+@router.post("/{lesson_id}/start", response_model=dict, status_code=status.HTTP_201_CREATED)
 async def start_lesson(
     lesson_id: UUID,
     db: Annotated[Session, Depends(get_db)],
@@ -262,16 +245,12 @@ async def start_lesson(
     # Vérifier que la leçon existe
     lesson = db.query(Lesson).filter(Lesson.id == lesson_id).first()
     if not lesson:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée")
 
     # Vérifier si une progression existe déjà
     progress = (
         db.query(UserProgress)
-        .filter(
-            UserProgress.user_id == current_user.id, UserProgress.lesson_id == lesson_id
-        )
+        .filter(UserProgress.user_id == current_user.id, UserProgress.lesson_id == lesson_id)
         .first()
     )
 
@@ -305,10 +284,8 @@ async def start_lesson(
     }
 
 
-@router.get("/{lesson_id}/exercises", response_model=List[ExerciseResponse])
-async def get_lesson_exercises(
-    lesson_id: UUID, db: Annotated[Session, Depends(get_db)]
-) -> List[Exercise]:
+@router.get("/{lesson_id}/exercises", response_model=list[ExerciseResponse])
+async def get_lesson_exercises(lesson_id: UUID, db: Annotated[Session, Depends(get_db)]) -> list[Exercise]:
     """
     Récupère tous les exercices d'une leçon
 
@@ -325,16 +302,9 @@ async def get_lesson_exercises(
     # Vérifier que la leçon existe
     lesson = db.query(Lesson).filter(Lesson.id == lesson_id).first()
     if not lesson:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée")
 
     # Récupérer tous les exercices de cette leçon
-    exercises = (
-        db.query(Exercise)
-        .filter(Exercise.lesson_id == lesson_id)
-        .order_by(Exercise.order_index)
-        .all()
-    )
+    exercises = db.query(Exercise).filter(Exercise.lesson_id == lesson_id).order_by(Exercise.order_index).all()
 
     return exercises

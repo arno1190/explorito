@@ -2,26 +2,26 @@
 Endpoints de suivi de progression
 """
 
-from typing import Annotated, List
-from uuid import UUID
 from datetime import date
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from sqlalchemy import func
+from typing import Annotated
+from uuid import UUID
 
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
+from app.api.auth import get_current_active_user
 from app.core.database import get_db
-from app.models.user import User
-from app.models.content import Subject, Lesson, Exercise
-from app.models.progress import UserProgress, SubjectProgress, ProgressStatus, ExerciseResult
+from app.models.content import Exercise, Lesson, Subject
 from app.models.gamification import Streak
+from app.models.progress import ExerciseResult, ProgressStatus, SubjectProgress, UserProgress
+from app.models.user import User
 from app.schemas.progress import (
+    LessonProgressResponse,
     ProgressDashboard,
     SubjectProgressResponse,
-    LessonProgressResponse,
 )
-from app.api.auth import get_current_active_user
 from app.services.gamification import calculate_level_from_xp, calculate_next_level_xp
-
 
 router = APIRouter()
 
@@ -43,10 +43,7 @@ async def get_user_progress(
     """
     # Calculer l'XP total
     total_xp = (
-        db.query(func.sum(SubjectProgress.total_xp))
-        .filter(SubjectProgress.user_id == current_user.id)
-        .scalar()
-        or 0
+        db.query(func.sum(SubjectProgress.total_xp)).filter(SubjectProgress.user_id == current_user.id).scalar() or 0
     )
 
     # Calculer le niveau global
@@ -82,11 +79,7 @@ async def get_user_progress(
     )
 
     # Récupérer la progression par matière
-    subject_progress_list = (
-        db.query(SubjectProgress)
-        .filter(SubjectProgress.user_id == current_user.id)
-        .all()
-    )
+    subject_progress_list = db.query(SubjectProgress).filter(SubjectProgress.user_id == current_user.id).all()
 
     # Enrichir avec le nom de la matière
     subjects_progress = []
@@ -115,9 +108,7 @@ async def get_user_progress(
     # Compter les achievements
     achievements_count = (
         db.query(func.count("*"))
-        .select_from(
-            db.query(User).filter(User.id == current_user.id).join(User.achievements)
-        )
+        .select_from(db.query(User).filter(User.id == current_user.id).join(User.achievements))
         .scalar()
         or 0
     )
@@ -158,9 +149,7 @@ async def get_subject_progress(
     # Vérifier que la matière existe
     subject = db.query(Subject).filter(Subject.id == subject_id).first()
     if not subject:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Matière non trouvée"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Matière non trouvée")
 
     # Récupérer la progression
     subject_progress = (
@@ -214,16 +203,12 @@ async def get_lesson_progress(
     # Vérifier que la leçon existe
     lesson = db.query(Lesson).filter(Lesson.id == lesson_id).first()
     if not lesson:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée")
 
     # Récupérer la progression
     lesson_progress = (
         db.query(UserProgress)
-        .filter(
-            UserProgress.user_id == current_user.id, UserProgress.lesson_id == lesson_id
-        )
+        .filter(UserProgress.user_id == current_user.id, UserProgress.lesson_id == lesson_id)
         .first()
     )
 
@@ -266,12 +251,12 @@ async def get_dashboard(
     return await get_user_progress(current_user, db)
 
 
-@router.get("/lessons/{lesson_id}/completed-exercises", response_model=List[str])
+@router.get("/lessons/{lesson_id}/completed-exercises", response_model=list[str])
 async def get_completed_exercises(
     lesson_id: UUID,
     current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
-) -> List[str]:
+) -> list[str]:
     """
     Récupère la liste des IDs d'exercices complétés (avec succès) pour une leçon
 
@@ -286,14 +271,10 @@ async def get_completed_exercises(
     # Vérifier que la leçon existe
     lesson = db.query(Lesson).filter(Lesson.id == lesson_id).first()
     if not lesson:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée")
 
     # Récupérer les exercices de cette leçon
-    exercise_ids = (
-        db.query(Exercise.id).filter(Exercise.lesson_id == lesson_id).all()
-    )
+    exercise_ids = db.query(Exercise.id).filter(Exercise.lesson_id == lesson_id).all()
     exercise_id_list = [str(e[0]) for e in exercise_ids]
 
     # Récupérer les exercices complétés avec succès par l'utilisateur
@@ -302,7 +283,7 @@ async def get_completed_exercises(
         .filter(
             ExerciseResult.user_id == current_user.id,
             ExerciseResult.exercise_id.in_([UUID(e) for e in exercise_id_list]),
-            ExerciseResult.is_correct == True,
+            ExerciseResult.is_correct.is_(True),
         )
         .distinct()
         .all()
@@ -311,12 +292,12 @@ async def get_completed_exercises(
     return [str(c[0]) for c in completed]
 
 
-@router.get("/{child_id}", response_model=List[LessonProgressResponse])
+@router.get("/{child_id}", response_model=list[LessonProgressResponse])
 async def get_child_progress(
     child_id: UUID,
     current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
-) -> List[LessonProgressResponse]:
+) -> list[LessonProgressResponse]:
     """
     Récupère la progression d'un enfant (parent access only)
 
@@ -331,7 +312,7 @@ async def get_child_progress(
     Raises:
         HTTPException: Si l'utilisateur n'est pas parent ou si l'enfant ne lui appartient pas
     """
-    from app.models.user import UserRole, Profile
+    from app.models.user import Profile, UserRole
 
     # Vérifier que l'utilisateur est un parent
     if current_user.role != UserRole.PARENT:
@@ -341,11 +322,7 @@ async def get_child_progress(
         )
 
     # Vérifier que l'enfant appartient à ce parent
-    child_profile = (
-        db.query(Profile)
-        .filter(Profile.user_id == child_id, Profile.parent_id == current_user.id)
-        .first()
-    )
+    child_profile = db.query(Profile).filter(Profile.user_id == child_id, Profile.parent_id == current_user.id).first()
 
     if not child_profile:
         raise HTTPException(
@@ -354,9 +331,7 @@ async def get_child_progress(
         )
 
     # Récupérer toutes les progressions de l'enfant
-    progress_list = (
-        db.query(UserProgress).filter(UserProgress.user_id == child_id).all()
-    )
+    progress_list = db.query(UserProgress).filter(UserProgress.user_id == child_id).all()
 
     # Enrichir avec les noms de leçons
     result = []
@@ -391,7 +366,7 @@ async def get_child_lesson_progress(
     Raises:
         HTTPException: Si l'utilisateur n'est pas parent, si l'enfant ne lui appartient pas, ou si la leçon n'existe pas
     """
-    from app.models.user import UserRole, Profile
+    from app.models.user import Profile, UserRole
 
     # Vérifier que l'utilisateur est un parent
     if current_user.role != UserRole.PARENT:
@@ -401,11 +376,7 @@ async def get_child_lesson_progress(
         )
 
     # Vérifier que l'enfant appartient à ce parent
-    child_profile = (
-        db.query(Profile)
-        .filter(Profile.user_id == child_id, Profile.parent_id == current_user.id)
-        .first()
-    )
+    child_profile = db.query(Profile).filter(Profile.user_id == child_id, Profile.parent_id == current_user.id).first()
 
     if not child_profile:
         raise HTTPException(
@@ -416,15 +387,11 @@ async def get_child_lesson_progress(
     # Vérifier que la leçon existe
     lesson = db.query(Lesson).filter(Lesson.id == lesson_id).first()
     if not lesson:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée")
 
     # Récupérer la progression
     lesson_progress = (
-        db.query(UserProgress)
-        .filter(UserProgress.user_id == child_id, UserProgress.lesson_id == lesson_id)
-        .first()
+        db.query(UserProgress).filter(UserProgress.user_id == child_id, UserProgress.lesson_id == lesson_id).first()
     )
 
     if not lesson_progress:

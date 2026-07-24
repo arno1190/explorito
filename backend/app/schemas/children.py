@@ -2,8 +2,9 @@
 Schémas Pydantic pour la gestion des enfants
 """
 
-from datetime import datetime, date
+from datetime import date, datetime
 from uuid import UUID
+
 from pydantic import BaseModel, Field
 
 
@@ -15,9 +16,7 @@ class ChildCreate(BaseModel):
     name: str = Field(..., min_length=2, max_length=100, description="Nom de l'enfant")
     birth_date: date = Field(..., description="Date de naissance")
     email: str = Field(..., description="Email de l'enfant (pour créer le compte)")
-    password: str = Field(
-        ..., min_length=8, description="Mot de passe (minimum 8 caractères)"
-    )
+    password: str = Field(..., min_length=8, description="Mot de passe (minimum 8 caractères)")
 
     class Config:
         json_schema_extra = {
@@ -28,6 +27,21 @@ class ChildCreate(BaseModel):
                 "password": "SecurePass123",
             }
         }
+
+
+class ChildUpdate(BaseModel):
+    """
+    Schéma pour la mise à jour d'un profil enfant.
+
+    Tous les champs sont optionnels ; seuls ceux fournis sont modifiés.
+    """
+
+    name: str | None = Field(None, min_length=2, max_length=100, description="Nom de l'enfant")
+    birth_date: date | None = Field(None, description="Date de naissance")
+    password: str | None = Field(None, min_length=8, description="Nouveau mot de passe")
+
+    class Config:
+        json_schema_extra = {"example": {"name": "Alice", "birth_date": "2015-06-15"}}
 
 
 class ChildResponse(BaseModel):

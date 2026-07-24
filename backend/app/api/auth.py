@@ -4,6 +4,7 @@ Endpoints d'authentification JWT
 
 from datetime import timedelta
 from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -16,13 +17,13 @@ from app.core.security import (
     get_password_hash,
     verify_password,
 )
-from app.models.user import User, Profile
+from app.models.user import Profile, User
 from app.schemas.auth import (
+    RefreshTokenRequest,
     Token,
     UserLogin,
     UserRegister,
     UserResponse,
-    RefreshTokenRequest,
 )
 
 router = APIRouter()
@@ -119,18 +120,12 @@ async def get_current_active_user(
         HTTPException: Si l'utilisateur est inactif
     """
     if not current_user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Utilisateur inactif"
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Utilisateur inactif")
     return current_user
 
 
-@router.post(
-    "/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED
-)
-async def register(
-    user_data: UserRegister, db: Annotated[Session, Depends(get_db)]
-) -> User:
+@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+async def register(user_data: UserRegister, db: Annotated[Session, Depends(get_db)]) -> User:
     """
     Inscrit un nouvel utilisateur (parent ou enfant)
 
@@ -195,9 +190,7 @@ async def register(
 
 
 @router.post("/login", response_model=Token)
-async def login(
-    user_credentials: UserLogin, db: Annotated[Session, Depends(get_db)]
-) -> Token:
+async def login(user_credentials: UserLogin, db: Annotated[Session, Depends(get_db)]) -> Token:
     """
     Connecte un utilisateur et retourne un token JWT
 
@@ -220,9 +213,7 @@ async def login(
         )
 
     if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Compte utilisateur inactif"
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Compte utilisateur inactif")
 
     # Créer le token d'accès
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -272,9 +263,7 @@ async def login_form(
         )
 
     if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Compte utilisateur inactif"
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Compte utilisateur inactif")
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
@@ -296,9 +285,7 @@ async def login_form(
 
 
 @router.post("/refresh", response_model=Token)
-async def refresh_token(
-    refresh_data: RefreshTokenRequest, db: Annotated[Session, Depends(get_db)]
-) -> Token:
+async def refresh_token(refresh_data: RefreshTokenRequest, db: Annotated[Session, Depends(get_db)]) -> Token:
     """
     Rafraîchit un token d'accès expiré
 

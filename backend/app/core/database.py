@@ -9,9 +9,7 @@ from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 
 # Créer l'engine SQLAlchemy
-engine = create_engine(
-    str(settings.DATABASE_URL), pool_pre_ping=True, echo=settings.DEBUG
-)
+engine = create_engine(str(settings.DATABASE_URL), pool_pre_ping=True, echo=settings.DEBUG)
 
 # Session locale
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

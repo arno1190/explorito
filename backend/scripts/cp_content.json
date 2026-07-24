@@ -1,0 +1,2774 @@
+{
+  "islands": [
+    {
+      "id": "francais",
+      "name": "Île Dino-Lettres",
+      "emoji": "🏝️",
+      "color": "bg-emerald-600",
+      "desc": "Français"
+    },
+    {
+      "id": "maths",
+      "name": "Île Volcan-Nombres",
+      "emoji": "🌋",
+      "color": "bg-red-500",
+      "desc": "Mathématiques"
+    },
+    {
+      "id": "monde",
+      "name": "Île Spatiale",
+      "emoji": "🚀",
+      "color": "bg-indigo-500",
+      "desc": "Questionner le monde"
+    },
+    {
+      "id": "arts",
+      "name": "Île Créative",
+      "emoji": "🎨",
+      "color": "bg-fuchsia-500",
+      "desc": "Arts & Logique"
+    },
+    {
+      "id": "histoire",
+      "name": "Île du Temps",
+      "emoji": "⏳",
+      "color": "bg-amber-700",
+      "desc": "Histoire"
+    },
+    {
+      "id": "geo",
+      "name": "Île de France",
+      "emoji": "🗼",
+      "color": "bg-rose-600",
+      "desc": "Géographie France"
+    },
+    {
+      "id": "orthographe",
+      "name": "Île des Mots",
+      "emoji": "✏️",
+      "color": "bg-cyan-600",
+      "desc": "Orthographe"
+    },
+    {
+      "id": "blagues",
+      "name": "Île Rigolote",
+      "emoji": "😂",
+      "color": "bg-yellow-500",
+      "desc": "Blagues"
+    }
+  ],
+  "exercises": {
+    "CP": {
+      "francais": {
+        "1": [
+          {
+            "type": "qcm",
+            "q": "Combien de syllabes dans \"CROCODILE\" ?",
+            "options": [
+              "2",
+              "3",
+              "4",
+              "5"
+            ],
+            "answer": "3",
+            "img": "🐊"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel son entends-tu à la fin de \"KANGOUROU\" ?",
+            "options": [
+              "KAN",
+              "GOU",
+              "ROU",
+              "KOU"
+            ],
+            "answer": "ROU",
+            "img": "🦘"
+          },
+          {
+            "type": "qcm",
+            "q": "Combien de syllabes dans \"ORDINATEUR\" ?",
+            "options": [
+              "2",
+              "3",
+              "4",
+              "5"
+            ],
+            "answer": "4",
+            "img": "💻"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel mot commence par le même son que \"CHAPEAU\" ?",
+            "options": [
+              "SAPIN",
+              "CHEVAL",
+              "PAPA",
+              "CAMION"
+            ],
+            "answer": "CHEVAL",
+            "img": "🎩"
+          },
+          {
+            "type": "qcm",
+            "q": "Combien de syllabes dans \"PARACHUTE\" ?",
+            "options": [
+              "2",
+              "3",
+              "4",
+              "5"
+            ],
+            "answer": "3",
+            "img": "🪂"
+          }
+        ],
+        "2": [
+          {
+            "type": "qcm",
+            "q": "Quel est le contraire de \"MONTER\" ?",
+            "options": [
+              "COURIR",
+              "DESCENDRE",
+              "SAUTER",
+              "VOLER"
+            ],
+            "answer": "DESCENDRE",
+            "img": "⬇️"
+          },
+          {
+            "type": "qcm",
+            "q": "Trouve le mot bien écrit :",
+            "options": [
+              "ÉLÉFANT",
+              "ÉLÉPHANT",
+              "ÉLEPHANT",
+              "ELÉFANT"
+            ],
+            "answer": "ÉLÉPHANT",
+            "img": "🐘"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel est le féminin de \"UN PRINCE\" ?",
+            "options": [
+              "UNE PRINCE",
+              "UNE PRINCESSE",
+              "UNE PRINSE",
+              "UNE PRINSESSE"
+            ],
+            "answer": "UNE PRINCESSE",
+            "img": "👸"
+          },
+          {
+            "type": "qcm",
+            "q": "Trouve le mot bien écrit :",
+            "options": [
+              "TOUJOUR",
+              "TOUJOURS",
+              "TOUJORS",
+              "TOUJOURE"
+            ],
+            "answer": "TOUJOURS",
+            "img": "🕐"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel animal peut voler et vit la nuit ?",
+            "options": [
+              "LA TORTUE",
+              "LE SERPENT",
+              "LA CHAUVE-SOURIS",
+              "LE CRABE"
+            ],
+            "answer": "LA CHAUVE-SOURIS",
+            "img": "🦇"
+          }
+        ],
+        "3": [
+          {
+            "type": "qcm",
+            "q": "\"Le chat grimpe dans l'arbre car le chien le poursuit.\" Pourquoi le chat grimpe-t-il ?",
+            "options": [
+              "Il a faim",
+              "Le chien le poursuit",
+              "Il veut dormir",
+              "Il cherche un oiseau"
+            ],
+            "answer": "Le chien le poursuit",
+            "img": "🐱"
+          },
+          {
+            "type": "qcm",
+            "q": "\"Pierre a oublié son parapluie. En sortant, il est tout mouillé.\" Pourquoi est-il mouillé ?",
+            "options": [
+              "Il a pris un bain",
+              "Il pleut dehors",
+              "Il a nagé",
+              "Il a bu de l'eau"
+            ],
+            "answer": "Il pleut dehors",
+            "img": "🌧️"
+          },
+          {
+            "type": "qcm",
+            "q": "\"Marie lit tous les soirs avant de dormir.\" Marie aime...",
+            "options": [
+              "dormir",
+              "manger",
+              "lire",
+              "courir"
+            ],
+            "answer": "lire",
+            "img": "📖"
+          },
+          {
+            "type": "qcm",
+            "q": "\"Le boulanger se lève très tôt pour préparer le pain.\" Quand se lève-t-il ?",
+            "options": [
+              "À midi",
+              "Très tôt le matin",
+              "Le soir",
+              "L'après-midi"
+            ],
+            "answer": "Très tôt le matin",
+            "img": "🥖"
+          },
+          {
+            "type": "qcm",
+            "q": "\"Les hirondelles partent en automne et reviennent au printemps.\" Ces oiseaux sont...",
+            "options": [
+              "nocturnes",
+              "migrateurs",
+              "marins",
+              "domestiques"
+            ],
+            "answer": "migrateurs",
+            "img": "🐦"
+          }
+        ]
+      },
+      "maths": {
+        "1": [
+          {
+            "type": "qcm",
+            "q": "Quel nombre vient juste après 39 ?",
+            "options": [
+              "38",
+              "40",
+              "41",
+              "49"
+            ],
+            "answer": "40",
+            "img": "🔢"
+          },
+          {
+            "type": "qcm",
+            "q": "Compte les fusées : 🚀🚀🚀🚀🚀🚀🚀🚀",
+            "options": [
+              "6",
+              "7",
+              "8",
+              "9"
+            ],
+            "answer": "8",
+            "img": "🚀"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel nombre vient juste avant 50 ?",
+            "options": [
+              "48",
+              "49",
+              "51",
+              "40"
+            ],
+            "answer": "49",
+            "img": "🔢"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel nombre est entre 36 et 38 ?",
+            "options": [
+              "35",
+              "37",
+              "39",
+              "36"
+            ],
+            "answer": "37",
+            "img": "🎯"
+          },
+          {
+            "type": "qcm",
+            "q": "Compte de 5 en 5 : 15, 20, 25, ...",
+            "options": [
+              "26",
+              "28",
+              "30",
+              "35"
+            ],
+            "answer": "30",
+            "img": "📊"
+          }
+        ],
+        "2": [
+          {
+            "type": "qcm",
+            "q": "14 + 9 = ?",
+            "options": [
+              "21",
+              "22",
+              "23",
+              "25"
+            ],
+            "answer": "23",
+            "img": "➕"
+          },
+          {
+            "type": "qcm",
+            "q": "25 - 8 = ?",
+            "options": [
+              "15",
+              "17",
+              "18",
+              "33"
+            ],
+            "answer": "17",
+            "img": "➖"
+          },
+          {
+            "type": "qcm",
+            "q": "🎒 Un sac contient 18 billes. J'en ajoute 7. Combien y en a-t-il ?",
+            "options": [
+              "23",
+              "24",
+              "25",
+              "26"
+            ],
+            "answer": "25",
+            "img": "🔵"
+          },
+          {
+            "type": "qcm",
+            "q": "32 - 15 = ?",
+            "options": [
+              "13",
+              "17",
+              "19",
+              "23"
+            ],
+            "answer": "17",
+            "img": "➖"
+          },
+          {
+            "type": "qcm",
+            "q": "19 + 14 = ?",
+            "options": [
+              "31",
+              "33",
+              "35",
+              "23"
+            ],
+            "answer": "33",
+            "img": "➕"
+          }
+        ],
+        "3": [
+          {
+            "type": "qcm",
+            "q": "🧁 Papa a 42 gâteaux. Il en donne 16 le matin et 5 l'après-midi. Combien lui en reste-t-il ?",
+            "options": [
+              "19",
+              "21",
+              "23",
+              "26"
+            ],
+            "answer": "21",
+            "img": "🧁"
+          },
+          {
+            "type": "qcm",
+            "q": "56 - 29 = ?",
+            "options": [
+              "25",
+              "27",
+              "33",
+              "37"
+            ],
+            "answer": "27",
+            "img": "🧮"
+          },
+          {
+            "type": "qcm",
+            "q": "👧👦 Dans la classe, il y a 13 filles et 15 garçons. Combien d'élèves en tout ?",
+            "options": [
+              "26",
+              "27",
+              "28",
+              "30"
+            ],
+            "answer": "28",
+            "img": "🏫"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel est le double de 17 ?",
+            "options": [
+              "27",
+              "34",
+              "37",
+              "24"
+            ],
+            "answer": "34",
+            "img": "✖️"
+          },
+          {
+            "type": "qcm",
+            "q": "48 + 25 = ?",
+            "options": [
+              "63",
+              "71",
+              "73",
+              "75"
+            ],
+            "answer": "73",
+            "img": "🚀"
+          }
+        ]
+      },
+      "monde": {
+        "1": [
+          {
+            "type": "qcm",
+            "q": "Quel jour vient après MERCREDI ?",
+            "options": [
+              "MARDI",
+              "JEUDI",
+              "VENDREDI",
+              "LUNDI"
+            ],
+            "answer": "JEUDI",
+            "img": "📅"
+          },
+          {
+            "type": "qcm",
+            "q": "Combien y a-t-il de mois dans une année ?",
+            "options": [
+              "10",
+              "11",
+              "12",
+              "13"
+            ],
+            "answer": "12",
+            "img": "📆"
+          },
+          {
+            "type": "qcm",
+            "q": "Quelle saison vient après l'été ?",
+            "options": [
+              "Le printemps",
+              "L'automne",
+              "L'hiver",
+              "L'été"
+            ],
+            "answer": "L'automne",
+            "img": "🍂"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel mois vient après JUIN ?",
+            "options": [
+              "MAI",
+              "JUILLET",
+              "AOÛT",
+              "MARS"
+            ],
+            "answer": "JUILLET",
+            "img": "☀️"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel jour est entre MARDI et JEUDI ?",
+            "options": [
+              "LUNDI",
+              "MERCREDI",
+              "VENDREDI",
+              "SAMEDI"
+            ],
+            "answer": "MERCREDI",
+            "img": "📅"
+          }
+        ],
+        "2": [
+          {
+            "type": "qcm",
+            "q": "Combien de pattes a une araignée ?",
+            "options": [
+              "6",
+              "8",
+              "10",
+              "12"
+            ],
+            "answer": "8",
+            "img": "🕷️"
+          },
+          {
+            "type": "qcm",
+            "q": "Quelle planète est surnommée \"la planète rouge\" ?",
+            "options": [
+              "Vénus",
+              "Mars",
+              "Jupiter",
+              "Saturne"
+            ],
+            "answer": "Mars",
+            "img": "🔴"
+          },
+          {
+            "type": "qcm",
+            "q": "Que fabrique une abeille ?",
+            "options": [
+              "Du lait",
+              "Du miel",
+              "De la confiture",
+              "Du sucre"
+            ],
+            "answer": "Du miel",
+            "img": "🐝"
+          },
+          {
+            "type": "qcm",
+            "q": "Que produit un pommier ?",
+            "options": [
+              "Des poires",
+              "Des pommes",
+              "Des cerises",
+              "Des noix"
+            ],
+            "answer": "Des pommes",
+            "img": "🍎"
+          },
+          {
+            "type": "qcm",
+            "q": "Comment s'appelle le bébé de la vache ?",
+            "options": [
+              "Le poulain",
+              "Le veau",
+              "L'agneau",
+              "Le porcelet"
+            ],
+            "answer": "Le veau",
+            "img": "🐮"
+          }
+        ],
+        "3": [
+          {
+            "type": "qcm",
+            "q": "Quel organe pompe le sang dans le corps ?",
+            "options": [
+              "Le cerveau",
+              "Le cœur",
+              "Les poumons",
+              "L'estomac"
+            ],
+            "answer": "Le cœur",
+            "img": "❤️"
+          },
+          {
+            "type": "qcm",
+            "q": "Quand l'eau gèle, elle se transforme en...",
+            "options": [
+              "Vapeur",
+              "Glace",
+              "Pluie",
+              "Boue"
+            ],
+            "answer": "Glace",
+            "img": "🧊"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel animal pond des œufs et a des plumes ?",
+            "options": [
+              "Le chat",
+              "La poule",
+              "Le lapin",
+              "Le chien"
+            ],
+            "answer": "La poule",
+            "img": "🐔"
+          },
+          {
+            "type": "qcm",
+            "q": "La Lune tourne autour de...",
+            "options": [
+              "Le Soleil",
+              "La Terre",
+              "Mars",
+              "Jupiter"
+            ],
+            "answer": "La Terre",
+            "img": "🌙"
+          },
+          {
+            "type": "qcm",
+            "q": "La grenouille vit dans l'eau et sur terre. On dit qu'elle est...",
+            "options": [
+              "Un mammifère",
+              "Un amphibien",
+              "Un reptile",
+              "Un insecte"
+            ],
+            "answer": "Un amphibien",
+            "img": "🐸"
+          }
+        ]
+      },
+      "arts": {
+        "1": [
+          {
+            "type": "qcm",
+            "q": "Combien de côtés a un rectangle ?",
+            "options": [
+              "3",
+              "4",
+              "5",
+              "6"
+            ],
+            "answer": "4",
+            "img": "🟦"
+          },
+          {
+            "type": "qcm",
+            "q": "Rouge + Jaune = ?",
+            "options": [
+              "Vert",
+              "Violet",
+              "Orange",
+              "Marron"
+            ],
+            "answer": "Orange",
+            "img": "🎨"
+          },
+          {
+            "type": "qcm",
+            "q": "Quelle forme ressemble à un ballon ?",
+            "options": [
+              "Le carré",
+              "Le cercle",
+              "Le triangle",
+              "Le rectangle"
+            ],
+            "answer": "Le cercle",
+            "img": "⚽"
+          },
+          {
+            "type": "qcm",
+            "q": "Bleu + Rouge = ?",
+            "options": [
+              "Vert",
+              "Orange",
+              "Violet",
+              "Marron"
+            ],
+            "answer": "Violet",
+            "img": "🎨"
+          },
+          {
+            "type": "qcm",
+            "q": "Combien de triangles faut-il pour faire un carré ?",
+            "options": [
+              "1",
+              "2",
+              "3",
+              "4"
+            ],
+            "answer": "2",
+            "img": "📐"
+          }
+        ],
+        "2": [
+          {
+            "type": "qcm",
+            "q": "Si tu te retournes, ta gauche devient...",
+            "options": [
+              "Ta droite",
+              "Ta gauche",
+              "Le haut",
+              "Le bas"
+            ],
+            "answer": "Ta droite",
+            "img": "🔄"
+          },
+          {
+            "type": "qcm",
+            "q": "Jaune + Bleu + Rouge = ?",
+            "options": [
+              "Noir",
+              "Blanc",
+              "Marron",
+              "Gris"
+            ],
+            "answer": "Marron",
+            "img": "🎨"
+          },
+          {
+            "type": "qcm",
+            "q": "Combien de faces a un dé ?",
+            "options": [
+              "4",
+              "5",
+              "6",
+              "8"
+            ],
+            "answer": "6",
+            "img": "🎲"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel objet a la forme d'une sphère ?",
+            "options": [
+              "Un livre",
+              "Un ballon",
+              "Une boîte",
+              "Une feuille"
+            ],
+            "answer": "Un ballon",
+            "img": "🏀"
+          },
+          {
+            "type": "qcm",
+            "q": "Combien y a-t-il de couleurs dans l'arc-en-ciel ?",
+            "options": [
+              "5",
+              "6",
+              "7",
+              "8"
+            ],
+            "answer": "7",
+            "img": "🌈"
+          }
+        ],
+        "3": [
+          {
+            "type": "qcm",
+            "q": "Continue la suite : 3, 6, 9, 12, ...",
+            "options": [
+              "13",
+              "14",
+              "15",
+              "16"
+            ],
+            "answer": "15",
+            "img": "🔢"
+          },
+          {
+            "type": "qcm",
+            "q": "🔴🔵🟢🔴🔵🟢🔴... Que vient ensuite ?",
+            "options": [
+              "🔴",
+              "🔵",
+              "🟢",
+              "🟡"
+            ],
+            "answer": "🔵",
+            "img": "❓"
+          },
+          {
+            "type": "qcm",
+            "q": "Trouve l'intrus : 🐱🐶🐰🌳🐹",
+            "options": [
+              "🐱",
+              "🐶",
+              "🌳",
+              "🐹"
+            ],
+            "answer": "🌳",
+            "img": "👀"
+          },
+          {
+            "type": "qcm",
+            "q": "Continue : 1, 3, 5, 7, ...",
+            "options": [
+              "8",
+              "9",
+              "10",
+              "11"
+            ],
+            "answer": "9",
+            "img": "📊"
+          },
+          {
+            "type": "qcm",
+            "q": "🔺🔺🔻🔺🔺🔻🔺🔺... Que vient ensuite ?",
+            "options": [
+              "🔺",
+              "🔻",
+              "🔵",
+              "🟢"
+            ],
+            "answer": "🔻",
+            "img": "✨"
+          }
+        ]
+      },
+      "histoire": {
+        "1": [
+          {
+            "type": "qcm",
+            "q": "Qui vivait il y a très longtemps, avant les villes ?",
+            "options": [
+              "Les robots",
+              "Les hommes préhistoriques",
+              "Les astronautes",
+              "Les chevaliers"
+            ],
+            "answer": "Les hommes préhistoriques",
+            "img": "🏔️"
+          },
+          {
+            "type": "qcm",
+            "q": "Comment les hommes préhistoriques gardaient-ils la chaleur ?",
+            "options": [
+              "Avec un radiateur",
+              "Avec le feu",
+              "Avec l'électricité",
+              "Avec la clim"
+            ],
+            "answer": "Avec le feu",
+            "img": "🔥"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel animal disparu avait de très longues défenses ?",
+            "options": [
+              "Le lion",
+              "Le mammouth",
+              "L'ours",
+              "Le loup"
+            ],
+            "answer": "Le mammouth",
+            "img": "🦣"
+          },
+          {
+            "type": "qcm",
+            "q": "Les chevaliers vivaient-ils avant ou après les hommes préhistoriques ?",
+            "options": [
+              "Avant",
+              "Après",
+              "En même temps",
+              "On ne sait pas"
+            ],
+            "answer": "Après",
+            "img": "⚔️"
+          },
+          {
+            "type": "qcm",
+            "q": "Où les hommes préhistoriques dessinaient-ils des animaux ?",
+            "options": [
+              "Dans des cahiers",
+              "Sur les murs des grottes",
+              "Sur du papier",
+              "Sur des tableaux"
+            ],
+            "answer": "Sur les murs des grottes",
+            "img": "🎨"
+          }
+        ],
+        "2": [
+          {
+            "type": "qcm",
+            "q": "Qui a fait construire le château de Versailles ?",
+            "options": [
+              "Napoléon",
+              "Louis XIV",
+              "Charlemagne",
+              "Henri IV"
+            ],
+            "answer": "Louis XIV",
+            "img": "👑"
+          },
+          {
+            "type": "qcm",
+            "q": "Qui était la grande guerrière qui a aidé la France ?",
+            "options": [
+              "Marie-Antoinette",
+              "Jeanne d'Arc",
+              "Cléopâtre",
+              "Blanche-Neige"
+            ],
+            "answer": "Jeanne d'Arc",
+            "img": "⚔️"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel peuple a construit les pyramides ?",
+            "options": [
+              "Les Romains",
+              "Les Égyptiens",
+              "Les Gaulois",
+              "Les Vikings"
+            ],
+            "answer": "Les Égyptiens",
+            "img": "🏛️"
+          },
+          {
+            "type": "qcm",
+            "q": "Comment s'appelle le grand guerrier gaulois ?",
+            "options": [
+              "Astérix",
+              "Vercingétorix",
+              "Obélix",
+              "Jules César"
+            ],
+            "answer": "Vercingétorix",
+            "img": "🛡️"
+          },
+          {
+            "type": "qcm",
+            "q": "Qui a découvert l'Amérique en 1492 ?",
+            "options": [
+              "Marco Polo",
+              "Christophe Colomb",
+              "Magellan",
+              "Napoléon"
+            ],
+            "answer": "Christophe Colomb",
+            "img": "🚢"
+          }
+        ],
+        "3": [
+          {
+            "type": "qcm",
+            "q": "En quelle année la Tour Eiffel a-t-elle été construite ?",
+            "options": [
+              "1789",
+              "1889",
+              "1914",
+              "1969"
+            ],
+            "answer": "1889",
+            "img": "🗼"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel événement a commencé le 14 juillet 1789 ?",
+            "options": [
+              "La Première Guerre",
+              "La Révolution française",
+              "La fête de la musique",
+              "Les Jeux Olympiques"
+            ],
+            "answer": "La Révolution française",
+            "img": "🇫🇷"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel célèbre Français était un empereur ?",
+            "options": [
+              "Louis XIV",
+              "Napoléon Bonaparte",
+              "Charlemagne",
+              "Vercingétorix"
+            ],
+            "answer": "Napoléon Bonaparte",
+            "img": "👑"
+          },
+          {
+            "type": "qcm",
+            "q": "Quand la Première Guerre mondiale a-t-elle commencé ?",
+            "options": [
+              "1789",
+              "1889",
+              "1914",
+              "1945"
+            ],
+            "answer": "1914",
+            "img": "📜"
+          },
+          {
+            "type": "qcm",
+            "q": "La fête nationale française est le...",
+            "options": [
+              "1er janvier",
+              "14 juillet",
+              "25 décembre",
+              "11 novembre"
+            ],
+            "answer": "14 juillet",
+            "img": "🎆"
+          }
+        ]
+      },
+      "geo": {
+        "1": [
+          {
+            "type": "qcm",
+            "q": "Quelle est la capitale de la France ?",
+            "options": [
+              "Lyon",
+              "Paris",
+              "Marseille",
+              "Bordeaux"
+            ],
+            "answer": "Paris",
+            "img": "🗼"
+          },
+          {
+            "type": "qcm",
+            "q": "Sur quel continent se trouve la France ?",
+            "options": [
+              "L'Asie",
+              "L'Europe",
+              "L'Afrique",
+              "L'Amérique"
+            ],
+            "answer": "L'Europe",
+            "img": "🌍"
+          },
+          {
+            "type": "qcm",
+            "q": "De quelles couleurs est le drapeau français ?",
+            "options": [
+              "Bleu, blanc, rouge",
+              "Vert, blanc, rouge",
+              "Bleu, jaune, rouge",
+              "Noir, blanc, rouge"
+            ],
+            "answer": "Bleu, blanc, rouge",
+            "img": "🇫🇷"
+          },
+          {
+            "type": "qcm",
+            "q": "Comment appelle-t-on la forme de la France ?",
+            "options": [
+              "Le triangle",
+              "L'hexagone",
+              "Le carré",
+              "Le rectangle"
+            ],
+            "answer": "L'hexagone",
+            "img": "🗺️"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel monument est le symbole de Paris ?",
+            "options": [
+              "La Tour Eiffel",
+              "Big Ben",
+              "La Statue de la Liberté",
+              "Le Colisée"
+            ],
+            "answer": "La Tour Eiffel",
+            "img": "🗼"
+          }
+        ],
+        "2": [
+          {
+            "type": "qcm",
+            "q": "Quel est le plus long fleuve de France ?",
+            "options": [
+              "La Seine",
+              "La Loire",
+              "Le Rhône",
+              "La Garonne"
+            ],
+            "answer": "La Loire",
+            "img": "🏞️"
+          },
+          {
+            "type": "qcm",
+            "q": "Quelle est la plus haute montagne de France ?",
+            "options": [
+              "Le Mont Blanc",
+              "Le Puy de Dôme",
+              "Le Mont Ventoux",
+              "Les Vosges"
+            ],
+            "answer": "Le Mont Blanc",
+            "img": "🏔️"
+          },
+          {
+            "type": "qcm",
+            "q": "Quelle mer se trouve au sud de la France ?",
+            "options": [
+              "La mer du Nord",
+              "La Méditerranée",
+              "La Manche",
+              "L'océan Pacifique"
+            ],
+            "answer": "La Méditerranée",
+            "img": "🌊"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel pays est au nord de la France ?",
+            "options": [
+              "L'Espagne",
+              "La Belgique",
+              "L'Italie",
+              "Le Portugal"
+            ],
+            "answer": "La Belgique",
+            "img": "🗺️"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel fleuve traverse Paris ?",
+            "options": [
+              "La Loire",
+              "La Seine",
+              "Le Rhône",
+              "La Garonne"
+            ],
+            "answer": "La Seine",
+            "img": "🌉"
+          }
+        ],
+        "3": [
+          {
+            "type": "qcm",
+            "q": "Quelle île française est dans l'océan Indien ?",
+            "options": [
+              "La Guadeloupe",
+              "La Réunion",
+              "La Corse",
+              "La Martinique"
+            ],
+            "answer": "La Réunion",
+            "img": "🏝️"
+          },
+          {
+            "type": "qcm",
+            "q": "Combien de pays partagent une frontière avec la France ?",
+            "options": [
+              "5",
+              "6",
+              "8",
+              "10"
+            ],
+            "answer": "8",
+            "img": "🗺️"
+          },
+          {
+            "type": "qcm",
+            "q": "Quelle chaîne de montagnes sépare la France de l'Italie ?",
+            "options": [
+              "Les Alpes",
+              "Les Pyrénées",
+              "Le Jura",
+              "Les Vosges"
+            ],
+            "answer": "Les Alpes",
+            "img": "⛰️"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel océan borde la côte ouest de la France ?",
+            "options": [
+              "L'océan Pacifique",
+              "L'océan Atlantique",
+              "L'océan Indien",
+              "L'océan Arctique"
+            ],
+            "answer": "L'océan Atlantique",
+            "img": "🌊"
+          },
+          {
+            "type": "qcm",
+            "q": "La Corse se trouve dans quelle mer ?",
+            "options": [
+              "La mer du Nord",
+              "La Méditerranée",
+              "La Manche",
+              "L'océan Atlantique"
+            ],
+            "answer": "La Méditerranée",
+            "img": "🏝️"
+          }
+        ]
+      },
+      "orthographe": {
+        "1": [
+          {
+            "type": "completion",
+            "q": "écu_euil",
+            "options": [],
+            "answer": "r",
+            "img": "🐿️"
+          },
+          {
+            "type": "completion",
+            "q": "gi_afe",
+            "options": [],
+            "answer": "r",
+            "img": "🦒"
+          },
+          {
+            "type": "completion",
+            "q": "tor_ue",
+            "options": [],
+            "answer": "t",
+            "img": "🐢"
+          },
+          {
+            "type": "completion",
+            "q": "co_uille",
+            "options": [],
+            "answer": "q",
+            "img": "🐚"
+          },
+          {
+            "type": "completion",
+            "q": "p_rroquet",
+            "options": [],
+            "answer": "e",
+            "img": "🦜"
+          }
+        ],
+        "2": [
+          {
+            "type": "completion",
+            "q": "ch__ette",
+            "options": [],
+            "answer": "ou",
+            "img": "🦉"
+          },
+          {
+            "type": "completion",
+            "q": "p_p_llon",
+            "options": [],
+            "answer": "ai",
+            "img": "🦋"
+          },
+          {
+            "type": "completion",
+            "q": "c_c_nelle",
+            "options": [],
+            "answer": "oi",
+            "img": "🐞"
+          },
+          {
+            "type": "completion",
+            "q": "h_r_sson",
+            "options": [],
+            "answer": "éi",
+            "img": "🦔"
+          },
+          {
+            "type": "completion",
+            "q": "t_ur_esol",
+            "options": [],
+            "answer": "on",
+            "img": "🌻"
+          }
+        ],
+        "3": [
+          {
+            "type": "completion",
+            "q": "rhin_céros",
+            "options": [],
+            "answer": "o",
+            "img": "🦏"
+          },
+          {
+            "type": "completion",
+            "q": "ch_mp_gnon",
+            "options": [],
+            "answer": "ai",
+            "img": "🍄"
+          },
+          {
+            "type": "completion",
+            "q": "b_cycl_tte",
+            "options": [],
+            "answer": "ie",
+            "img": "🚲"
+          },
+          {
+            "type": "completion",
+            "q": "mar_uerit_",
+            "options": [],
+            "answer": "ge",
+            "img": "🌼"
+          },
+          {
+            "type": "completion",
+            "q": "s_uter_lle",
+            "options": [],
+            "answer": "ae",
+            "img": "🦗"
+          }
+        ]
+      },
+      "blagues": {
+        "1": [
+          {
+            "type": "blague",
+            "q": "Que dit un escargot sur le dos d'une tortue ?",
+            "options": [],
+            "answer": "Youhou, ça décoiffe !",
+            "img": "🐌"
+          },
+          {
+            "type": "blague",
+            "q": "Pourquoi les girafes ont-elles un long cou ?",
+            "options": [],
+            "answer": "Parce que leurs pieds sentent mauvais !",
+            "img": "🦒"
+          },
+          {
+            "type": "blague",
+            "q": "Que dit une maman tomate à un bébé tomate qui traîne ?",
+            "options": [],
+            "answer": "Allez, ketchup !",
+            "img": "🍅"
+          },
+          {
+            "type": "blague",
+            "q": "Pourquoi les vaches ferment-elles les yeux en donnant du lait ?",
+            "options": [],
+            "answer": "Pour faire du lait concentré !",
+            "img": "🐄"
+          },
+          {
+            "type": "blague",
+            "q": "Qu'est-ce qu'un crocodile qui surveille la cour d'école ?",
+            "options": [],
+            "answer": "Un sur-veillant !",
+            "img": "🐊"
+          }
+        ],
+        "2": [
+          {
+            "type": "blague",
+            "q": "Que dit un zéro à un huit ?",
+            "options": [],
+            "answer": "Jolie ceinture !",
+            "img": "🔢"
+          },
+          {
+            "type": "blague",
+            "q": "Comment appelle-t-on un boomerang qui ne revient pas ?",
+            "options": [],
+            "answer": "Un bout de bois !",
+            "img": "🪃"
+          },
+          {
+            "type": "blague",
+            "q": "Pourquoi les éléphants ne font-ils pas d'ordinateur ?",
+            "options": [],
+            "answer": "Parce qu'ils ont peur de la souris !",
+            "img": "🐘"
+          },
+          {
+            "type": "blague",
+            "q": "Quel est le fruit le plus explosif ?",
+            "options": [],
+            "answer": "La grenade !",
+            "img": "💥"
+          },
+          {
+            "type": "blague",
+            "q": "Quel est le sport préféré des insectes ?",
+            "options": [],
+            "answer": "Le cricket !",
+            "img": "🦗"
+          }
+        ],
+        "3": [
+          {
+            "type": "blague",
+            "q": "Pourquoi le robot va-t-il chez le docteur ?",
+            "options": [],
+            "answer": "Parce qu'il a un virus !",
+            "img": "🤖"
+          },
+          {
+            "type": "blague",
+            "q": "Quel est le comble pour un astronaute ?",
+            "options": [],
+            "answer": "D'en avoir plein le dos de la Lune !",
+            "img": "🧑‍🚀"
+          },
+          {
+            "type": "blague",
+            "q": "Que dit un citron qui fait un hold-up ?",
+            "options": [],
+            "answer": "Plus un zeste !",
+            "img": "🍋"
+          },
+          {
+            "type": "blague",
+            "q": "Pourquoi les montres sont-elles mauvaises au foot ?",
+            "options": [],
+            "answer": "Parce qu'elles jouent les prolongations !",
+            "img": "⏰"
+          },
+          {
+            "type": "blague",
+            "q": "Comment appelle-t-on un chat qui fait de la musique ?",
+            "options": [],
+            "answer": "Un chat-nteur !",
+            "img": "🎵"
+          }
+        ]
+      }
+    },
+    "CE1": {
+      "francais": {
+        "1": [
+          {
+            "type": "qcm",
+            "q": "Quel est le pluriel de \"un cheval\" ?",
+            "options": [
+              "des chevals",
+              "des chevaux",
+              "des chevales",
+              "des chevauxs"
+            ],
+            "answer": "des chevaux",
+            "img": "🐴"
+          },
+          {
+            "type": "qcm",
+            "q": "Trouve le verbe dans : \"Le chat dort sur le canapé.\"",
+            "options": [
+              "chat",
+              "dort",
+              "sur",
+              "canapé"
+            ],
+            "answer": "dort",
+            "img": "🐱"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel est le contraire de \"rapide\" ?",
+            "options": [
+              "vite",
+              "lent",
+              "grand",
+              "petit"
+            ],
+            "answer": "lent",
+            "img": "🐢"
+          },
+          {
+            "type": "qcm",
+            "q": "Combien y a-t-il de phrases ? \"Le soleil brille. Les oiseaux chantent.\"",
+            "options": [
+              "1",
+              "2",
+              "3",
+              "4"
+            ],
+            "answer": "2",
+            "img": "☀️"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel mot est un nom ? \"Le petit lapin saute.\"",
+            "options": [
+              "petit",
+              "lapin",
+              "saute",
+              "le"
+            ],
+            "answer": "lapin",
+            "img": "🐰"
+          }
+        ],
+        "2": [
+          {
+            "type": "qcm",
+            "q": "Quel est le féminin de \"un boulanger\" ?",
+            "options": [
+              "une boulangère",
+              "une boulangerie",
+              "une boulange",
+              "une boulangeuse"
+            ],
+            "answer": "une boulangère",
+            "img": "🥐"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel mot est un adjectif ? \"La grande maison est belle.\"",
+            "options": [
+              "maison",
+              "grande",
+              "est",
+              "la"
+            ],
+            "answer": "grande",
+            "img": "🏠"
+          },
+          {
+            "type": "qcm",
+            "q": "Trouve le sujet : \"Les enfants jouent dans la cour.\"",
+            "options": [
+              "jouent",
+              "la cour",
+              "Les enfants",
+              "dans"
+            ],
+            "answer": "Les enfants",
+            "img": "👧"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel est le synonyme de \"content\" ?",
+            "options": [
+              "triste",
+              "joyeux",
+              "fatigué",
+              "en colère"
+            ],
+            "answer": "joyeux",
+            "img": "😊"
+          },
+          {
+            "type": "qcm",
+            "q": "Complète : \"Je mange ___ pomme.\"",
+            "options": [
+              "un",
+              "une",
+              "des",
+              "le"
+            ],
+            "answer": "une",
+            "img": "🍎"
+          }
+        ],
+        "3": [
+          {
+            "type": "qcm",
+            "q": "Conjugue \"finir\" au présent avec \"nous\" :",
+            "options": [
+              "nous finons",
+              "nous finissons",
+              "nous finissez",
+              "nous finit"
+            ],
+            "answer": "nous finissons",
+            "img": "✅"
+          },
+          {
+            "type": "qcm",
+            "q": "\"Le renard rusé attrape la poule blanche.\" Quel est le COD ?",
+            "options": [
+              "Le renard",
+              "rusé",
+              "la poule blanche",
+              "attrape"
+            ],
+            "answer": "la poule blanche",
+            "img": "🦊"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel temps est utilisé : \"Demain, j'irai au parc.\" ?",
+            "options": [
+              "Le présent",
+              "L'imparfait",
+              "Le futur",
+              "Le passé composé"
+            ],
+            "answer": "Le futur",
+            "img": "📅"
+          },
+          {
+            "type": "qcm",
+            "q": "Trouve l'intrus (famille de mots) :",
+            "options": [
+              "dent",
+              "dentiste",
+              "dentaire",
+              "danser"
+            ],
+            "answer": "danser",
+            "img": "🔍"
+          },
+          {
+            "type": "qcm",
+            "q": "\"Il mange, il boit et il dort.\" Combien y a-t-il de verbes ?",
+            "options": [
+              "1",
+              "2",
+              "3",
+              "4"
+            ],
+            "answer": "3",
+            "img": "📝"
+          }
+        ]
+      },
+      "maths": {
+        "1": [
+          {
+            "type": "qcm",
+            "q": "45 + 27 = ?",
+            "options": [
+              "62",
+              "72",
+              "82",
+              "71"
+            ],
+            "answer": "72",
+            "img": "➕"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel nombre vient juste après 99 ?",
+            "options": [
+              "98",
+              "100",
+              "101",
+              "109"
+            ],
+            "answer": "100",
+            "img": "🔢"
+          },
+          {
+            "type": "qcm",
+            "q": "68 - 23 = ?",
+            "options": [
+              "35",
+              "45",
+              "55",
+              "41"
+            ],
+            "answer": "45",
+            "img": "➖"
+          },
+          {
+            "type": "qcm",
+            "q": "Range du plus petit au plus grand : 56, 38, 72, 41",
+            "options": [
+              "38, 41, 56, 72",
+              "72, 56, 41, 38",
+              "38, 56, 41, 72",
+              "41, 38, 56, 72"
+            ],
+            "answer": "38, 41, 56, 72",
+            "img": "📊"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel est le double de 35 ?",
+            "options": [
+              "60",
+              "65",
+              "70",
+              "75"
+            ],
+            "answer": "70",
+            "img": "✖️"
+          }
+        ],
+        "2": [
+          {
+            "type": "qcm",
+            "q": "🍬 Léa a 54 bonbons. Elle en donne 18. Combien lui en reste-t-il ?",
+            "options": [
+              "32",
+              "36",
+              "38",
+              "42"
+            ],
+            "answer": "36",
+            "img": "🍬"
+          },
+          {
+            "type": "qcm",
+            "q": "3 × 7 = ?",
+            "options": [
+              "18",
+              "21",
+              "24",
+              "27"
+            ],
+            "answer": "21",
+            "img": "✖️"
+          },
+          {
+            "type": "qcm",
+            "q": "134 + 58 = ?",
+            "options": [
+              "182",
+              "188",
+              "192",
+              "198"
+            ],
+            "answer": "192",
+            "img": "➕"
+          },
+          {
+            "type": "qcm",
+            "q": "Quelle heure est-il quand la grande aiguille est sur 6 et la petite sur 3 ?",
+            "options": [
+              "6h30",
+              "3h30",
+              "6h03",
+              "3h06"
+            ],
+            "answer": "3h30",
+            "img": "🕞"
+          },
+          {
+            "type": "qcm",
+            "q": "5 × 4 = ?",
+            "options": [
+              "15",
+              "20",
+              "25",
+              "9"
+            ],
+            "answer": "20",
+            "img": "✖️"
+          }
+        ],
+        "3": [
+          {
+            "type": "qcm",
+            "q": "247 - 139 = ?",
+            "options": [
+              "98",
+              "108",
+              "112",
+              "118"
+            ],
+            "answer": "108",
+            "img": "🧮"
+          },
+          {
+            "type": "qcm",
+            "q": "🎂 Maman prépare 4 gâteaux avec 6 parts chacun. Combien de parts en tout ?",
+            "options": [
+              "20",
+              "22",
+              "24",
+              "10"
+            ],
+            "answer": "24",
+            "img": "🎂"
+          },
+          {
+            "type": "qcm",
+            "q": "Combien de centaines dans 358 ?",
+            "options": [
+              "3",
+              "5",
+              "8",
+              "35"
+            ],
+            "answer": "3",
+            "img": "🔢"
+          },
+          {
+            "type": "qcm",
+            "q": "8 × 6 = ?",
+            "options": [
+              "42",
+              "46",
+              "48",
+              "54"
+            ],
+            "answer": "48",
+            "img": "✖️"
+          },
+          {
+            "type": "qcm",
+            "q": "365 + 248 = ?",
+            "options": [
+              "603",
+              "613",
+              "513",
+              "593"
+            ],
+            "answer": "613",
+            "img": "🚀"
+          }
+        ]
+      },
+      "monde": {
+        "1": [
+          {
+            "type": "qcm",
+            "q": "Quel est le cycle de l'eau ? L'eau s'évapore puis...",
+            "options": [
+              "disparaît",
+              "forme des nuages et retombe en pluie",
+              "devient du feu",
+              "se transforme en glace pour toujours"
+            ],
+            "answer": "forme des nuages et retombe en pluie",
+            "img": "💧"
+          },
+          {
+            "type": "qcm",
+            "q": "Comment s'appelle le mouvement de la Terre sur elle-même ?",
+            "options": [
+              "La révolution",
+              "La rotation",
+              "L'éclipse",
+              "La gravité"
+            ],
+            "answer": "La rotation",
+            "img": "🌍"
+          },
+          {
+            "type": "qcm",
+            "q": "Combien y a-t-il de continents ?",
+            "options": [
+              "4",
+              "5",
+              "6",
+              "7"
+            ],
+            "answer": "7",
+            "img": "🗺️"
+          },
+          {
+            "type": "qcm",
+            "q": "Les plantes ont besoin de quoi pour pousser ?",
+            "options": [
+              "Eau, lumière et terre",
+              "Eau et chocolat",
+              "Lumière et bonbons",
+              "Terre et cailloux seulement"
+            ],
+            "answer": "Eau, lumière et terre",
+            "img": "🌱"
+          },
+          {
+            "type": "qcm",
+            "q": "Qu'est-ce qu'un herbivore ?",
+            "options": [
+              "Un animal qui mange de la viande",
+              "Un animal qui mange des plantes",
+              "Un animal qui mange de tout",
+              "Un animal qui ne mange rien"
+            ],
+            "answer": "Un animal qui mange des plantes",
+            "img": "🐄"
+          }
+        ],
+        "2": [
+          {
+            "type": "qcm",
+            "q": "Quelle est la planète la plus proche du Soleil ?",
+            "options": [
+              "Vénus",
+              "Mars",
+              "Mercure",
+              "La Terre"
+            ],
+            "answer": "Mercure",
+            "img": "☀️"
+          },
+          {
+            "type": "qcm",
+            "q": "Comment appelle-t-on un scientifique qui étudie les étoiles ?",
+            "options": [
+              "Un biologiste",
+              "Un astronome",
+              "Un géologue",
+              "Un chimiste"
+            ],
+            "answer": "Un astronome",
+            "img": "🔭"
+          },
+          {
+            "type": "qcm",
+            "q": "Qu'est-ce qui provoque les marées ?",
+            "options": [
+              "Le vent",
+              "La Lune",
+              "Les poissons",
+              "Les bateaux"
+            ],
+            "answer": "La Lune",
+            "img": "🌊"
+          },
+          {
+            "type": "qcm",
+            "q": "Comment les oiseaux savent-ils où migrer ?",
+            "options": [
+              "Ils suivent un GPS",
+              "Ils utilisent le soleil et les étoiles",
+              "Ils demandent aux autres animaux",
+              "Ils lisent une carte"
+            ],
+            "answer": "Ils utilisent le soleil et les étoiles",
+            "img": "🐦"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel gaz les plantes rejettent-elles et dont nous avons besoin ?",
+            "options": [
+              "Le CO2",
+              "L'oxygène",
+              "L'azote",
+              "L'hélium"
+            ],
+            "answer": "L'oxygène",
+            "img": "🌳"
+          }
+        ],
+        "3": [
+          {
+            "type": "qcm",
+            "q": "Comment s'appelle la couche de gaz qui entoure la Terre ?",
+            "options": [
+              "La biosphère",
+              "L'atmosphère",
+              "La lithosphère",
+              "L'hydrosphère"
+            ],
+            "answer": "L'atmosphère",
+            "img": "🌐"
+          },
+          {
+            "type": "qcm",
+            "q": "Combien de temps met la Terre pour faire le tour du Soleil ?",
+            "options": [
+              "1 jour",
+              "1 mois",
+              "1 an",
+              "1 semaine"
+            ],
+            "answer": "1 an",
+            "img": "🌞"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel est le plus grand océan du monde ?",
+            "options": [
+              "L'Atlantique",
+              "L'Indien",
+              "Le Pacifique",
+              "L'Arctique"
+            ],
+            "answer": "Le Pacifique",
+            "img": "🌊"
+          },
+          {
+            "type": "qcm",
+            "q": "Les dinosaures ont disparu il y a environ...",
+            "options": [
+              "1 000 ans",
+              "1 million d'années",
+              "66 millions d'années",
+              "100 ans"
+            ],
+            "answer": "66 millions d'années",
+            "img": "🦕"
+          },
+          {
+            "type": "qcm",
+            "q": "Le squelette d'un adulte a environ combien d'os ?",
+            "options": [
+              "106",
+              "156",
+              "206",
+              "306"
+            ],
+            "answer": "206",
+            "img": "🦴"
+          }
+        ]
+      },
+      "arts": {
+        "1": [
+          {
+            "type": "qcm",
+            "q": "Quelles sont les 3 couleurs primaires en peinture ?",
+            "options": [
+              "Rouge, vert, bleu",
+              "Rouge, jaune, bleu",
+              "Rouge, jaune, vert",
+              "Bleu, vert, jaune"
+            ],
+            "answer": "Rouge, jaune, bleu",
+            "img": "🎨"
+          },
+          {
+            "type": "qcm",
+            "q": "Combien de côtés a un hexagone ?",
+            "options": [
+              "4",
+              "5",
+              "6",
+              "8"
+            ],
+            "answer": "6",
+            "img": "⬡"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel instrument a des touches noires et blanches ?",
+            "options": [
+              "La guitare",
+              "Le piano",
+              "La flûte",
+              "Le tambour"
+            ],
+            "answer": "Le piano",
+            "img": "🎹"
+          },
+          {
+            "type": "qcm",
+            "q": "Quelle forme a 3 côtés et 3 sommets ?",
+            "options": [
+              "Le carré",
+              "Le cercle",
+              "Le triangle",
+              "Le losange"
+            ],
+            "answer": "Le triangle",
+            "img": "🔺"
+          },
+          {
+            "type": "qcm",
+            "q": "Jaune + Bleu = ?",
+            "options": [
+              "Orange",
+              "Violet",
+              "Vert",
+              "Marron"
+            ],
+            "answer": "Vert",
+            "img": "🎨"
+          }
+        ],
+        "2": [
+          {
+            "type": "qcm",
+            "q": "Qui a peint la Joconde ?",
+            "options": [
+              "Picasso",
+              "Léonard de Vinci",
+              "Van Gogh",
+              "Monet"
+            ],
+            "answer": "Léonard de Vinci",
+            "img": "🖼️"
+          },
+          {
+            "type": "qcm",
+            "q": "Combien de notes de musique y a-t-il ?",
+            "options": [
+              "5",
+              "6",
+              "7",
+              "8"
+            ],
+            "answer": "7",
+            "img": "🎵"
+          },
+          {
+            "type": "qcm",
+            "q": "Comment appelle-t-on une ligne qui ne s'arrête jamais et va tout droit ?",
+            "options": [
+              "Un segment",
+              "Une droite",
+              "Un rayon",
+              "Un angle"
+            ],
+            "answer": "Une droite",
+            "img": "📏"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel est le contraire de symétrique ?",
+            "options": [
+              "Égal",
+              "Pareil",
+              "Asymétrique",
+              "Parallèle"
+            ],
+            "answer": "Asymétrique",
+            "img": "🪞"
+          },
+          {
+            "type": "qcm",
+            "q": "Continue la suite : 2, 5, 8, 11, ...",
+            "options": [
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "answer": "14",
+            "img": "🔢"
+          }
+        ],
+        "3": [
+          {
+            "type": "qcm",
+            "q": "Continue : 1, 4, 9, 16, ...",
+            "options": [
+              "20",
+              "21",
+              "24",
+              "25"
+            ],
+            "answer": "25",
+            "img": "🧮"
+          },
+          {
+            "type": "qcm",
+            "q": "Trouve l'intrus dans cette suite logique : 🟢🔴🟢🔴🟢🟡🟢🔴",
+            "options": [
+              "🟢",
+              "🔴",
+              "🟡",
+              "Aucun"
+            ],
+            "answer": "🟡",
+            "img": "🔍"
+          },
+          {
+            "type": "qcm",
+            "q": "Combien d'axes de symétrie a un carré ?",
+            "options": [
+              "1",
+              "2",
+              "3",
+              "4"
+            ],
+            "answer": "4",
+            "img": "📐"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel tableau célèbre montre une nuit étoilée ?",
+            "options": [
+              "Les Tournesols",
+              "La Nuit étoilée",
+              "La Joconde",
+              "Le Cri"
+            ],
+            "answer": "La Nuit étoilée",
+            "img": "🌃"
+          },
+          {
+            "type": "qcm",
+            "q": "🔵🔵🔴🔵🔵🔴🔵🔵... Que vient ensuite ?",
+            "options": [
+              "🔵",
+              "🔴",
+              "🟢",
+              "🟡"
+            ],
+            "answer": "🔴",
+            "img": "❓"
+          }
+        ]
+      },
+      "histoire": {
+        "1": [
+          {
+            "type": "qcm",
+            "q": "Avec quoi les hommes préhistoriques fabriquaient-ils leurs outils ?",
+            "options": [
+              "Du métal",
+              "De la pierre",
+              "Du plastique",
+              "Du bois uniquement"
+            ],
+            "answer": "De la pierre",
+            "img": "🪨"
+          },
+          {
+            "type": "qcm",
+            "q": "Qui était le chef des Gaulois face aux Romains ?",
+            "options": [
+              "Astérix",
+              "Vercingétorix",
+              "Clovis",
+              "Charlemagne"
+            ],
+            "answer": "Vercingétorix",
+            "img": "⚔️"
+          },
+          {
+            "type": "qcm",
+            "q": "Comment s'appelle l'écriture des Égyptiens anciens ?",
+            "options": [
+              "L'alphabet",
+              "Les hiéroglyphes",
+              "Le braille",
+              "Le morse"
+            ],
+            "answer": "Les hiéroglyphes",
+            "img": "📜"
+          },
+          {
+            "type": "qcm",
+            "q": "Les châteaux forts servaient surtout à...",
+            "options": [
+              "Faire des fêtes",
+              "Se protéger des ennemis",
+              "Ranger des livres",
+              "Garder des animaux"
+            ],
+            "answer": "Se protéger des ennemis",
+            "img": "🏰"
+          },
+          {
+            "type": "qcm",
+            "q": "Qui a inventé l'imprimerie en Europe ?",
+            "options": [
+              "Léonard de Vinci",
+              "Gutenberg",
+              "Jules César",
+              "Napoléon"
+            ],
+            "answer": "Gutenberg",
+            "img": "📖"
+          }
+        ],
+        "2": [
+          {
+            "type": "qcm",
+            "q": "En quelle année Christophe Colomb a-t-il découvert l'Amérique ?",
+            "options": [
+              "1292",
+              "1392",
+              "1492",
+              "1592"
+            ],
+            "answer": "1492",
+            "img": "🚢"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel roi de France était surnommé le Roi-Soleil ?",
+            "options": [
+              "Louis XIII",
+              "Louis XIV",
+              "Louis XV",
+              "Louis XVI"
+            ],
+            "answer": "Louis XIV",
+            "img": "👑"
+          },
+          {
+            "type": "qcm",
+            "q": "Que célèbre-t-on le 14 juillet en France ?",
+            "options": [
+              "Noël",
+              "La prise de la Bastille",
+              "La fête de la musique",
+              "L'armistice"
+            ],
+            "answer": "La prise de la Bastille",
+            "img": "🇫🇷"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel peuple a construit le Colisée ?",
+            "options": [
+              "Les Grecs",
+              "Les Romains",
+              "Les Égyptiens",
+              "Les Gaulois"
+            ],
+            "answer": "Les Romains",
+            "img": "🏛️"
+          },
+          {
+            "type": "qcm",
+            "q": "Comment s'appelle le premier roi des Francs baptisé chrétien ?",
+            "options": [
+              "Charlemagne",
+              "Clovis",
+              "Vercingétorix",
+              "Philippe Auguste"
+            ],
+            "answer": "Clovis",
+            "img": "⛪"
+          }
+        ],
+        "3": [
+          {
+            "type": "qcm",
+            "q": "Quand la Seconde Guerre mondiale s'est-elle terminée ?",
+            "options": [
+              "1918",
+              "1939",
+              "1945",
+              "1950"
+            ],
+            "answer": "1945",
+            "img": "🕊️"
+          },
+          {
+            "type": "qcm",
+            "q": "Qui a été le premier homme à marcher sur la Lune ?",
+            "options": [
+              "Youri Gagarine",
+              "Neil Armstrong",
+              "Thomas Pesquet",
+              "Buzz Aldrin"
+            ],
+            "answer": "Neil Armstrong",
+            "img": "🌙"
+          },
+          {
+            "type": "qcm",
+            "q": "La Déclaration des droits de l'homme date de...",
+            "options": [
+              "1689",
+              "1789",
+              "1889",
+              "1989"
+            ],
+            "answer": "1789",
+            "img": "📜"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel empereur français a conquis une grande partie de l'Europe ?",
+            "options": [
+              "Louis XIV",
+              "Napoléon Bonaparte",
+              "Charlemagne",
+              "De Gaulle"
+            ],
+            "answer": "Napoléon Bonaparte",
+            "img": "🗡️"
+          },
+          {
+            "type": "qcm",
+            "q": "En quelle année le mur de Berlin est-il tombé ?",
+            "options": [
+              "1969",
+              "1979",
+              "1989",
+              "1999"
+            ],
+            "answer": "1989",
+            "img": "🧱"
+          }
+        ]
+      },
+      "geo": {
+        "1": [
+          {
+            "type": "qcm",
+            "q": "Combien y a-t-il d'océans sur Terre ?",
+            "options": [
+              "3",
+              "4",
+              "5",
+              "6"
+            ],
+            "answer": "5",
+            "img": "🌊"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel est le plus grand pays du monde ?",
+            "options": [
+              "La Chine",
+              "Les États-Unis",
+              "La Russie",
+              "Le Canada"
+            ],
+            "answer": "La Russie",
+            "img": "🗺️"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel continent est le plus froid ?",
+            "options": [
+              "L'Afrique",
+              "L'Asie",
+              "L'Antarctique",
+              "L'Europe"
+            ],
+            "answer": "L'Antarctique",
+            "img": "🧊"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel fleuve traverse Paris ?",
+            "options": [
+              "Le Rhône",
+              "La Loire",
+              "La Seine",
+              "La Garonne"
+            ],
+            "answer": "La Seine",
+            "img": "🌉"
+          },
+          {
+            "type": "qcm",
+            "q": "Quelle chaîne de montagnes sépare la France de l'Espagne ?",
+            "options": [
+              "Les Alpes",
+              "Les Pyrénées",
+              "Le Jura",
+              "Les Vosges"
+            ],
+            "answer": "Les Pyrénées",
+            "img": "⛰️"
+          }
+        ],
+        "2": [
+          {
+            "type": "qcm",
+            "q": "Quelle est la capitale de l'Italie ?",
+            "options": [
+              "Madrid",
+              "Rome",
+              "Lisbonne",
+              "Berlin"
+            ],
+            "answer": "Rome",
+            "img": "🇮🇹"
+          },
+          {
+            "type": "qcm",
+            "q": "Sur quel continent se trouve l'Égypte ?",
+            "options": [
+              "L'Asie",
+              "L'Europe",
+              "L'Afrique",
+              "L'Amérique"
+            ],
+            "answer": "L'Afrique",
+            "img": "🏛️"
+          },
+          {
+            "type": "qcm",
+            "q": "Comment s'appelle la ligne imaginaire au milieu de la Terre ?",
+            "options": [
+              "Le méridien",
+              "L'équateur",
+              "Le tropique",
+              "Le pôle"
+            ],
+            "answer": "L'équateur",
+            "img": "🌍"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel est le désert le plus grand du monde ?",
+            "options": [
+              "Le Gobi",
+              "Le Sahara",
+              "Le Kalahari",
+              "L'Atacama"
+            ],
+            "answer": "Le Sahara",
+            "img": "🏜️"
+          },
+          {
+            "type": "qcm",
+            "q": "Quelle est la capitale de l'Allemagne ?",
+            "options": [
+              "Munich",
+              "Berlin",
+              "Hambourg",
+              "Francfort"
+            ],
+            "answer": "Berlin",
+            "img": "🇩🇪"
+          }
+        ],
+        "3": [
+          {
+            "type": "qcm",
+            "q": "Quel pays a la forme d'une botte ?",
+            "options": [
+              "La France",
+              "L'Espagne",
+              "L'Italie",
+              "La Grèce"
+            ],
+            "answer": "L'Italie",
+            "img": "👢"
+          },
+          {
+            "type": "qcm",
+            "q": "Comment s'appelle le plus long fleuve du monde ?",
+            "options": [
+              "L'Amazone",
+              "Le Nil",
+              "Le Mississippi",
+              "Le Yangtsé"
+            ],
+            "answer": "Le Nil",
+            "img": "🏞️"
+          },
+          {
+            "type": "qcm",
+            "q": "Combien de régions y a-t-il en France métropolitaine ?",
+            "options": [
+              "10",
+              "13",
+              "18",
+              "22"
+            ],
+            "answer": "13",
+            "img": "🗺️"
+          },
+          {
+            "type": "qcm",
+            "q": "Quel océan se trouve entre l'Europe et l'Amérique ?",
+            "options": [
+              "Le Pacifique",
+              "L'Indien",
+              "L'Atlantique",
+              "L'Arctique"
+            ],
+            "answer": "L'Atlantique",
+            "img": "🌊"
+          },
+          {
+            "type": "qcm",
+            "q": "Quelle est la plus grande île française ?",
+            "options": [
+              "La Guadeloupe",
+              "La Martinique",
+              "La Corse",
+              "La Réunion"
+            ],
+            "answer": "La Corse",
+            "img": "🏝️"
+          }
+        ]
+      },
+      "orthographe": {
+        "1": [
+          {
+            "type": "completion",
+            "q": "l_br_irie",
+            "options": [],
+            "answer": "ia",
+            "img": "📚"
+          },
+          {
+            "type": "completion",
+            "q": "cha_eau",
+            "options": [],
+            "answer": "p",
+            "img": "🎩"
+          },
+          {
+            "type": "completion",
+            "q": "orang_-outan_",
+            "options": [],
+            "answer": "g",
+            "img": "🦧"
+          },
+          {
+            "type": "completion",
+            "q": "autom_bile",
+            "options": [],
+            "answer": "o",
+            "img": "🚗"
+          },
+          {
+            "type": "completion",
+            "q": "dino_aure",
+            "options": [],
+            "answer": "s",
+            "img": "🦕"
+          }
+        ],
+        "2": [
+          {
+            "type": "completion",
+            "q": "app_ren_re",
+            "options": [],
+            "answer": "d",
+            "img": "📖"
+          },
+          {
+            "type": "completion",
+            "q": "temp_rature",
+            "options": [],
+            "answer": "é",
+            "img": "🌡️"
+          },
+          {
+            "type": "completion",
+            "q": "pa_illon",
+            "options": [],
+            "answer": "p",
+            "img": "🦋"
+          },
+          {
+            "type": "completion",
+            "q": "aven_ure",
+            "options": [],
+            "answer": "t",
+            "img": "🗺️"
+          },
+          {
+            "type": "completion",
+            "q": "mervei__eux",
+            "options": [],
+            "answer": "ll",
+            "img": "✨"
+          }
+        ],
+        "3": [
+          {
+            "type": "completion",
+            "q": "géo_ra_hie",
+            "options": [],
+            "answer": "gp",
+            "img": "🌍"
+          },
+          {
+            "type": "completion",
+            "q": "math_mati_ues",
+            "options": [],
+            "answer": "éq",
+            "img": "🧮"
+          },
+          {
+            "type": "completion",
+            "q": "e_tra_rdinaire",
+            "options": [],
+            "answer": "xo",
+            "img": "🌟"
+          },
+          {
+            "type": "completion",
+            "q": "bi_ycl_tte",
+            "options": [],
+            "answer": "ce",
+            "img": "🚲"
+          },
+          {
+            "type": "completion",
+            "q": "in_é_endance",
+            "options": [],
+            "answer": "dp",
+            "img": "🗽"
+          }
+        ]
+      },
+      "blagues": {
+        "1": [
+          {
+            "type": "blague",
+            "q": "Que dit un escargot quand il croise une limace ?",
+            "options": [],
+            "answer": "Oh, une nudiste !",
+            "img": "🐌"
+          },
+          {
+            "type": "blague",
+            "q": "Pourquoi les plongeurs plongent-ils toujours en arrière ?",
+            "options": [],
+            "answer": "Parce que sinon ils tomberaient dans le bateau !",
+            "img": "🤿"
+          },
+          {
+            "type": "blague",
+            "q": "Quel est le comble pour un électricien ?",
+            "options": [],
+            "answer": "De ne pas être au courant !",
+            "img": "⚡"
+          },
+          {
+            "type": "blague",
+            "q": "Qu'est-ce qu'un canif ?",
+            "options": [],
+            "answer": "Un petit fien !",
+            "img": "🐕"
+          },
+          {
+            "type": "blague",
+            "q": "Pourquoi les poissons vivent-ils dans l'eau salée ?",
+            "options": [],
+            "answer": "Parce que le poivre les fait éternuer !",
+            "img": "🐟"
+          }
+        ],
+        "2": [
+          {
+            "type": "blague",
+            "q": "Comment appelle-t-on un chat tombé dans un pot de peinture le jour de Noël ?",
+            "options": [],
+            "answer": "Un chat-peint de Noël !",
+            "img": "🐱"
+          },
+          {
+            "type": "blague",
+            "q": "Quel est le fruit le plus rapide ?",
+            "options": [],
+            "answer": "La mûre, parce qu'elle est toujours pressée !",
+            "img": "🫐"
+          },
+          {
+            "type": "blague",
+            "q": "Que fait une fraise sur un cheval ?",
+            "options": [],
+            "answer": "De la confiture !",
+            "img": "🍓"
+          },
+          {
+            "type": "blague",
+            "q": "Pourquoi le livre de maths est-il triste ?",
+            "options": [],
+            "answer": "Parce qu'il a trop de problèmes !",
+            "img": "📘"
+          },
+          {
+            "type": "blague",
+            "q": "Quel est l'animal le plus connecté ?",
+            "options": [],
+            "answer": "Le poisson, parce qu'il est toujours en ligne !",
+            "img": "🎣"
+          }
+        ],
+        "3": [
+          {
+            "type": "blague",
+            "q": "Quel est le comble pour un jardinier ?",
+            "options": [],
+            "answer": "De raconter des salades !",
+            "img": "🥬"
+          },
+          {
+            "type": "blague",
+            "q": "Comment appelle-t-on un dinosaure qui fait du bruit en dormant ?",
+            "options": [],
+            "answer": "Un ronflosaure !",
+            "img": "🦕"
+          },
+          {
+            "type": "blague",
+            "q": "Pourquoi l'épouvantail a-t-il gagné un prix ?",
+            "options": [],
+            "answer": "Parce qu'il était exceptionnel dans son domaine !",
+            "img": "🌾"
+          },
+          {
+            "type": "blague",
+            "q": "Qu'est-ce qu'un crocodile qui surveille les examens ?",
+            "options": [],
+            "answer": "Un croco-surveillant !",
+            "img": "🐊"
+          },
+          {
+            "type": "blague",
+            "q": "Que dit un oignon quand il se cogne ?",
+            "options": [],
+            "answer": "Aïe aïe aïe !",
+            "img": "🧅"
+          }
+        ]
+      }
+    }
+  }
+}

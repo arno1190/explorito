@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { childrenApi, gamificationApi } from "@/lib/api";
+import {
+  createChildApiV1ChildrenPost,
+  deleteChildApiV1ChildrenChildIdDelete,
+  getChildrenApiV1ChildrenGet,
+} from "@/lib/api/generated/children/children";
+import { getChildStatsApiV1GamificationChildIdStatsGet } from "@/lib/api/generated/gamification/gamification";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,13 +28,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Play, TrendingUp } from "lucide-react";
-import type { Child, GamificationStats } from "@/types";
+import type { ChildResponse, ChildStatsResponse } from "@/lib/api/model";
 
 export default function DashboardPage() {
   const { user, impersonateChild } = useAuth();
-  const [children, setChildren] = useState<Child[]>([]);
+  const [children, setChildren] = useState<ChildResponse[]>([]);
   const [childrenStats, setChildrenStats] = useState<
-    Record<string, GamificationStats>
+    Record<string, ChildStatsResponse>
   >({});
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -46,13 +51,15 @@ export default function DashboardPage() {
   const loadChildren = async () => {
     try {
       setLoading(true);
-      const data = await childrenApi.getAll();
+      const data = await getChildrenApiV1ChildrenGet();
       setChildren(data);
 
       // Load stats for each child
       const statsPromises = data.map(async (child) => {
         try {
-          const stats = await gamificationApi.getStats(child.id);
+          const stats = await getChildStatsApiV1GamificationChildIdStatsGet(
+            child.id
+          );
           return { id: child.id, stats };
         } catch (err) {
           console.error(`Failed to load stats for child ${child.id}:`, err);
@@ -61,7 +68,7 @@ export default function DashboardPage() {
       });
 
       const statsResults = await Promise.all(statsPromises);
-      const statsMap: Record<string, GamificationStats> = {};
+      const statsMap: Record<string, ChildStatsResponse> = {};
       statsResults.forEach(({ id, stats }) => {
         if (stats) {
           statsMap[id] = stats;
@@ -80,7 +87,7 @@ export default function DashboardPage() {
     setError("");
 
     try {
-      await childrenApi.create({
+      await createChildApiV1ChildrenPost({
         name,
         birth_date: birthDate,
         email,
@@ -105,7 +112,7 @@ export default function DashboardPage() {
     }
 
     try {
-      await childrenApi.delete(id);
+      await deleteChildApiV1ChildrenChildIdDelete(id);
       loadChildren();
     } catch (err) {
       console.error("Failed to delete child:", err);

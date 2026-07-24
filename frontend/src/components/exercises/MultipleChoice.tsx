@@ -1,193 +1,92 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Check, X } from "lucide-react";
+import type {
+  ExerciseTypeComponentProps,
+  MultipleChoiceContent,
+} from "./types";
 
-interface MultipleChoiceProps {
-  question: string;
-  options: string[];
-  onAnswer: (answer: string | string[]) => void;
-  disabled?: boolean;
-  showResult?: boolean;
-  isCorrect?: boolean;
-  correctAnswer?: string | string[];
-  allowMultiple?: boolean; // Allow selecting multiple options
-}
-
+/**
+ * QCM. Émet `{ option_ids: string[] }`.
+ * Réponse unique par défaut ; multiple si `content.multiple`.
+ */
 export function MultipleChoice({
   question,
-  options,
+  content,
+  emoji,
   onAnswer,
   disabled = false,
   showResult = false,
   isCorrect,
-  correctAnswer,
-  allowMultiple = false,
-}: MultipleChoiceProps) {
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+}: ExerciseTypeComponentProps<MultipleChoiceContent>) {
+  const multiple = content.multiple ?? false;
+  const [selected, setSelected] = useState<string[]>([]);
 
-  // Reset selection when component becomes enabled again (retry scenario)
-  useEffect(() => {
-    if (!disabled && !showResult) {
-      setSelectedOptions([]);
-    }
-  }, [disabled, showResult]);
-
-  const handleSelect = (option: string) => {
-    if (disabled) return;
-
-    let newSelection: string[];
-
-    if (allowMultiple) {
-      // Toggle selection for multiple choice
-      if (selectedOptions.includes(option)) {
-        newSelection = selectedOptions.filter((o) => o !== option);
-      } else {
-        newSelection = [...selectedOptions, option];
-      }
-    } else {
-      // Single selection - replace previous
-      newSelection = [option];
-    }
-
-    setSelectedOptions(newSelection);
-
-    // Send answer in appropriate format
-    if (allowMultiple) {
-      onAnswer(newSelection);
-    } else {
-      onAnswer(newSelection[0] || "");
-    }
+  const emit = (ids: string[]) => {
+    setSelected(ids);
+    onAnswer(ids.length > 0 ? { option_ids: ids } : null);
   };
 
-  const isOptionSelected = (option: string) => selectedOptions.includes(option);
-
-  // Check if an option is a correct answer
-  const isCorrectAnswer = (option: string): boolean => {
-    if (!correctAnswer) return false;
-    if (Array.isArray(correctAnswer)) {
-      return correctAnswer.includes(option);
+  const toggle = (id: string) => {
+    if (disabled) return;
+    if (multiple) {
+      emit(
+        selected.includes(id)
+          ? selected.filter((x) => x !== id)
+          : [...selected, id]
+      );
+    } else {
+      emit([id]);
     }
-    return correctAnswer === option;
   };
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-fun-text">{question}</h2>
+      <div className="flex items-center gap-3">
+        {emoji && <span className="text-4xl">{emoji}</span>}
+        <h2 className="text-xl font-bold text-fun-text sm:text-2xl">
+          {question}
+        </h2>
+      </div>
 
-      {allowMultiple && (
-        <p className="text-sm text-fun-text-muted italic">
-          Plusieurs réponses possibles - sélectionne toutes les bonnes réponses
-        </p>
-      )}
-
-      <div className="grid gap-4">
-        {options.map((option, index) => {
-          const isSelected = isOptionSelected(option);
-          // When showing results:
-          // - If overall answer is correct AND option is selected -> green (user got it right)
-          // - If option is a correct answer (show correct answers) -> green
-          // - If option is selected but answer is wrong -> red
-          const isCorrectOption =
-            showResult &&
-            (isCorrectAnswer(option) || (isCorrect && isSelected));
-          const isWrongSelection =
-            showResult && isSelected && !isCorrect && !isCorrectAnswer(option);
-
-          // Letter label (A, B, C, D...)
-          const letter = String.fromCharCode(65 + index);
-
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {content.options.map((option) => {
+          const isSelected = selected.includes(option.id);
           return (
-            <Card
-              key={index}
+            <button
+              key={option.id}
+              type="button"
+              onClick={() => toggle(option.id)}
+              disabled={disabled}
               className={cn(
-                "p-0 cursor-pointer transition-all border-3 overflow-hidden",
-                "hover:shadow-lg hover:scale-[1.01]",
-                // Default state
-                !isSelected &&
-                  !showResult &&
-                  "border-fun-border hover:border-fun-sky/50",
-                // Selected state (not showing result yet)
-                isSelected &&
-                  !showResult &&
-                  "border-fun-sky bg-fun-sky-light ring-2 ring-fun-sky/30",
-                // Correct answer revealed
-                isCorrectOption && "border-fun-green bg-fun-green-light",
-                // Wrong selection revealed
-                isWrongSelection && "border-fun-red bg-fun-red-light",
-                // Disabled
+                "flex min-h-[56px] items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left text-lg font-semibold transition-all active:scale-95",
+                "border-fun-border bg-white text-fun-text hover:border-fun-sky",
+                isSelected && !showResult && "border-fun-sky bg-fun-sky-light",
+                showResult &&
+                  isSelected &&
+                  isCorrect &&
+                  "border-fun-green bg-fun-green-light",
+                showResult &&
+                  isSelected &&
+                  isCorrect === false &&
+                  "border-fun-red bg-fun-red-light",
                 disabled && "cursor-not-allowed"
               )}
-              onClick={() => handleSelect(option)}
             >
-              <div className="flex items-stretch">
-                {/* Letter Badge */}
-                <div
-                  className={cn(
-                    "w-14 flex items-center justify-center text-xl font-bold transition-all",
-                    // Default
-                    !isSelected &&
-                      !showResult &&
-                      "bg-fun-sky-light text-fun-sky",
-                    // Selected
-                    isSelected && !showResult && "bg-fun-sky text-white",
-                    // Correct
-                    isCorrectOption && "bg-fun-green text-white",
-                    // Wrong
-                    isWrongSelection && "bg-fun-red text-white"
-                  )}
-                >
-                  {showResult && isCorrectOption ? (
-                    <Check className="h-6 w-6" />
-                  ) : showResult && isWrongSelection ? (
-                    <X className="h-6 w-6" />
-                  ) : (
-                    letter
-                  )}
-                </div>
-
-                {/* Option Text */}
-                <div className="flex-grow p-4 flex items-center">
-                  <span
-                    className={cn(
-                      "text-lg font-medium",
-                      isSelected && !showResult && "text-fun-sky",
-                      isCorrectOption && "text-fun-green",
-                      isWrongSelection && "text-fun-red"
-                    )}
-                  >
-                    {option}
-                  </span>
-                </div>
-
-                {/* Selection indicator on the right */}
-                {isSelected && !showResult && (
-                  <div className="w-12 flex items-center justify-center bg-fun-sky">
-                    <Check className="h-5 w-5 text-white" />
-                  </div>
-                )}
-              </div>
-            </Card>
+              {option.image && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={option.image}
+                  alt=""
+                  className="h-10 w-10 rounded-lg object-cover"
+                />
+              )}
+              <span>{option.text}</span>
+            </button>
           );
         })}
       </div>
-
-      {showResult && (
-        <div
-          className={cn(
-            "p-4 rounded-lg text-center font-semibold",
-            isCorrect
-              ? "bg-fun-green-light text-fun-green"
-              : "bg-fun-red-light text-fun-red"
-          )}
-        >
-          {isCorrect
-            ? "Excellent! C'est la bonne réponse!"
-            : "Pas tout à fait, essaie encore!"}
-        </div>
-      )}
     </div>
   );
 }

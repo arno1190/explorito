@@ -2,22 +2,23 @@
 Modèles de contenu pédagogique
 """
 
+import enum
 import uuid
 from datetime import datetime
+
 from sqlalchemy import (
-    Column,
-    String,
-    Boolean,
-    DateTime,
-    Integer,
-    Text,
-    ForeignKey,
     JSON,
+    Boolean,
+    Column,
+    DateTime,
     Enum,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-import enum
 
 from app.core.database import Base
 
@@ -38,6 +39,24 @@ class DifficultyEnum(str, enum.Enum):
     HARD = "hard"
 
 
+class ExerciseType(str, enum.Enum):
+    """
+    Types d'exercices supportés (jeu de types canonique).
+
+    Volontairement restreint aux 4 types réellement implémentés et alimentés
+    en contenu, en cohérence avec le frontend :
+    - MULTIPLE_CHOICE : QCM (réponse unique ou multiple)
+    - FILL_BLANKS : compléter les trous (marqueurs ``___`` dans le texte)
+    - REVEAL : carte à révéler (blague) — pas de bonne réponse, étoile garantie
+    - PYTHAGORE : mini-jeu de table de multiplication (grille)
+    """
+
+    MULTIPLE_CHOICE = "multiple_choice"
+    FILL_BLANKS = "fill_blanks"
+    REVEAL = "reveal"
+    PYTHAGORE = "pythagore"
+
+
 class Subject(Base):
     """
     Matière scolaire
@@ -49,9 +68,7 @@ class Subject(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String, nullable=False)  # "Français", "Mathématiques", etc.
-    slug = Column(
-        String, unique=True, nullable=False, index=True
-    )  # "francais", "mathematiques"
+    slug = Column(String, unique=True, nullable=False, index=True)  # "francais", "mathematiques"
     description = Column(Text, nullable=True)
     icon = Column(String, nullable=True)  # emoji ou URL d'image
     color = Column(String, nullable=True)  # code couleur hex
@@ -59,12 +76,8 @@ class Subject(Base):
     is_active = Column(Boolean, default=True)
 
     # Relations
-    learning_paths = relationship(
-        "LearningPath", back_populates="subject", cascade="all, delete-orphan"
-    )
-    subject_progress = relationship(
-        "SubjectProgress", back_populates="subject", cascade="all, delete-orphan"
-    )
+    learning_paths = relationship("LearningPath", back_populates="subject", cascade="all, delete-orphan")
+    subject_progress = relationship("SubjectProgress", back_populates="subject", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Subject {self.name}>"
@@ -93,9 +106,7 @@ class LearningPath(Base):
 
     # Relations
     subject = relationship("Subject", back_populates="learning_paths")
-    lessons = relationship(
-        "Lesson", back_populates="path", cascade="all, delete-orphan"
-    )
+    lessons = relationship("Lesson", back_populates="path", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<LearningPath {self.name}>"
@@ -119,9 +130,7 @@ class Lesson(Base):
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     order_index = Column(Integer, default=0)
-    unlock_criteria = Column(
-        JSON, default={}
-    )  # {required_xp: 100, required_lessons: [...]}
+    unlock_criteria = Column(JSON, default={})  # {required_xp: 100, required_lessons: [...]}
     xp_reward = Column(Integer, default=10)
     estimated_duration = Column(Integer, nullable=True)  # en minutes
     cover_image = Column(String, nullable=True)
@@ -129,12 +138,8 @@ class Lesson(Base):
 
     # Relations
     path = relationship("LearningPath", back_populates="lessons")
-    exercises = relationship(
-        "Exercise", back_populates="lesson", cascade="all, delete-orphan"
-    )
-    user_progress = relationship(
-        "UserProgress", back_populates="lesson", cascade="all, delete-orphan"
-    )
+    exercises = relationship("Exercise", back_populates="lesson", cascade="all, delete-orphan")
+    user_progress = relationship("UserProgress", back_populates="lesson", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Lesson {self.name}>"
@@ -144,15 +149,16 @@ class Exercise(Base):
     """
     Exercice individuel dans une leçon
 
-    Supporte 12 types différents: mcq, drag_drop, fill_blanks, etc.
+    Le champ ``type`` est contraint au jeu de types canonique
+    (voir :class:`ExerciseType`) : ``multiple_choice``, ``fill_blanks``,
+    ``reveal``, ``pythagore``. La colonne reste ``String`` en base ; la
+    validation de forme est assurée par les schémas Pydantic.
     """
 
     __tablename__ = "exercises"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    lesson_id = Column(
-        UUID(as_uuid=True), ForeignKey("lessons.id", ondelete="CASCADE"), nullable=False
-    )
+    lesson_id = Column(UUID(as_uuid=True), ForeignKey("lessons.id", ondelete="CASCADE"), nullable=False)
     type = Column(String, nullable=False)  # 'mcq', 'drag_drop', 'fill_blanks', etc.
     question = Column(Text, nullable=False)
     content = Column(JSON, nullable=False)  # Structure dépend du type
@@ -165,12 +171,8 @@ class Exercise(Base):
 
     # Relations
     lesson = relationship("Lesson", back_populates="exercises")
-    results = relationship(
-        "ExerciseResult", back_populates="exercise", cascade="all, delete-orphan"
-    )
-    review_queue = relationship(
-        "ReviewQueue", back_populates="exercise", cascade="all, delete-orphan"
-    )
+    results = relationship("ExerciseResult", back_populates="exercise", cascade="all, delete-orphan")
+    review_queue = relationship("ReviewQueue", back_populates="exercise", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Exercise {self.type} - {self.question[:30]}>"
@@ -194,9 +196,7 @@ class Media(Base):
     source = Column(String, nullable=True)  # 'ratus_extraction', 'upload', 'generated'
     tags = Column(JSON, default=[])  # ['character', 'ratus', 'syllable', 'ma']
     meta_info = Column(JSON, default={})  # Infos extraction
-    uploaded_by = Column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
-    )
+    uploaded_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     # Relations

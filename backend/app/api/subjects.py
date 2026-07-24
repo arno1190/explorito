@@ -2,17 +2,18 @@
 Endpoints de gestion des matières
 """
 
-from typing import Annotated, List
+from typing import Annotated
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.core.database import get_db
-from app.models.user import User, UserRole
-from app.models.content import Subject, Lesson, LearningPath
-from app.schemas.subject import SubjectCreate, SubjectUpdate, SubjectResponse
-from app.schemas.lesson import LessonResponse
 from app.api.auth import get_current_active_user
+from app.core.database import get_db
+from app.models.content import LearningPath, Lesson, Subject
+from app.models.user import User, UserRole
+from app.schemas.lesson import LessonResponse
+from app.schemas.subject import SubjectCreate, SubjectResponse, SubjectUpdate
 
 router = APIRouter()
 
@@ -40,15 +41,13 @@ def require_admin(
     return current_user
 
 
-@router.get("", response_model=List[SubjectResponse])
+@router.get("", response_model=list[SubjectResponse])
 async def list_subjects(
     db: Annotated[Session, Depends(get_db)],
     skip: int = Query(0, ge=0, description="Nombre d'éléments à ignorer"),
-    limit: int = Query(
-        100, ge=1, le=100, description="Nombre maximum d'éléments à retourner"
-    ),
+    limit: int = Query(100, ge=1, le=100, description="Nombre maximum d'éléments à retourner"),
     is_active: bool | None = Query(None, description="Filtrer par statut actif"),
-) -> List[SubjectResponse]:
+) -> list[SubjectResponse]:
     """
     Liste toutes les matières
 
@@ -130,9 +129,7 @@ async def create_subject(
 
 
 @router.get("/{subject_id}", response_model=SubjectResponse)
-async def get_subject(
-    subject_id: UUID, db: Annotated[Session, Depends(get_db)]
-) -> SubjectResponse:
+async def get_subject(subject_id: UUID, db: Annotated[Session, Depends(get_db)]) -> SubjectResponse:
     """
     Récupère les détails d'une matière
 
@@ -150,9 +147,7 @@ async def get_subject(
 
     subject = db.query(Subject).filter(Subject.id == subject_id).first()
     if not subject:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Matière non trouvée"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Matière non trouvée")
 
     # Compter les leçons
     lesson_count = (
@@ -193,9 +188,7 @@ async def update_subject(
     """
     subject = db.query(Subject).filter(Subject.id == subject_id).first()
     if not subject:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Matière non trouvée"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Matière non trouvée")
 
     # Vérifier le slug si modifié
     if subject_data.slug and subject_data.slug != subject.slug:
@@ -239,18 +232,14 @@ async def delete_subject(
     """
     subject = db.query(Subject).filter(Subject.id == subject_id).first()
     if not subject:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Matière non trouvée"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Matière non trouvée")
 
     db.delete(subject)
     db.commit()
 
 
-@router.get("/{subject_id}/lessons", response_model=List[LessonResponse])
-async def get_subject_lessons(
-    subject_id: UUID, db: Annotated[Session, Depends(get_db)]
-) -> List[Lesson]:
+@router.get("/{subject_id}/lessons", response_model=list[LessonResponse])
+async def get_subject_lessons(subject_id: UUID, db: Annotated[Session, Depends(get_db)]) -> list[Lesson]:
     """
     Récupère toutes les leçons d'une matière
 
@@ -266,24 +255,15 @@ async def get_subject_lessons(
     """
     subject = db.query(Subject).filter(Subject.id == subject_id).first()
     if not subject:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Matière non trouvée"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Matière non trouvée")
 
     # Récupérer tous les learning paths de cette matière
-    learning_paths = (
-        db.query(LearningPath).filter(LearningPath.subject_id == subject_id).all()
-    )
+    learning_paths = db.query(LearningPath).filter(LearningPath.subject_id == subject_id).all()
 
     # Récupérer toutes les leçons de ces learning paths
     lessons = []
     for path in learning_paths:
-        path_lessons = (
-            db.query(Lesson)
-            .filter(Lesson.path_id == path.id)
-            .order_by(Lesson.order_index)
-            .all()
-        )
+        path_lessons = db.query(Lesson).filter(Lesson.path_id == path.id).order_by(Lesson.order_index).all()
         lessons.extend(path_lessons)
 
     return lessons

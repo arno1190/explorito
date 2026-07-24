@@ -2,22 +2,23 @@
 Modèles de suivi de progression
 """
 
+import enum
 import uuid
 from datetime import datetime
+
 from sqlalchemy import (
+    JSON,
+    Boolean,
     Column,
     DateTime,
-    Integer,
-    Boolean,
-    ForeignKey,
-    Numeric,
-    JSON,
-    UniqueConstraint,
     Enum,
+    ForeignKey,
+    Integer,
+    Numeric,
+    UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-import enum
 
 from app.core.database import Base
 
@@ -114,9 +115,7 @@ class SubjectProgress(Base):
     """
 
     __tablename__ = "subject_progress"
-    __table_args__ = (
-        UniqueConstraint("user_id", "subject_id", name="uq_user_subject"),
-    )
+    __table_args__ = (UniqueConstraint("user_id", "subject_id", name="uq_user_subject"),)
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     user_id = Column(

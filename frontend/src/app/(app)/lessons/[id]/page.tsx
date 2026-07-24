@@ -6,8 +6,16 @@ import { useAuth } from "@/lib/auth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { lessonsApi, exercisesApi, progressApi } from "@/lib/api";
-import type { Lesson, Exercise, Subject } from "@/types";
+import {
+  getLessonApiV1LessonsLessonIdGet,
+  getLessonExercisesApiV1LessonsLessonIdExercisesGet,
+} from "@/lib/api/generated/lessons/lessons";
+import { getCompletedExercisesApiV1ProgressLessonsLessonIdCompletedExercisesGet } from "@/lib/api/generated/progress/progress";
+import type {
+  ExerciseResponse,
+  LessonResponse,
+  SubjectResponse,
+} from "@/lib/api/model";
 import {
   ChevronLeft,
   PlayCircle,
@@ -22,9 +30,9 @@ export default function LessonDetailPage() {
   const { user, impersonatedChild } = useAuth();
   const lessonId = params.id as string;
 
-  const [lesson, setLesson] = useState<Lesson | null>(null);
-  const [subject, setSubject] = useState<Subject | null>(null);
-  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [lesson, setLesson] = useState<LessonResponse | null>(null);
+  const [subject, setSubject] = useState<SubjectResponse | null>(null);
+  const [exercises, setExercises] = useState<ExerciseResponse[]>([]);
   const [completedExerciseIds, setCompletedExerciseIds] = useState<Set<string>>(
     new Set()
   );
@@ -39,10 +47,11 @@ export default function LessonDetailPage() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const lessonData = await lessonsApi.getById(lessonId);
+        const lessonData = await getLessonApiV1LessonsLessonIdGet(lessonId);
         setLesson(lessonData);
 
-        const exercisesData = await exercisesApi.getByLesson(lessonId);
+        const exercisesData =
+          await getLessonExercisesApiV1LessonsLessonIdExercisesGet(lessonId);
         // Sort by order_index
         const sortedExercises = exercisesData.sort(
           (a, b) => (a.order_index || 0) - (b.order_index || 0)
@@ -52,7 +61,9 @@ export default function LessonDetailPage() {
         // Fetch completed exercises from backend
         try {
           const completedIds =
-            await progressApi.getCompletedExercises(lessonId);
+            await getCompletedExercisesApiV1ProgressLessonsLessonIdCompletedExercisesGet(
+              lessonId
+            );
           setCompletedExerciseIds(new Set(completedIds));
         } catch (err) {
           // If fetch fails, fall back to localStorage
@@ -99,7 +110,7 @@ export default function LessonDetailPage() {
     totalExercises > 0
       ? Math.round((completedCount / totalExercises) * 100)
       : 0;
-  const totalPoints = exercises.reduce((sum, ex) => sum + (ex.points || 10), 0);
+  const totalPoints = exercises.reduce((sum, ex) => sum + 10, 0);
 
   if (loading) {
     return (
@@ -157,7 +168,7 @@ export default function LessonDetailPage() {
         <div className="flex items-center gap-3 mb-4">
           <div
             className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-2xl"
-            style={{ backgroundColor: subject.color }}
+            style={{ backgroundColor: subject.color ?? undefined }}
           >
             {(lesson.order_index || 0) + 1}
           </div>
@@ -175,7 +186,7 @@ export default function LessonDetailPage() {
             </span>
             <span
               className="text-sm font-bold"
-              style={{ color: subject.color }}
+              style={{ color: subject.color ?? undefined }}
             >
               {progressPercent}%
             </span>
@@ -204,7 +215,7 @@ export default function LessonDetailPage() {
 
         {exercises.map((exercise, index) => {
           const isCompleted = completedExerciseIds.has(exercise.id);
-          const points = exercise.points || 10;
+          const points = 10;
 
           return (
             <Card
@@ -222,7 +233,7 @@ export default function LessonDetailPage() {
                   className={`flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg ${
                     isCompleted ? "bg-fun-green text-white" : "text-white"
                   }`}
-                  style={!isCompleted ? { backgroundColor: subject.color } : {}}
+                  style={!isCompleted ? { backgroundColor: subject.color ?? undefined } : {}}
                 >
                   {isCompleted ? (
                     <CheckCircle2 className="h-7 w-7" />
@@ -234,7 +245,7 @@ export default function LessonDetailPage() {
                 {/* Exercise Info */}
                 <div className="flex-grow min-w-0">
                   <h3 className="text-lg font-bold mb-1 truncate">
-                    {exercise.title || `Exercice ${index + 1}`}
+                    {`Exercice ${index + 1}`}
                   </h3>
                   <p className="text-fun-text-muted text-sm line-clamp-2">
                     {exercise.question}
@@ -251,7 +262,7 @@ export default function LessonDetailPage() {
                     className="text-xs px-2 py-1 rounded-full"
                     style={{
                       backgroundColor: `${subject.color}15`,
-                      color: subject.color,
+                      color: subject.color ?? undefined,
                     }}
                   >
                     {getExerciseTypeLabel(exercise.type)}
@@ -278,7 +289,7 @@ export default function LessonDetailPage() {
           <Button
             size="lg"
             className="px-8 py-6 text-lg"
-            style={{ backgroundColor: subject.color }}
+            style={{ backgroundColor: subject.color ?? undefined }}
             onClick={() => router.push(`/exercises/${exercises[0].id}`)}
           >
             {completedCount === 0

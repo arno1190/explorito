@@ -1,67 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card } from "@/components/ui/card";
-import { subjectsApi } from "@/lib/api";
-import type { Subject } from "@/types";
-import {
-  BookOpen,
-  Palette,
-  Calculator,
-  Globe,
-  Music,
-  Dumbbell,
-} from "lucide-react";
+import { BookOpen } from "lucide-react";
 
-const iconMap: Record<string, React.ElementType> = {
-  book: BookOpen,
-  palette: Palette,
-  calculator: Calculator,
-  globe: Globe,
-  music: Music,
-  dumbbell: Dumbbell,
-};
+import { Card } from "@/components/ui/card";
+import { useListSubjectsApiV1SubjectsGet as useSubjects } from "@/lib/api/generated/subjects/subjects";
 
 export default function SubjectsPage() {
   const router = useRouter();
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: subjects, isLoading, isError, refetch } = useSubjects();
 
-  useEffect(() => {
-    const fetchSubjects = async () => {
-      try {
-        setLoading(true);
-        const data = await subjectsApi.getAll();
-        setSubjects(data);
-      } catch (err) {
-        setError("Impossible de charger les matières");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSubjects();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-[candy-spin-slow_1s_linear_infinite] rounded-full h-12 w-12 border-4 border-fun-green-light border-t-fun-green"></div>
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="h-12 w-12 animate-[candy-spin-slow_1s_linear_infinite] rounded-full border-4 border-fun-green-light border-t-fun-green" />
       </div>
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex min-h-[400px] items-center justify-center">
         <div className="text-center">
-          <p className="text-fun-red font-semibold">{error}</p>
+          <p className="font-semibold text-fun-red">
+            Impossible de charger les matières
+          </p>
           <button
-            onClick={() => window.location.reload()}
-            className="mt-4 text-primary hover:underline"
+            onClick={() => refetch()}
+            className="mt-4 text-fun-sky hover:underline"
           >
             Réessayer
           </button>
@@ -71,51 +37,43 @@ export default function SubjectsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
+    <div className="container mx-auto max-w-6xl p-6 pb-24">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-fun-text mb-2">Matières</h1>
+        <h1 className="mb-2 text-4xl font-extrabold text-fun-text">Matières</h1>
         <p className="text-fun-text-muted">
           Choisis une matière pour commencer à apprendre
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {subjects.map((subject) => {
-          const IconComponent = iconMap[subject.icon] || BookOpen;
-
-          return (
-            <Card
-              key={subject.id}
-              className="p-6 cursor-pointer transition-all rounded-2xl candy-shadow hover:candy-shadow-lg hover:scale-[1.02] border-2"
-              style={{ borderColor: subject.color }}
-              onClick={() => router.push(`/subjects/${subject.id}`)}
-            >
-              <div className="flex flex-col items-center text-center gap-4">
-                <div
-                  className="p-6 rounded-full"
-                  style={{ backgroundColor: `${subject.color}20` }}
-                >
-                  <IconComponent
-                    className="h-12 w-12"
-                    style={{ color: subject.color }}
-                  />
-                </div>
-
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">{subject.name}</h2>
-                  <p className="text-fun-text-muted text-sm">
-                    {subject.description}
-                  </p>
-                </div>
-
-                <div className="mt-2 px-4 py-2 bg-fun-green-light rounded-full text-sm font-semibold text-fun-green">
-                  {subject.lesson_count} leçon
-                  {subject.lesson_count !== 1 ? "s" : ""}
-                </div>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {(subjects ?? []).map((subject) => (
+          <Card
+            key={subject.id}
+            className="cursor-pointer rounded-2xl border-2 candy-shadow transition-all hover:scale-[1.02] hover:candy-shadow-lg"
+            style={{ borderColor: subject.color ?? undefined }}
+            onClick={() => router.push(`/subjects/${subject.id}`)}
+          >
+            <div className="flex flex-col items-center gap-4 p-6 text-center">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-fun-sky-light text-4xl">
+                {subject.icon ?? (
+                  <BookOpen className="h-10 w-10 text-fun-sky" />
+                )}
               </div>
-            </Card>
-          );
-        })}
+              <div>
+                <h2 className="mb-2 text-2xl font-bold text-fun-text">
+                  {subject.name}
+                </h2>
+                <p className="text-sm text-fun-text-muted">
+                  {subject.description}
+                </p>
+              </div>
+              <div className="rounded-full bg-fun-green-light px-4 py-2 text-sm font-semibold text-fun-green-dark">
+                {subject.lesson_count ?? 0} leçon
+                {(subject.lesson_count ?? 0) !== 1 ? "s" : ""}
+              </div>
+            </div>
+          </Card>
+        ))}
       </div>
     </div>
   );

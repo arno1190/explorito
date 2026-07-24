@@ -1,172 +1,59 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
-import { useAuth } from "@/lib/auth";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { useMemo, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { ChevronLeft, Flame, Star } from "lucide-react";
+
+import { ExerciseFeedback } from "@/components/exercises/ExerciseFeedback";
 import { ExerciseRenderer } from "@/components/exercises/ExerciseRenderer";
+import type { AnswerPayload } from "@/components/exercises/types";
 import { Confetti } from "@/components/gamification/Confetti";
 import { XPGain } from "@/components/gamification/XPGain";
-import { ExerciseFeedback } from "@/components/exercises/ExerciseFeedback";
-import { useSound } from "@/hooks/useSound";
-import { exercisesApi, lessonsApi } from "@/lib/api";
-import type {
-  Exercise,
-  Lesson,
-  ExerciseSubmission,
-  ExerciseResult,
-} from "@/types";
-import { ChevronLeft, Trophy, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  useGetExerciseApiV1ExercisesExerciseIdGet as useExercise,
+  useSubmitExerciseApiV1ExercisesExerciseIdSubmitPost as useSubmitExercise,
+} from "@/lib/api/generated/exercises/exercises";
+import {
+  useGetLessonApiV1LessonsLessonIdGet as useLesson,
+  useGetLessonExercisesApiV1LessonsLessonIdExercisesGet as useLessonExercises,
+} from "@/lib/api/generated/lessons/lessons";
+import type { ExerciseSubmitResponse } from "@/lib/api/model";
 
 export default function ExercisePage() {
   const router = useRouter();
   const params = useParams();
-  const { user, impersonatedChild } = useAuth();
   const exerciseId = params.id as string;
 
-  const [exercise, setExercise] = useState<Exercise | null>(null);
-  const [lesson, setLesson] = useState<Lesson | null>(null);
-  const [allExercises, setAllExercises] = useState<Exercise[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const [answer, setAnswer] = useState<unknown>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState<ExerciseResult | null>(null);
+  const [answer, setAnswer] = useState<AnswerPayload>(null);
+  const [result, setResult] = useState<ExerciseSubmitResponse | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showXPGain, setShowXPGain] = useState(false);
-  const [startTime] = useState(Date.now());
-  const { play } = useSound();
+  const [startTime, setStartTime] = useState(() => Date.now());
 
-  // Determine the child ID - either from impersonation or the logged-in child user
-  const childId =
-    impersonatedChild?.id || (user?.role === "child" ? user.id : null);
+  const exerciseQuery = useExercise(exerciseId);
+  const exercise = exerciseQuery.data;
+  const lessonId = exercise?.lesson_id;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const exerciseData = await exercisesApi.getById(exerciseId);
-        setExercise(exerciseData);
+  const lessonQuery = useLesson(lessonId ?? "", {
+    query: { enabled: !!lessonId },
+  });
+  const lesson = lessonQuery.data;
 
-        const lessonData = await lessonsApi.getById(exerciseData.lesson_id);
-        setLesson(lessonData);
+  const exercisesQuery = useLessonExercises(lessonId ?? "", {
+    query: { enabled: !!lessonId },
+  });
+  const allExercises = useMemo(
+    () =>
+      [...(exercisesQuery.data ?? [])].sort(
+        (a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)
+      ),
+    [exercisesQuery.data]
+  );
 
-        // Fetch all exercises for this lesson to enable "Next exercise" navigation
-        const exercisesData = await exercisesApi.getByLesson(
-          exerciseData.lesson_id
-        );
-        setAllExercises(
-          exercisesData.sort(
-            (a, b) => (a.order_index || 0) - (b.order_index || 0)
-          )
-        );
-      } catch (err) {
-        setError("Impossible de charger l'exercice");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const submitMutation = useSubmitExercise();
 
-    fetchData();
-  }, [exerciseId]);
-
-  // Format answer based on exercise type for backend compatibility
-  const formatAnswer = (
-    rawAnswer: unknown,
-    exerciseType: string
-  ): Record<string, unknown> => {
-    // Map frontend type to backend type
-    const backendType =
-      exerciseType === "multiple_choice"
-        ? "mcq"
-        : exerciseType === "drag_and_drop"
-          ? "drag_drop"
-          : exerciseType;
-
-    switch (backendType) {
-      case "mcq":
-        // Backend expects {"answer": "option_text"} for single or {"answers": [...]} for multiple
-        // Frontend sends string (single) or string[] (multiple)
-        if (Array.isArray(rawAnswer)) {
-          return { answers: rawAnswer };
-        }
-        return { answer: rawAnswer };
-
-      case "true_false":
-        // Backend expects {"answer": true/false}
-        // Frontend sends boolean
-        return { answer: rawAnswer };
-
-      case "fill_blanks":
-        // Backend expects {"blanks": ["answer1", "answer2"]}
-        // Frontend sends string[]
-        return { blanks: rawAnswer };
-
-      case "image_selection":
-        // Backend expects {"selected": "img_id"}
-        // Frontend sends the image ID
-        return { selected: rawAnswer };
-
-      case "drag_drop":
-        // Backend expects {"positions": {...}}
-        return { positions: rawAnswer };
-
-      default:
-        // Wrap in object if not already
-        if (typeof rawAnswer === "object" && rawAnswer !== null) {
-          return rawAnswer as Record<string, unknown>;
-        }
-        return { answer: rawAnswer };
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (!answer || !exercise) return;
-
-    // Verify we have a child ID (from impersonation or logged-in child)
-    if (!childId) {
-      setError(
-        "Aucun enfant sélectionné. Veuillez vous connecter en tant qu'enfant."
-      );
-      return;
-    }
-
-    try {
-      setSubmitting(true);
-
-      const timeSpent = Math.floor((Date.now() - startTime) / 1000);
-
-      // Format answer for backend based on exercise type
-      const formattedAnswer = formatAnswer(answer, exercise.type);
-
-      const submission: ExerciseSubmission = {
-        exercise_id: exerciseId,
-        child_id: childId,
-        answer: formattedAnswer,
-        is_correct: false, // Will be determined by backend
-        points_earned: 0, // Will be determined by backend
-        time_spent_seconds: timeSpent,
-      };
-
-      const submissionResult = await exercisesApi.submit(submission);
-      setResult(submissionResult);
-
-      if (submissionResult.is_correct) {
-        setShowConfetti(true);
-        setShowXPGain(true);
-      }
-    } catch (err) {
-      setError("Impossible de soumettre la réponse");
-      console.error(err);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // Find current exercise index and next exercise
   const currentIndex = allExercises.findIndex((e) => e.id === exerciseId);
   const nextExercise =
     currentIndex >= 0 && currentIndex < allExercises.length - 1
@@ -174,39 +61,50 @@ export default function ExercisePage() {
       : null;
   const isLastExercise = currentIndex === allExercises.length - 1;
 
-  const handleNextExercise = () => {
+  const handleSubmit = async () => {
+    if (!answer || !exercise) return;
+    const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+    const res = await submitMutation.mutateAsync({
+      exerciseId,
+      data: { answer, time_taken: timeTaken, hints_used: 0 },
+    });
+    setResult(res);
+    if (res.is_correct) {
+      setShowConfetti(true);
+      setShowXPGain(true);
+    }
+  };
+
+  const goNext = () => {
     if (nextExercise) {
       router.push(`/exercises/${nextExercise.id}`);
-    } else if (lesson) {
-      // Last exercise - go back to lesson
-      router.push(`/lessons/${lesson.id}`);
+    } else if (lessonId) {
+      router.push(`/lessons/${lessonId}`);
     }
   };
 
-  const handleBackToExercises = () => {
-    if (lesson) {
-      router.push(`/lessons/${lesson.id}`);
-    }
+  const retry = () => {
+    setResult(null);
+    setAnswer(null);
+    setStartTime(Date.now());
   };
 
-  if (loading) {
+  if (exerciseQuery.isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-[candy-spin-slow_1s_linear_infinite] rounded-full h-12 w-12 border-4 border-fun-green-light border-t-fun-green"></div>
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="h-12 w-12 animate-[candy-spin-slow_1s_linear_infinite] rounded-full border-4 border-fun-green-light border-t-fun-green" />
       </div>
     );
   }
 
-  if (error || !exercise || !lesson) {
+  if (exerciseQuery.isError || !exercise) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex min-h-[400px] items-center justify-center">
         <div className="text-center">
-          <p className="text-fun-red font-semibold">
-            {error || "Exercice introuvable"}
-          </p>
+          <p className="font-semibold text-fun-red">Exercice introuvable</p>
           <button
             onClick={() => router.push("/subjects")}
-            className="mt-4 text-primary hover:underline"
+            className="mt-4 text-fun-sky hover:underline"
           >
             Retour aux matières
           </button>
@@ -216,33 +114,34 @@ export default function ExercisePage() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <div className="container mx-auto max-w-4xl p-6 pb-24">
       <Confetti show={showConfetti} onComplete={() => setShowConfetti(false)} />
 
       <Button
         variant="ghost"
-        onClick={() => router.push(`/lessons/${lesson.id}`)}
+        onClick={() => lessonId && router.push(`/lessons/${lessonId}`)}
         className="mb-6"
       >
-        <ChevronLeft className="h-4 w-4 mr-2" />
+        <ChevronLeft className="mr-2 h-4 w-4" />
         Retour à la leçon
       </Button>
 
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-3xl font-bold text-fun-text">
-            {exercise.title || `Exercice ${(exercise.order_index || 0) + 1}`}
-          </h1>
-          <div className="flex items-center gap-2 bg-fun-sun-light px-4 py-2 rounded-full">
-            <Star className="h-5 w-5 text-fun-sun fill-fun-sun" />
-            <span className="font-bold text-fun-text">
-              {exercise.points || 10} pts
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-extrabold text-fun-text">
+          {lesson?.name ?? "Exercice"}
+          {allExercises.length > 0 && currentIndex >= 0 && (
+            <span className="ml-2 text-base font-semibold text-fun-text-muted">
+              {currentIndex + 1}/{allExercises.length}
             </span>
-          </div>
+          )}
+        </h1>
+        <div className="flex items-center gap-2 rounded-full bg-fun-sun-light px-4 py-2">
+          <Star className="h-5 w-5 fill-fun-sun text-fun-sun" />
+          <span className="font-bold text-fun-text">10 pts</span>
         </div>
       </div>
 
-      <Card className="p-8 mb-6">
+      <Card className="mb-6 p-8">
         <ExerciseRenderer
           exercise={exercise}
           onAnswer={setAnswer}
@@ -257,46 +156,71 @@ export default function ExercisePage() {
           <Button
             size="lg"
             onClick={handleSubmit}
-            disabled={!answer || submitting}
+            disabled={!answer || submitMutation.isPending}
             className="px-8 py-6 text-lg"
           >
-            {submitting ? "Vérification..." : "Vérifier ma réponse"}
+            {submitMutation.isPending
+              ? "Vérification..."
+              : "Vérifier ma réponse"}
           </Button>
         </div>
       )}
 
       {result && (
-        <div className="mb-6">
+        <div className="space-y-4">
           <ExerciseFeedback
             isCorrect={result.is_correct}
-            onNext={
-              result.is_correct
-                ? handleNextExercise
-                : () => {
-                    setResult(null);
-                    setAnswer(null);
-                  }
-            }
+            onNext={result.is_correct ? goNext : retry}
           />
+
+          {result.is_correct && (
+            <div className="flex flex-wrap items-center justify-center gap-4 text-fun-text">
+              <span className="inline-flex items-center gap-1 rounded-full bg-fun-sun-light px-3 py-1 font-bold">
+                <Star className="h-4 w-4 fill-fun-sun text-fun-sun" />+
+                {result.xp_awarded ?? 0} XP
+              </span>
+              {(result.current_streak ?? 0) > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-fun-red-light px-3 py-1 font-bold">
+                  <Flame className="h-4 w-4 text-fun-red" />
+                  {result.current_streak}
+                </span>
+              )}
+            </div>
+          )}
+
+          {result.lesson_completed && (
+            <div className="animate-[candy-pop_0.6s_ease-out] rounded-2xl bg-fun-green-light p-6 text-center">
+              <p className="text-xl font-extrabold text-fun-text">
+                Leçon terminée ! 🎉
+              </p>
+              <p className="mt-1 font-semibold text-fun-text-muted">
+                {"⭐".repeat(result.lesson_stars ?? 0)} · Score{" "}
+                {result.lesson_score ?? 0}%
+              </p>
+            </div>
+          )}
+
+          {result.is_correct && (
+            <div className="flex justify-center gap-4">
+              <Button
+                variant="outline"
+                onClick={() => lessonId && router.push(`/lessons/${lessonId}`)}
+              >
+                Retour aux exercices
+              </Button>
+              <Button onClick={goNext}>
+                {isLastExercise ? "Terminer la leçon 🎉" : "Exercice suivant →"}
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
       {showXPGain && (
         <XPGain
-          xp={exercise?.points || 10}
+          xp={result?.xp_awarded ?? 10}
           onComplete={() => setShowXPGain(false)}
         />
-      )}
-
-      {result && result.is_correct && (
-        <div className="flex justify-center gap-4">
-          <Button variant="outline" onClick={handleBackToExercises}>
-            Retour aux exercices
-          </Button>
-          <Button onClick={handleNextExercise}>
-            {isLastExercise ? "Terminer la leçon 🎉" : "Exercice suivant →"}
-          </Button>
-        </div>
       )}
     </div>
   );

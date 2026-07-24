@@ -3,9 +3,9 @@ Schémas Pydantic pour le suivi de progression
 """
 
 from datetime import datetime
-from typing import Optional, List
-from uuid import UUID
 from decimal import Decimal
+from uuid import UUID
+
 from pydantic import BaseModel, Field
 
 from app.models.progress import ProgressStatus
@@ -18,14 +18,14 @@ class LessonProgressResponse(BaseModel):
 
     id: UUID
     lesson_id: UUID
-    lesson_name: Optional[str] = None
+    lesson_name: str | None = None
     status: ProgressStatus
     score: int = Field(..., ge=0, le=100, description="Score en pourcentage (0-100)")
     stars: int = Field(..., ge=0, le=3, description="Étoiles obtenues (0-3)")
     attempts: int = Field(..., ge=0, description="Nombre de tentatives")
     time_spent: int = Field(..., ge=0, description="Temps passé en secondes")
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
 
     class Config:
         from_attributes = True
@@ -52,14 +52,12 @@ class SubjectProgressResponse(BaseModel):
 
     id: UUID
     subject_id: UUID
-    subject_name: Optional[str] = None
+    subject_name: str | None = None
     total_xp: int = Field(..., ge=0, description="XP total gagné dans cette matière")
     level: int = Field(..., ge=1, description="Niveau atteint dans cette matière")
     lessons_completed: int = Field(..., ge=0, description="Nombre de leçons complétées")
-    accuracy_rate: Decimal = Field(
-        ..., ge=0, le=100, description="Taux de réussite en pourcentage"
-    )
-    last_activity: Optional[datetime] = None
+    accuracy_rate: Decimal = Field(..., ge=0, le=100, description="Taux de réussite en pourcentage")
+    last_activity: datetime | None = None
 
     class Config:
         from_attributes = True
@@ -85,24 +83,14 @@ class ProgressDashboard(BaseModel):
     total_xp: int = Field(..., ge=0, description="XP total de l'utilisateur")
     overall_level: int = Field(..., ge=1, description="Niveau global de l'utilisateur")
     current_streak: int = Field(..., ge=0, description="Série de jours consécutifs")
-    lessons_completed_today: int = Field(
-        ..., ge=0, description="Leçons complétées aujourd'hui"
-    )
-    total_lessons_completed: int = Field(
-        ..., ge=0, description="Total de leçons complétées"
-    )
-    subjects_progress: List[SubjectProgressResponse] = Field(
+    lessons_completed_today: int = Field(..., ge=0, description="Leçons complétées aujourd'hui")
+    total_lessons_completed: int = Field(..., ge=0, description="Total de leçons complétées")
+    subjects_progress: list[SubjectProgressResponse] = Field(
         default_factory=list, description="Progression par matière"
     )
-    recent_lessons: List[LessonProgressResponse] = Field(
-        default_factory=list, description="Leçons récentes"
-    )
-    achievements_count: int = Field(
-        ..., ge=0, description="Nombre d'achievements débloqués"
-    )
-    next_level_xp: int = Field(
-        ..., gt=0, description="XP nécessaire pour le prochain niveau"
-    )
+    recent_lessons: list[LessonProgressResponse] = Field(default_factory=list, description="Leçons récentes")
+    achievements_count: int = Field(..., ge=0, description="Nombre d'achievements débloqués")
+    next_level_xp: int = Field(..., gt=0, description="XP nécessaire pour le prochain niveau")
 
     class Config:
         json_schema_extra = {

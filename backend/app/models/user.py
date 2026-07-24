@@ -2,12 +2,13 @@
 Modèles utilisateur et profil
 """
 
+import enum
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Boolean, DateTime, Date, ForeignKey, Enum, JSON
+
+from sqlalchemy import JSON, Boolean, Column, Date, DateTime, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-import enum
 
 from app.core.database import Base
 
@@ -48,33 +49,14 @@ class User(Base):
         cascade="all, delete-orphan",
         foreign_keys="Profile.user_id",
     )
-    progress = relationship(
-        "UserProgress", back_populates="user", cascade="all, delete-orphan"
-    )
-    exercise_results = relationship(
-        "ExerciseResult", back_populates="user", cascade="all, delete-orphan"
-    )
-    subject_progress = relationship(
-        "SubjectProgress", back_populates="user", cascade="all, delete-orphan"
-    )
-    achievements = relationship(
-        "UserAchievement", back_populates="user", cascade="all, delete-orphan"
-    )
-    daily_goals = relationship(
-        "DailyGoal", back_populates="user", cascade="all, delete-orphan"
-    )
-    streak = relationship(
-        "Streak", back_populates="user", uselist=False, cascade="all, delete-orphan"
-    )
-    rewards = relationship(
-        "Reward", back_populates="user", cascade="all, delete-orphan"
-    )
-    family_memberships = relationship(
-        "FamilyMember", back_populates="user", cascade="all, delete-orphan"
-    )
-    review_queue = relationship(
-        "ReviewQueue", back_populates="user", cascade="all, delete-orphan"
-    )
+    progress = relationship("UserProgress", back_populates="user", cascade="all, delete-orphan")
+    exercise_results = relationship("ExerciseResult", back_populates="user", cascade="all, delete-orphan")
+    subject_progress = relationship("SubjectProgress", back_populates="user", cascade="all, delete-orphan")
+    achievements = relationship("UserAchievement", back_populates="user", cascade="all, delete-orphan")
+    daily_goals = relationship("DailyGoal", back_populates="user", cascade="all, delete-orphan")
+    streak = relationship("Streak", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    rewards = relationship("Reward", back_populates="user", cascade="all, delete-orphan")
+    review_queue = relationship("ReviewQueue", back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<User {self.email} ({self.role})>"
@@ -98,9 +80,7 @@ class Profile(Base):
     avatar_url = Column(String, nullable=True)
     date_of_birth = Column(Date, nullable=True)
     is_child = Column(Boolean, default=False)
-    parent_id = Column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
-    )
+    parent_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     settings = Column(JSON, default={})  # Préférences UI, son, etc.
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 

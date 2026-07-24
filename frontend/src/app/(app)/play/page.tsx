@@ -1,16 +1,17 @@
 "use client";
 
 import { useAuth } from "@/lib/auth";
-import { subjectsApi, gamificationApi } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Subject, GamificationStats } from "@/types";
+import { listSubjectsApiV1SubjectsGet } from "@/lib/api/generated/subjects/subjects";
+import { getChildStatsApiV1GamificationChildIdStatsGet } from "@/lib/api/generated/gamification/gamification";
+import type { ChildStatsResponse, SubjectResponse } from "@/lib/api/model";
 
 export default function PlayPage() {
   const { user, impersonatedChild } = useAuth();
   const router = useRouter();
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [stats, setStats] = useState<GamificationStats | null>(null);
+  const [subjects, setSubjects] = useState<SubjectResponse[]>([]);
+  const [stats, setStats] = useState<ChildStatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Determine the child ID - either from impersonation or the logged-in user
@@ -32,13 +33,14 @@ export default function PlayPage() {
     const loadData = async () => {
       try {
         // Load subjects first (critical for the page)
-        const subjectsData = await subjectsApi.getAll();
+        const subjectsData = await listSubjectsApiV1SubjectsGet();
         setSubjects(subjectsData.filter((s) => s.is_active));
 
         // Load stats separately (non-critical - don't block subjects)
         if (childId) {
           try {
-            const statsData = await gamificationApi.getStats(childId);
+            const statsData =
+              await getChildStatsApiV1GamificationChildIdStatsGet(childId);
             setStats(statsData);
           } catch (statsError) {
             console.warn("Failed to load stats (non-critical):", statsError);
@@ -146,7 +148,10 @@ export default function PlayPage() {
               key={subject.id}
               onClick={() => router.push(`/subjects/${subject.id}`)}
               className="bg-white rounded-3xl candy-shadow hover:candy-shadow-lg p-8 hover:scale-105 transition-transform active:scale-95"
-              style={{ borderColor: subject.color, borderWidth: 4 }}
+              style={{
+                borderColor: subject.color ?? undefined,
+                borderWidth: 4,
+              }}
             >
               <div className="text-6xl mb-3">{subject.icon}</div>
               <h3 className="text-xl font-bold text-fun-text mb-2">
@@ -155,12 +160,14 @@ export default function PlayPage() {
               <div className="flex justify-center gap-1">
                 {[1, 2, 3].map((star) => (
                   <span key={star} className="text-2xl">
-                    {star <= (subject.lesson_count > 0 ? 1 : 0) ? "⭐" : "☆"}
+                    {star <= ((subject.lesson_count ?? 0) > 0 ? 1 : 0)
+                      ? "⭐"
+                      : "☆"}
                   </span>
                 ))}
               </div>
               <p className="text-sm text-fun-text-muted mt-2">
-                {subject.lesson_count} leçons
+                {subject.lesson_count ?? 0} leçons
               </p>
             </button>
           ))}
@@ -175,14 +182,14 @@ export default function PlayPage() {
       </div>
 
       {/* Recent Badges */}
-      {stats && stats.achievements.length > 0 && (
+      {stats && (stats.achievements?.length ?? 0) > 0 && (
         <div className="max-w-4xl mx-auto mt-8">
           <div className="bg-white rounded-3xl candy-shadow p-6">
             <h2 className="text-2xl font-bold text-fun-text mb-4">
               🏆 Badges récents
             </h2>
             <div className="flex gap-4 overflow-x-auto">
-              {stats.achievements.slice(0, 5).map((ua) => (
+              {(stats.achievements ?? []).slice(0, 5).map((ua) => (
                 <div
                   key={ua.id}
                   className="flex-shrink-0 text-center bg-fun-sun-light rounded-2xl p-4 min-w-[100px]"

@@ -2,48 +2,47 @@
 Endpoints de gamification
 """
 
-from typing import Annotated, List
 from datetime import date
+from typing import Annotated
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from sqlalchemy import func, desc
 
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import desc, func
+from sqlalchemy.orm import Session
+
+from app.api.auth import get_current_active_user
+from app.api.children import _require_owned_child
 from app.core.database import get_db
-from app.models.user import User, Profile, UserRole
 from app.models.gamification import (
     Achievement,
-    UserAchievement,
-    Streak,
     DailyGoal,
     Reward,
+    Streak,
+    UserAchievement,
 )
-from app.models.progress import SubjectProgress, UserProgress, ProgressStatus
-from app.models.family import FamilyMember
+from app.models.progress import ProgressStatus, SubjectProgress, UserProgress
+from app.models.user import Profile, User, UserRole
 from app.schemas.gamification import (
     AchievementResponse,
-    UserAchievementResponse,
-    StreakResponse,
-    DailyGoalResponse,
+    ChildStatsResponse,
     DailyGoalCreate,
-    RewardResponse,
+    DailyGoalResponse,
     LeaderboardEntry,
+    RewardResponse,
+    StreakResponse,
+    UserAchievementResponse,
 )
-from app.api.auth import get_current_active_user
 from app.services.gamification import (
-    get_or_create_daily_goal,
     calculate_level_from_xp,
     calculate_next_level_xp,
+    get_or_create_daily_goal,
 )
-
 
 router = APIRouter()
 
 
-@router.get("/achievements", response_model=List[AchievementResponse])
-async def list_achievements(
-    db: Annotated[Session, Depends(get_db)], category: str | None = None
-) -> List[Achievement]:
+@router.get("/achievements", response_model=list[AchievementResponse])
+async def list_achievements(db: Annotated[Session, Depends(get_db)], category: str | None = None) -> list[Achievement]:
     """
     Liste tous les achievements disponibles
 
@@ -63,11 +62,11 @@ async def list_achievements(
     return achievements
 
 
-@router.get("/achievements/me", response_model=List[UserAchievementResponse])
+@router.get("/achievements/me", response_model=list[UserAchievementResponse])
 async def get_user_achievements(
     current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
-) -> List[UserAchievement]:
+) -> list[UserAchievement]:
     """
     Récupère les achievements débloqués par l'utilisateur actuel
 
@@ -145,15 +144,9 @@ async def get_daily_goal(
     daily_goal = get_or_create_daily_goal(current_user.id, db)
 
     # Calculer le pourcentage de progression
-    xp_progress = (
-        (daily_goal.xp_earned / daily_goal.xp_target * 100)
-        if daily_goal.xp_target > 0
-        else 0
-    )
+    xp_progress = (daily_goal.xp_earned / daily_goal.xp_target * 100) if daily_goal.xp_target > 0 else 0
     lessons_progress = (
-        (daily_goal.lessons_completed / daily_goal.lessons_target * 100)
-        if daily_goal.lessons_target > 0
-        else 0
+        (daily_goal.lessons_completed / daily_goal.lessons_target * 100) if daily_goal.lessons_target > 0 else 0
     )
     progress_percentage = (xp_progress + lessons_progress) / 2
 
@@ -189,11 +182,7 @@ async def create_or_update_daily_goal(
     today = date.today()
 
     # Récupérer ou créer l'objectif du jour
-    daily_goal = (
-        db.query(DailyGoal)
-        .filter(DailyGoal.user_id == current_user.id, DailyGoal.date == today)
-        .first()
-    )
+    daily_goal = db.query(DailyGoal).filter(DailyGoal.user_id == current_user.id, DailyGoal.date == today).first()
 
     if not daily_goal:
         daily_goal = DailyGoal(
@@ -212,10 +201,7 @@ async def create_or_update_daily_goal(
         daily_goal.lessons_target = goal_data.lessons_target
 
         # Recalculer si l'objectif est complété
-        if (
-            daily_goal.xp_earned >= daily_goal.xp_target
-            and daily_goal.lessons_completed >= daily_goal.lessons_target
-        ):
+        if daily_goal.xp_earned >= daily_goal.xp_target and daily_goal.lessons_completed >= daily_goal.lessons_target:
             daily_goal.is_completed = True
         else:
             daily_goal.is_completed = False
@@ -224,15 +210,9 @@ async def create_or_update_daily_goal(
     db.refresh(daily_goal)
 
     # Calculer le pourcentage de progression
-    xp_progress = (
-        (daily_goal.xp_earned / daily_goal.xp_target * 100)
-        if daily_goal.xp_target > 0
-        else 0
-    )
+    xp_progress = (daily_goal.xp_earned / daily_goal.xp_target * 100) if daily_goal.xp_target > 0 else 0
     lessons_progress = (
-        (daily_goal.lessons_completed / daily_goal.lessons_target * 100)
-        if daily_goal.lessons_target > 0
-        else 0
+        (daily_goal.lessons_completed / daily_goal.lessons_target * 100) if daily_goal.lessons_target > 0 else 0
     )
     progress_percentage = (xp_progress + lessons_progress) / 2
 
@@ -248,11 +228,77 @@ async def create_or_update_daily_goal(
     )
 
 
-@router.get("/rewards", response_model=List[RewardResponse])
+@router.post("/{child_id}/daily-goal", response_model=DailyGoalResponse)
+async def set_child_daily_goal(
+    child_id: UUID,
+    goal_data: DailyGoalCreate,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> DailyGoalResponse:
+    """
+    Définit l'objectif quotidien d'un enfant (parent uniquement).
+
+    Args:
+        child_id: ID de l'enfant.
+        goal_data: Cibles XP et leçons.
+        current_user: Parent authentifié.
+        db: Session de base de données.
+
+    Returns:
+        Objectif quotidien de l'enfant.
+
+    Raises:
+        HTTPException: 403 si non-parent, 404 si l'enfant n'appartient pas au parent.
+    """
+    _require_owned_child(child_id, current_user, db)
+
+    today = date.today()
+    daily_goal = db.query(DailyGoal).filter(DailyGoal.user_id == child_id, DailyGoal.date == today).first()
+
+    if not daily_goal:
+        daily_goal = DailyGoal(
+            user_id=child_id,
+            date=today,
+            xp_target=goal_data.xp_target,
+            xp_earned=0,
+            lessons_target=goal_data.lessons_target,
+            lessons_completed=0,
+            is_completed=False,
+        )
+        db.add(daily_goal)
+    else:
+        daily_goal.xp_target = goal_data.xp_target
+        daily_goal.lessons_target = goal_data.lessons_target
+        daily_goal.is_completed = bool(
+            daily_goal.xp_earned >= daily_goal.xp_target and daily_goal.lessons_completed >= daily_goal.lessons_target
+        )
+
+    db.commit()
+    db.refresh(daily_goal)
+
+    xp_progress = (daily_goal.xp_earned / daily_goal.xp_target * 100) if daily_goal.xp_target > 0 else 0
+    lessons_progress = (
+        (daily_goal.lessons_completed / daily_goal.lessons_target * 100) if daily_goal.lessons_target > 0 else 0
+    )
+    progress_percentage = (xp_progress + lessons_progress) / 2
+
+    return DailyGoalResponse(
+        id=daily_goal.id,
+        date=daily_goal.date,
+        xp_target=daily_goal.xp_target,
+        xp_earned=daily_goal.xp_earned,
+        lessons_target=daily_goal.lessons_target,
+        lessons_completed=daily_goal.lessons_completed,
+        is_completed=daily_goal.is_completed,
+        progress_percentage=round(progress_percentage, 1),
+    )
+
+
+@router.get("/rewards", response_model=list[RewardResponse])
 async def get_user_rewards(
     current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
-) -> List[Reward]:
+) -> list[Reward]:
     """
     Récupère les récompenses débloquées par l'utilisateur
 
@@ -263,21 +309,16 @@ async def get_user_rewards(
     Returns:
         Liste des récompenses débloquées
     """
-    rewards = (
-        db.query(Reward)
-        .filter(Reward.user_id == current_user.id)
-        .order_by(desc(Reward.unlocked_at))
-        .all()
-    )
+    rewards = db.query(Reward).filter(Reward.user_id == current_user.id).order_by(desc(Reward.unlocked_at)).all()
 
     return rewards
 
 
-@router.get("/leaderboard", response_model=List[LeaderboardEntry])
+@router.get("/leaderboard", response_model=list[LeaderboardEntry])
 async def get_family_leaderboard(
     current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
-) -> List[LeaderboardEntry]:
+) -> list[LeaderboardEntry]:
     """
     Récupère le classement de la famille de l'utilisateur
 
@@ -291,25 +332,25 @@ async def get_family_leaderboard(
     Raises:
         HTTPException: Si l'utilisateur n'appartient à aucune famille
     """
-    # Trouver la famille de l'utilisateur
-    family_membership = (
-        db.query(FamilyMember).filter(FamilyMember.user_id == current_user.id).first()
-    )
+    # Déterminer l'unité familiale via Profile.parent_id.
+    # L'ancre est le parent : si l'utilisateur courant est un enfant rattaché,
+    # on remonte à son parent ; sinon l'utilisateur est lui-même l'ancre.
+    current_profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
 
-    if not family_membership:
+    if current_profile and current_profile.parent_id:
+        anchor_id = current_profile.parent_id
+    else:
+        anchor_id = current_user.id
+
+    # Membres = l'ancre (parent) + tous les enfants rattachés à l'ancre
+    child_profiles = db.query(Profile).filter(Profile.parent_id == anchor_id).all()
+    member_ids = [anchor_id] + [profile.user_id for profile in child_profiles]
+
+    if len(member_ids) <= 1:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Vous n'appartenez à aucune famille. Le classement est disponible uniquement pour les familles.",
+            detail="Aucune famille trouvée. Le classement est disponible uniquement pour les familles ayant plusieurs membres.",
         )
-
-    family_id = family_membership.family_id
-
-    # Récupérer tous les membres de la famille
-    family_members = (
-        db.query(FamilyMember).filter(FamilyMember.family_id == family_id).all()
-    )
-
-    member_ids = [fm.user_id for fm in family_members]
 
     # Construire le classement
     leaderboard = []
@@ -325,19 +366,14 @@ async def get_family_leaderboard(
             continue
 
         # Calculer l'XP total
-        total_xp = (
-            db.query(func.sum(SubjectProgress.total_xp))
-            .filter(SubjectProgress.user_id == user_id)
-            .scalar()
-            or 0
-        )
+        total_xp = db.query(func.sum(SubjectProgress.total_xp)).filter(SubjectProgress.user_id == user_id).scalar() or 0
 
         # Récupérer le streak
         streak = db.query(Streak).filter(Streak.user_id == user_id).first()
         current_streak = streak.current_streak if streak else 0
 
         # Compter les leçons complétées
-        from app.models.progress import UserProgress, ProgressStatus
+        from app.models.progress import ProgressStatus, UserProgress
 
         lessons_completed = (
             db.query(func.count(UserProgress.id))
@@ -375,12 +411,12 @@ async def get_family_leaderboard(
     return leaderboard
 
 
-@router.get("/{child_id}/stats")
+@router.get("/{child_id}/stats", response_model=ChildStatsResponse)
 async def get_child_stats(
     child_id: UUID,
     current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
-):
+) -> ChildStatsResponse:
     """
     Récupère les statistiques de gamification d'un enfant
 
@@ -409,9 +445,7 @@ async def get_child_stats(
     elif current_user.role == UserRole.PARENT:
         # Parent can only access their children's stats
         child_profile = (
-            db.query(Profile)
-            .filter(Profile.user_id == child_id, Profile.parent_id == current_user.id)
-            .first()
+            db.query(Profile).filter(Profile.user_id == child_id, Profile.parent_id == current_user.id).first()
         )
         if not child_profile:
             raise HTTPException(
@@ -419,17 +453,10 @@ async def get_child_stats(
                 detail="Enfant non trouvé ou n'appartient pas à ce parent",
             )
     else:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Accès refusé"
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès refusé")
 
     # Calculer l'XP total
-    total_xp = (
-        db.query(func.sum(SubjectProgress.total_xp))
-        .filter(SubjectProgress.user_id == child_id)
-        .scalar()
-        or 0
-    )
+    total_xp = db.query(func.sum(SubjectProgress.total_xp)).filter(SubjectProgress.user_id == child_id).scalar() or 0
 
     # Calculer le niveau
     level = calculate_level_from_xp(int(total_xp))
@@ -453,29 +480,29 @@ async def get_child_stats(
     )
 
     # Récupérer les achievements
-    user_achievements = (
-        db.query(UserAchievement).filter(UserAchievement.user_id == child_id).all()
+    user_achievements = db.query(UserAchievement).filter(UserAchievement.user_id == child_id).all()
+
+    return ChildStatsResponse.model_validate(
+        {
+            "child_id": child_id,
+            "total_xp": int(total_xp),
+            "level": level,
+            "current_level_xp": current_level_xp,
+            "next_level_xp": next_level_xp,
+            "current_streak": current_streak,
+            "longest_streak": longest_streak,
+            "total_exercises_completed": int(total_exercises),
+            "achievements": user_achievements,
+        }
     )
 
-    return {
-        "child_id": str(child_id),
-        "total_xp": int(total_xp),
-        "level": level,
-        "current_level_xp": current_level_xp,
-        "next_level_xp": next_level_xp,
-        "current_streak": current_streak,
-        "longest_streak": longest_streak,
-        "total_exercises_completed": int(total_exercises),
-        "achievements": user_achievements,
-    }
 
-
-@router.get("/{child_id}/achievements", response_model=List[UserAchievementResponse])
+@router.get("/{child_id}/achievements", response_model=list[UserAchievementResponse])
 async def get_child_achievements(
     child_id: UUID,
     current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
-) -> List[UserAchievement]:
+) -> list[UserAchievement]:
     """
     Récupère les achievements d'un enfant
 
@@ -504,9 +531,7 @@ async def get_child_achievements(
     elif current_user.role == UserRole.PARENT:
         # Parent can only access their children's achievements
         child_profile = (
-            db.query(Profile)
-            .filter(Profile.user_id == child_id, Profile.parent_id == current_user.id)
-            .first()
+            db.query(Profile).filter(Profile.user_id == child_id, Profile.parent_id == current_user.id).first()
         )
         if not child_profile:
             raise HTTPException(
@@ -514,9 +539,7 @@ async def get_child_achievements(
                 detail="Enfant non trouvé ou n'appartient pas à ce parent",
             )
     else:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Accès refusé"
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès refusé")
 
     # Récupérer les achievements de l'enfant
     user_achievements = (

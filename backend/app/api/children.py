@@ -2,21 +2,51 @@
 Endpoints pour la gestion des profils enfants
 """
 
-from typing import Annotated, List
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from typing import Annotated
 from uuid import UUID
 
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.api.auth import get_current_user
 from app.core.database import get_db
 from app.core.security import get_password_hash
-from app.models.user import User, Profile, UserRole
-from app.schemas.children import ChildCreate, ChildResponse
-from app.api.auth import get_current_user
+from app.models.user import Profile, User, UserRole
+from app.schemas.children import ChildCreate, ChildResponse, ChildUpdate
 
 router = APIRouter()
 
 
-@router.get("", response_model=List[ChildResponse])
+def _require_owned_child(child_id: UUID, current_user: User, db: Session) -> Profile:
+    """
+    Vérifie que l'appelant est un parent et que l'enfant lui appartient.
+
+    Returns:
+        Le profil de l'enfant.
+
+    Raises:
+        HTTPException: 403 si non-parent, 404 si l'enfant n'appartient pas au parent.
+    """
+    if current_user.role != UserRole.PARENT:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Seuls les parents peuvent accéder à cette ressource",
+        )
+    profile = (
+        db.query(Profile)
+        .filter(
+            Profile.user_id == child_id,
+            Profile.parent_id == current_user.id,
+            Profile.is_child.is_(True),
+        )
+        .first()
+    )
+    if not profile:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Enfant non trouvé")
+    return profile
+
+
+@router.get("", response_model=list[ChildResponse])
 async def get_children(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
@@ -35,11 +65,7 @@ async def get_children(
         )
 
     # Récupérer tous les profils enfants liés à ce parent
-    children_profiles = (
-        db.query(Profile)
-        .filter(Profile.parent_id == current_user.id, Profile.is_child == True)
-        .all()
-    )
+    children_profiles = db.query(Profile).filter(Profile.parent_id == current_user.id, Profile.is_child.is_(True)).all()
 
     # Convertir en ChildResponse
     children = []
@@ -85,15 +111,13 @@ async def get_child(
         .filter(
             Profile.user_id == child_id,
             Profile.parent_id == current_user.id,
-            Profile.is_child == True,
+            Profile.is_child.is_(True),
         )
         .first()
     )
 
     if not profile:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Enfant non trouvé"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Enfant non trouvé")
 
     return ChildResponse(
         id=profile.user_id,
@@ -165,6 +189,46 @@ async def create_child(
     )
 
 
+@router.put("/{child_id}", response_model=ChildResponse)
+async def update_child(
+    child_id: UUID,
+    child_data: ChildUpdate,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> ChildResponse:
+    """
+    Met à jour le profil d'un enfant du parent connecté.
+
+    Args:
+        child_id: ID de l'utilisateur enfant.
+        child_data: Champs à modifier (nom, date de naissance, mot de passe).
+
+    Returns:
+        Profil de l'enfant mis à jour.
+    """
+    profile = _require_owned_child(child_id, current_user, db)
+
+    if child_data.name is not None:
+        profile.display_name = child_data.name
+    if child_data.birth_date is not None:
+        profile.date_of_birth = child_data.birth_date
+    if child_data.password is not None:
+        child_user = db.query(User).filter(User.id == child_id).first()
+        if child_user is not None:
+            child_user.password_hash = get_password_hash(child_data.password)
+
+    db.commit()
+    db.refresh(profile)
+
+    return ChildResponse(
+        id=profile.user_id,
+        name=profile.display_name,
+        birth_date=profile.date_of_birth,
+        parent_id=profile.parent_id,
+        created_at=profile.created_at,
+    )
+
+
 @router.delete("/{child_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_child(
     child_id: UUID,
@@ -190,15 +254,13 @@ async def delete_child(
         .filter(
             Profile.user_id == child_id,
             Profile.parent_id == current_user.id,
-            Profile.is_child == True,
+            Profile.is_child.is_(True),
         )
         .first()
     )
 
     if not profile:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Enfant non trouvé"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Enfant non trouvé")
 
     # Supprimer l'utilisateur (cascade supprimera le profil)
     child_user = db.query(User).filter(User.id == child_id).first()

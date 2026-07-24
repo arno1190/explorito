@@ -3,45 +3,45 @@ Schémas Pydantic pour la validation et sérialisation des données
 """
 
 from app.schemas.auth import (
+    ProfileResponse,
+    RefreshTokenRequest,
     Token,
     TokenData,
     UserLogin,
     UserRegister,
     UserResponse,
-    ProfileResponse,
-    RefreshTokenRequest,
-)
-from app.schemas.subject import (
-    SubjectCreate,
-    SubjectUpdate,
-    SubjectResponse,
-)
-from app.schemas.lesson import (
-    LessonCreate,
-    LessonUpdate,
-    LessonResponse,
-    LessonWithExercises,
 )
 from app.schemas.exercise import (
     ExerciseCreate,
-    ExerciseUpdate,
     ExerciseResponse,
-    ExerciseSubmit,
     ExerciseResultResponse,
-)
-from app.schemas.progress import (
-    ProgressDashboard,
-    SubjectProgressResponse,
-    LessonProgressResponse,
+    ExerciseSubmit,
+    ExerciseUpdate,
 )
 from app.schemas.gamification import (
     AchievementResponse,
-    UserAchievementResponse,
-    StreakResponse,
-    DailyGoalResponse,
     DailyGoalCreate,
-    RewardResponse,
+    DailyGoalResponse,
     LeaderboardEntry,
+    RewardResponse,
+    StreakResponse,
+    UserAchievementResponse,
+)
+from app.schemas.lesson import (
+    LessonCreate,
+    LessonResponse,
+    LessonUpdate,
+    LessonWithExercises,
+)
+from app.schemas.progress import (
+    LessonProgressResponse,
+    ProgressDashboard,
+    SubjectProgressResponse,
+)
+from app.schemas.subject import (
+    SubjectCreate,
+    SubjectResponse,
+    SubjectUpdate,
 )
 
 __all__ = [
