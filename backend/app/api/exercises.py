@@ -70,9 +70,21 @@ def check_answer_correctness(exercise: Exercise, user_answer: dict[str, Any]) ->
             str(u).strip().lower() == str(c).strip().lower() for u, c in zip(user_blanks, correct_blanks, strict=True)
         )
 
-    if exercise.type == ExerciseType.REVEAL.value:
-        # Blague : pas de bonne réponse, on récompense toujours
+    if exercise.type in (ExerciseType.REVEAL.value, ExerciseType.READING.value):
+        # Blague / bloc de lecture : pas de bonne réponse, on valide toujours.
         return True
+
+    if exercise.type == ExerciseType.MATH_PROBLEM.value:
+        # Problème : réponse numérique comparée avec tolérance (défaut ~épsilon).
+        try:
+            user_value = float(str(user_answer.get("value")).replace(",", "."))
+        except (TypeError, ValueError):
+            return False
+        correct_value = correct_answer.get("value")
+        if correct_value is None:
+            return False
+        tolerance = float(correct_answer.get("tolerance", 0.0)) + 1e-9
+        return abs(user_value - float(correct_value)) <= tolerance
 
     if exercise.type == ExerciseType.PYTHAGORE.value:
         # Mini-jeu : chaque case "AxB" doit valoir A*B ; toutes correctes -> gagné

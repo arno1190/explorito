@@ -11,6 +11,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
+from app.models.content import LevelEnum  # noqa: F401  (utilisé par Profile.level)
 
 
 class UserRole(str, enum.Enum):
@@ -81,6 +82,7 @@ class Profile(Base):
     avatar_url = Column(String, nullable=True)
     date_of_birth = Column(Date, nullable=True)
     is_child = Column(Boolean, default=False)
+    level = Column(Enum(LevelEnum), nullable=True)  # Niveau scolaire (défini par le parent)
     parent_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     settings = Column(JSON, default={})  # Préférences UI, son, etc.
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

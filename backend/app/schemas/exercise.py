@@ -81,6 +81,26 @@ class PythagoreContent(BaseModel):
     blanks: int = Field(default=5, ge=1, le=100)
 
 
+class MathProblemContent(BaseModel):
+    """Contenu d'un problème de maths (l'énoncé est dans ``question``)."""
+
+    unit: str | None = Field(None, description="Unité affichée à côté de la réponse (€, cm…)")
+
+
+class MathProblemAnswer(BaseModel):
+    """Réponse correcte d'un problème de maths : une valeur numérique."""
+
+    value: float
+    tolerance: float = Field(default=0.0, ge=0.0, description="Tolérance absolue acceptée")
+
+
+class ReadingContent(BaseModel):
+    """Contenu d'un bloc de lecture (compréhension / leçon)."""
+
+    text: str = Field(..., min_length=1)
+    image: str | None = None
+
+
 BLANK_MARKER = "___"
 
 
@@ -128,6 +148,14 @@ def validate_exercise_payload(
     elif exercise_type == ExerciseType.PYTHAGORE:
         PythagoreContent.model_validate(content)
         # Les produits sont calculés à la correction : pas de correct_answer stocké.
+
+    elif exercise_type == ExerciseType.MATH_PROBLEM:
+        MathProblemContent.model_validate(content)
+        MathProblemAnswer.model_validate(correct_answer)
+
+    elif exercise_type == ExerciseType.READING:
+        ReadingContent.model_validate(content)
+        # Bloc de lecture : pas de bonne réponse (toujours validé).
 
 
 # --------------------------------------------------------------------------- #

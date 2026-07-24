@@ -10,12 +10,25 @@ from sqlalchemy.orm import Session
 
 from app.api.auth import get_current_active_user
 from app.core.database import get_db
-from app.models.content import LearningPath, Lesson, Subject
-from app.models.user import User, UserRole
+from app.models.content import LearningPath, Lesson, LevelEnum, Subject
+from app.models.user import Profile, User, UserRole
 from app.schemas.lesson import LessonResponse
 from app.schemas.subject import SubjectCreate, SubjectResponse, SubjectUpdate
 
 router = APIRouter()
+
+
+def child_content_level(current_user: User, db: Session) -> LevelEnum | None:
+    """
+    Niveau de contenu à afficher pour l'utilisateur.
+
+    Pour un enfant, son niveau scolaire (profil) filtre le contenu. Pour un
+    parent/admin (gestion, navigation), aucun filtre (None).
+    """
+    if current_user.role != UserRole.CHILD:
+        return None
+    profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
+    return profile.level if profile else None
 
 
 def require_admin(
@@ -43,6 +56,7 @@ def require_admin(
 
 @router.get("", response_model=list[SubjectResponse])
 async def list_subjects(
+    current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
     skip: int = Query(0, ge=0, description="Nombre d'éléments à ignorer"),
     limit: int = Query(100, ge=1, le=100, description="Nombre maximum d'éléments à retourner"),
@@ -62,6 +76,8 @@ async def list_subjects(
     """
     from sqlalchemy import func
 
+    level = child_content_level(current_user, db)
+
     query = db.query(Subject).order_by(Subject.order_index, Subject.name)
 
     if is_active is not None:
@@ -69,20 +85,27 @@ async def list_subjects(
 
     subjects = query.offset(skip).limit(limit).all()
 
-    # Enrichir avec lesson_count
+    # Enrichir avec lesson_count (filtré au niveau de l'enfant, leçons publiées).
     result = []
     for subject in subjects:
-        # Compter les leçons à travers les learning paths
-        lesson_count = (
+        count_query = (
             db.query(func.count(Lesson.id))
             .join(LearningPath, Lesson.path_id == LearningPath.id)
             .filter(LearningPath.subject_id == subject.id)
-            .scalar()
-            or 0
         )
+        if level is not None:
+            count_query = count_query.filter(
+                LearningPath.level == level,
+                Lesson.is_published.is_(True),
+            )
+        lesson_count = int(count_query.scalar() or 0)
+
+        # Pour un enfant, masquer les matières sans contenu à son niveau.
+        if level is not None and lesson_count == 0:
+            continue
 
         subject_dict = SubjectResponse.model_validate(subject).model_dump()
-        subject_dict["lesson_count"] = int(lesson_count)
+        subject_dict["lesson_count"] = lesson_count
         result.append(SubjectResponse(**subject_dict))
 
     return result
@@ -239,16 +262,22 @@ async def delete_subject(
 
 
 @router.get("/{subject_id}/lessons", response_model=list[LessonResponse])
-async def get_subject_lessons(subject_id: UUID, db: Annotated[Session, Depends(get_db)]) -> list[Lesson]:
+async def get_subject_lessons(
+    subject_id: UUID,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> list[Lesson]:
     """
-    Récupère toutes les leçons d'une matière
+    Récupère les leçons d'une matière (filtrées au niveau de l'enfant).
 
     Args:
         subject_id: ID de la matière
+        current_user: Utilisateur authentifié
         db: Session de base de données
 
     Returns:
-        Liste des leçons de toutes les learning paths de cette matière
+        Leçons des parcours de cette matière ; pour un enfant, limitées à son
+        niveau scolaire et aux leçons publiées.
 
     Raises:
         HTTPException: Si la matière n'existe pas
@@ -257,13 +286,18 @@ async def get_subject_lessons(subject_id: UUID, db: Annotated[Session, Depends(g
     if not subject:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Matière non trouvée")
 
-    # Récupérer tous les learning paths de cette matière
-    learning_paths = db.query(LearningPath).filter(LearningPath.subject_id == subject_id).all()
+    level = child_content_level(current_user, db)
 
-    # Récupérer toutes les leçons de ces learning paths
-    lessons = []
+    paths_query = db.query(LearningPath).filter(LearningPath.subject_id == subject_id)
+    if level is not None:
+        paths_query = paths_query.filter(LearningPath.level == level)
+    learning_paths = paths_query.all()
+
+    lessons: list[Lesson] = []
     for path in learning_paths:
-        path_lessons = db.query(Lesson).filter(Lesson.path_id == path.id).order_by(Lesson.order_index).all()
-        lessons.extend(path_lessons)
+        lessons_query = db.query(Lesson).filter(Lesson.path_id == path.id)
+        if level is not None:
+            lessons_query = lessons_query.filter(Lesson.is_published.is_(True))
+        lessons.extend(lessons_query.order_by(Lesson.order_index).all())
 
     return lessons

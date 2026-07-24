@@ -24,11 +24,16 @@ from app.core.database import Base
 
 
 class LevelEnum(str, enum.Enum):
-    """Niveaux scolaires"""
+    """Niveaux scolaires français, de la maternelle au CM2."""
 
+    PS = "ps"  # Petite Section
+    MS = "ms"  # Moyenne Section
+    GS = "gs"  # Grande Section
     CP = "cp"
     CE1 = "ce1"
     CE2 = "ce2"
+    CM1 = "cm1"
+    CM2 = "cm2"
 
 
 class DifficultyEnum(str, enum.Enum):
@@ -55,6 +60,8 @@ class ExerciseType(str, enum.Enum):
     FILL_BLANKS = "fill_blanks"
     REVEAL = "reveal"
     PYTHAGORE = "pythagore"
+    MATH_PROBLEM = "math_problem"  # problème à résoudre, réponse numérique
+    READING = "reading"  # texte à lire (compréhension / leçon), sans bonne réponse
 
 
 class Subject(Base):

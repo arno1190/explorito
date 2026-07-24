@@ -76,6 +76,7 @@ async def get_children(
                 name=profile.display_name,
                 birth_date=profile.date_of_birth,
                 parent_id=profile.parent_id,
+                level=profile.level,
                 created_at=profile.created_at,
             )
         )
@@ -124,6 +125,7 @@ async def get_child(
         name=profile.display_name,
         birth_date=profile.date_of_birth,
         parent_id=profile.parent_id,
+        level=profile.level,
         created_at=profile.created_at,
     )
 
@@ -174,6 +176,7 @@ async def create_child(
         display_name=child_data.name,
         date_of_birth=child_data.birth_date,
         is_child=True,
+        level=child_data.level,
         parent_id=current_user.id,
     )
     db.add(child_profile)
@@ -185,6 +188,7 @@ async def create_child(
         name=child_profile.display_name,
         birth_date=child_profile.date_of_birth,
         parent_id=child_profile.parent_id,
+        level=child_profile.level,
         created_at=child_profile.created_at,
     )
 
@@ -212,6 +216,8 @@ async def update_child(
         profile.display_name = child_data.name
     if child_data.birth_date is not None:
         profile.date_of_birth = child_data.birth_date
+    if child_data.level is not None:
+        profile.level = child_data.level
     if child_data.password is not None:
         child_user = db.query(User).filter(User.id == child_id).first()
         if child_user is not None:
@@ -225,6 +231,7 @@ async def update_child(
         name=profile.display_name,
         birth_date=profile.date_of_birth,
         parent_id=profile.parent_id,
+        level=profile.level,
         created_at=profile.created_at,
     )
 

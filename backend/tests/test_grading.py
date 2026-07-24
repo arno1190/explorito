@@ -88,6 +88,38 @@ def test_pythagore_malformed_key():
     assert check_answer_correctness(ex, {"cells": {"bad": 12}}) is False
 
 
+# --- math_problem ------------------------------------------------------------
+def test_math_problem_exact():
+    ex = _exercise("math_problem", {"value": 12})
+    assert check_answer_correctness(ex, {"value": 12}) is True
+    assert check_answer_correctness(ex, {"value": 13}) is False
+
+
+def test_math_problem_accepts_comma_decimal():
+    ex = _exercise("math_problem", {"value": 12.5})
+    assert check_answer_correctness(ex, {"value": "12,5"}) is True
+    assert check_answer_correctness(ex, {"value": "12.5"}) is True
+
+
+def test_math_problem_tolerance():
+    ex = _exercise("math_problem", {"value": 3.14, "tolerance": 0.01})
+    assert check_answer_correctness(ex, {"value": 3.15}) is True
+    assert check_answer_correctness(ex, {"value": 3.2}) is False
+
+
+def test_math_problem_non_numeric():
+    ex = _exercise("math_problem", {"value": 5})
+    assert check_answer_correctness(ex, {"value": "cinq"}) is False
+    assert check_answer_correctness(ex, {}) is False
+
+
+# --- reading -----------------------------------------------------------------
+def test_reading_always_correct():
+    ex = _exercise("reading", {})
+    assert check_answer_correctness(ex, {"read": True}) is True
+    assert check_answer_correctness(ex, {}) is True
+
+
 # --- type inconnu ------------------------------------------------------------
 @pytest.mark.parametrize("legacy", ["mcq", "drag_drop", "true_false", "unknown"])
 def test_unknown_type_rejected(legacy: str):
