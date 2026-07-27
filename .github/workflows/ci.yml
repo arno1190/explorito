@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch: {} # allow manual deploy from the Actions tab
 
 jobs:
   backend:
@@ -38,8 +39,75 @@ jobs:
 
       # mypy est informatif pour l'instant : les modèles utilisent l'ancien style
       # `Column()` (non `Mapped[]`), ce qui génère de nombreux faux positifs sous
-      # `strict = true`. À rendre bloquant après migration des modèles vers
-      # `Mapped[...]` (dette technique connue).
+      # `strict = true`. À rendre bloquant après migration vers `Mapped[...]`.
       - name: Mypy (non bloquant)
         continue-on-error: true
         run: uv run mypy -p app
+
+  frontend:
+    name: Frontend (types · build check)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm exec tsc --noEmit
+
+      - name: Prettier check
+        run: pnpm exec prettier --check "src/**/*.{ts,tsx}"
+
+  deploy:
+    name: Deploy (SSH to Scaleway)
+    needs: [backend, frontend]
+    # Only on a real push to main (or manual dispatch) — never on PRs.
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: explorito-deploy
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Rsync code to server
+        run: |
+          rsync -az --delete \
+            --exclude '.git' --exclude 'node_modules' --exclude '.venv' \
+            --exclude '.next' --exclude '__pycache__' --exclude '*.pyc' \
+            --exclude '.env' --exclude 'backend/extracted_content' \
+            --exclude 'backend/uploads' \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
+            ./ "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/explorito/"
+
+      - name: Build & restart on server
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            'bash /opt/explorito/scripts/prod-build.sh'
+
+      - name: Smoke test
+        run: |
+          sleep 8
+          curl -fsS -m 30 https://api.explorito.example.com/health && echo " OK"
