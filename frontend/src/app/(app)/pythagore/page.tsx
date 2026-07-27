@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { usePlaySessionApiV1PythagoreSessionPost as usePlaySession } from "@/lib/api/generated/pythagore/pythagore";
 import { PythagoreDifficulty } from "@/lib/api/model";
 import type { PythagoreItem, PythagoreSessionResponse } from "@/lib/api/model";
@@ -14,8 +15,8 @@ interface DifficultyConfig {
   key: PythagoreDifficulty;
   label: string;
   emoji: string;
-  tables: number[];
-  count: number;
+  size: number; // grille size × size (facteurs 1..size)
+  blanks: number; // nombre de cases à compléter
 }
 
 const DIFFICULTIES: DifficultyConfig[] = [
@@ -23,77 +24,78 @@ const DIFFICULTIES: DifficultyConfig[] = [
     key: PythagoreDifficulty.facile,
     label: "Facile",
     emoji: "🌱",
-    tables: [2, 3, 4, 5],
-    count: 8,
+    size: 5,
+    blanks: 6,
   },
   {
     key: PythagoreDifficulty.moyen,
     label: "Moyen",
     emoji: "⭐",
-    tables: [2, 3, 4, 5, 6, 7, 8, 9],
-    count: 10,
+    size: 10,
+    blanks: 10,
   },
   {
     key: PythagoreDifficulty.difficile,
     label: "Difficile",
     emoji: "🔥",
-    tables: [6, 7, 8, 9, 10, 11, 12],
-    count: 12,
+    size: 10,
+    blanks: 18,
   },
 ];
 
-function buildQuestions(config: DifficultyConfig): { a: number; b: number }[] {
-  const questions: { a: number; b: number }[] = [];
-  for (let i = 0; i < config.count; i++) {
-    const a = config.tables[Math.floor(Math.random() * config.tables.length)];
-    const b = 1 + Math.floor(Math.random() * 10); // 1..10 (dans les bornes 1..12)
-    questions.push({ a, b });
+/** Choisit `blanks` cases distinctes (a,b) dans la grille size×size. */
+function pickBlanks(size: number, blanks: number): Set<string> {
+  const keys: string[] = [];
+  for (let a = 1; a <= size; a++) {
+    for (let b = 1; b <= size; b++) keys.push(`${a}-${b}`);
   }
-  return questions;
+  // Mélange (Fisher-Yates) puis prend les premiers `blanks`.
+  for (let i = keys.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [keys[i], keys[j]] = [keys[j], keys[i]];
+  }
+  return new Set(keys.slice(0, Math.min(blanks, keys.length)));
 }
 
 export default function PythagorePage() {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>("intro");
   const [config, setConfig] = useState<DifficultyConfig>(DIFFICULTIES[1]);
-  const [questions, setQuestions] = useState<{ a: number; b: number }[]>([]);
-  const [index, setIndex] = useState(0);
-  const [items, setItems] = useState<PythagoreItem[]>([]);
-  const [input, setInput] = useState("");
+  const [blankKeys, setBlankKeys] = useState<Set<string>>(new Set());
+  const [values, setValues] = useState<Record<string, string>>({});
   const [result, setResult] = useState<PythagoreSessionResponse | null>(null);
 
   const { mutate, isPending } = usePlaySession();
 
-  const current = questions[index];
-  const progressPct = useMemo(
-    () => (questions.length ? (index / questions.length) * 100 : 0),
-    [index, questions.length]
+  const rows = useMemo(
+    () => Array.from({ length: config.size }, (_, i) => i + 1),
+    [config.size]
   );
+
+  const filledCount = useMemo(
+    () =>
+      [...blankKeys].filter((k) => (values[k] ?? "").trim().length > 0).length,
+    [blankKeys, values]
+  );
+  const allFilled = filledCount === blankKeys.size && blankKeys.size > 0;
 
   const start = (c: DifficultyConfig) => {
     setConfig(c);
-    setQuestions(buildQuestions(c));
-    setItems([]);
-    setIndex(0);
-    setInput("");
+    setBlankKeys(pickBlanks(c.size, c.blanks));
+    setValues({});
     setResult(null);
     setPhase("playing");
   };
 
-  const submitAnswer = () => {
-    if (input.trim() === "" || !current) return;
-    const answer = parseInt(input, 10);
-    const nextItems = [...items, { a: current.a, b: current.b, answer }];
-    setItems(nextItems);
-    setInput("");
-
-    if (index + 1 < questions.length) {
-      setIndex(index + 1);
-      return;
-    }
-    // Dernière question -> le serveur corrige et attribue l'XP.
+  const finish = () => {
+    if (!allFilled || isPending) return;
+    // Chaque case trouée -> un item {a, b, answer}. Le serveur corrige (a×b).
+    const items: PythagoreItem[] = [...blankKeys].map((k) => {
+      const [a, b] = k.split("-").map(Number);
+      return { a, b, answer: parseInt(values[k], 10) };
+    });
     mutate(
-      { data: { difficulty: config.key, items: nextItems } },
+      { data: { difficulty: config.key, items } },
       {
         onSuccess: (data) => {
           setResult(data);
@@ -105,7 +107,7 @@ export default function PythagorePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-fun-sky-light via-white to-fun-violet-light p-4">
-      <div className="mx-auto max-w-xl">
+      <div className="mx-auto max-w-2xl">
         <Button
           variant="ghost"
           onClick={() => router.push("/play")}
@@ -120,11 +122,11 @@ export default function PythagorePage() {
           <div className="rounded-3xl bg-white p-6 candy-shadow">
             <div className="mb-2 text-center text-6xl">✖️</div>
             <h1 className="mb-1 text-center text-3xl font-extrabold text-fun-text">
-              Défi des tables
+              La table de Pythagore
             </h1>
             <p className="mb-6 text-center text-fun-text-muted">
-              Réponds vite et enchaîne les bonnes réponses pour gagner des ⚡ XP
-              bonus !
+              Complète les cases vides de la table de multiplication et gagne
+              des ⚡ XP !
             </p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               {DIFFICULTIES.map((d) => (
@@ -138,7 +140,7 @@ export default function PythagorePage() {
                     {d.label}
                   </span>
                   <span className="text-xs text-fun-text-muted">
-                    {d.count} questions
+                    {d.blanks} cases · table de {d.size}
                   </span>
                 </button>
               ))}
@@ -146,37 +148,87 @@ export default function PythagorePage() {
           </div>
         )}
 
-        {phase === "playing" && current && (
-          <div className="rounded-3xl bg-white p-6 candy-shadow">
-            <div className="mb-4 h-3 w-full rounded-full bg-fun-green-light">
-              <div
-                className="h-3 rounded-full bg-fun-green transition-all"
-                style={{ width: `${progressPct}%` }}
-              />
+        {phase === "playing" && (
+          <div className="rounded-3xl bg-white p-4 candy-shadow sm:p-6">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-xl font-extrabold text-fun-text">
+                Complète la table
+              </h2>
+              <span className="rounded-full bg-fun-sun-light px-3 py-1 text-sm font-bold text-fun-sun">
+                {filledCount}/{blankKeys.size}
+              </span>
             </div>
-            <p className="mb-2 text-center text-sm font-semibold text-fun-text-muted">
-              Question {index + 1} / {questions.length}
-            </p>
-            <div className="my-8 text-center text-6xl font-extrabold text-fun-text">
-              {current.a} × {current.b}
+
+            <div className="overflow-x-auto pb-2">
+              <table className="border-collapse">
+                <thead>
+                  <tr>
+                    <th className="sticky left-0 z-10 h-10 w-10 rounded-tl-xl bg-fun-sky text-white">
+                      ×
+                    </th>
+                    {rows.map((c) => (
+                      <th
+                        key={c}
+                        className="h-10 min-w-[44px] bg-fun-sky-light text-sm font-bold text-fun-text"
+                      >
+                        {c}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((r) => (
+                    <tr key={r}>
+                      <th className="sticky left-0 z-10 h-11 w-10 bg-fun-sky-light text-sm font-bold text-fun-text">
+                        {r}
+                      </th>
+                      {rows.map((c) => {
+                        const key = `${r}-${c}`;
+                        const isBlank = blankKeys.has(key);
+                        return (
+                          <td
+                            key={c}
+                            className="h-11 min-w-[44px] border border-fun-border p-0 text-center"
+                          >
+                            {isBlank ? (
+                              <input
+                                type="number"
+                                inputMode="numeric"
+                                aria-label={`${r} fois ${c}`}
+                                value={values[key] ?? ""}
+                                onChange={(e) =>
+                                  setValues((v) => ({
+                                    ...v,
+                                    [key]: e.target.value,
+                                  }))
+                                }
+                                className={cn(
+                                  "h-full w-full min-w-[44px] bg-fun-sun-light text-center text-sm font-bold text-fun-text outline-none focus:bg-fun-sun/30",
+                                  (values[key] ?? "").trim() &&
+                                    "bg-fun-sky-light"
+                                )}
+                              />
+                            ) : (
+                              <span className="text-sm text-fun-text-muted">
+                                {r * c}
+                              </span>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <input
-              type="number"
-              inputMode="numeric"
-              autoFocus
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && submitAnswer()}
-              placeholder="?"
-              className="mb-4 h-16 w-full rounded-xl border-2 border-fun-border text-center text-3xl font-bold text-fun-text focus:border-fun-sky focus:outline-none"
-            />
+
             <Button
-              onClick={submitAnswer}
-              disabled={input.trim() === "" || isPending}
-              className="h-14 w-full rounded-xl text-lg font-bold active:scale-95"
+              onClick={finish}
+              disabled={!allFilled || isPending}
+              className="mt-4 h-14 w-full rounded-xl text-lg font-bold active:scale-95"
               size="lg"
             >
-              {index + 1 < questions.length ? "Valider" : "Terminer"}
+              {isPending ? "…" : "Valider la table"}
             </Button>
           </div>
         )}
@@ -190,8 +242,8 @@ export default function PythagorePage() {
               +{result.xp_earned} XP
             </h2>
             <p className="mb-4 text-fun-text-muted">
-              {result.correct} / {result.total} bonnes réponses · meilleure
-              série {result.longest_streak} 🔥
+              {result.correct} / {result.total} cases justes · meilleure série{" "}
+              {result.longest_streak} 🔥
             </p>
             {result.capped && (
               <p className="mb-4 rounded-xl bg-fun-sun-light px-3 py-2 text-sm font-semibold text-fun-text-muted">
