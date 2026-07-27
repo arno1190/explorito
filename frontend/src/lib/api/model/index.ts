@@ -61,6 +61,8 @@ export * from "./progressDashboard";
 export * from "./progressStatus";
 export * from "./purchaseRequest";
 export * from "./purchaseResponse";
+export * from "./recentLessonResponse";
+export * from "./recentLessonsApiV1LessonsRecentGetParams";
 export * from "./refreshTokenRequest";
 export * from "./rewardResponse";
 export * from "./startLessonApiV1LessonsLessonIdStartPost201";

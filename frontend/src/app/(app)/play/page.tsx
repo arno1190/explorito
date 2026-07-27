@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { listSubjectsApiV1SubjectsGet } from "@/lib/api/generated/subjects/subjects";
+import { useRecentLessonsApiV1LessonsRecentGet as useRecentLessons } from "@/lib/api/generated/lessons/lessons";
 import { getChildStatsApiV1GamificationChildIdStatsGet } from "@/lib/api/generated/gamification/gamification";
 import type { ChildStatsResponse, SubjectResponse } from "@/lib/api/model";
 
@@ -13,6 +14,7 @@ export default function PlayPage() {
   const [subjects, setSubjects] = useState<SubjectResponse[]>([]);
   const [stats, setStats] = useState<ChildStatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const { data: recent } = useRecentLessons({ limit: 6 });
 
   // Determine the child ID - either from impersonation or the logged-in user
   // IMPORTANT: If user is a child, ALWAYS use their own ID (not impersonation)
@@ -139,6 +141,36 @@ export default function PlayPage() {
           </p>
         </div>
       </div>
+
+      {/* Nouveautés — leçons récemment ajoutées */}
+      {recent && recent.length > 0 && (
+        <div className="max-w-4xl mx-auto mb-8">
+          <h2 className="text-2xl font-bold text-fun-text mb-3">
+            ✨ Nouveautés
+          </h2>
+          <div className="flex gap-4 overflow-x-auto pb-2">
+            {recent.map((lz) => (
+              <button
+                key={lz.id}
+                onClick={() => router.push(`/lessons/${lz.id}`)}
+                className="flex-shrink-0 w-44 text-left bg-white rounded-2xl candy-shadow hover:candy-shadow-lg hover:scale-[1.02] transition-all p-4 border-2"
+                style={{ borderColor: lz.subject_color ?? undefined }}
+              >
+                <div className="text-4xl mb-2">{lz.subject_icon}</div>
+                <div className="text-xs font-semibold text-fun-text-muted">
+                  {lz.subject_name}
+                </div>
+                <div className="font-bold text-fun-text leading-tight">
+                  {lz.name}
+                </div>
+                <div className="mt-2 inline-block rounded-full bg-fun-violet-light px-2 py-0.5 text-xs font-bold text-fun-violet">
+                  Nouveau
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Subjects Grid */}
       <div className="max-w-4xl mx-auto">

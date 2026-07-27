@@ -2,12 +2,25 @@
 Schémas Pydantic pour les leçons
 """
 
+from datetime import datetime
 from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, Field
 
 from app.schemas.exercise import ExerciseResponse
+
+
+class RecentLessonResponse(BaseModel):
+    """Leçon récente pour le fil « Nouveautés » (avec infos matière)."""
+
+    id: UUID
+    name: str
+    subject_id: UUID
+    subject_name: str
+    subject_icon: str | None = None
+    subject_color: str | None = None
+    created_at: datetime
 
 
 class LessonBase(BaseModel):

@@ -28,10 +28,180 @@ import type {
   LessonUpdate,
   LessonWithExercises,
   ListLessonsApiV1LessonsGetParams,
+  RecentLessonResponse,
+  RecentLessonsApiV1LessonsRecentGetParams,
   StartLessonApiV1LessonsLessonIdStartPost201,
 } from "../../model";
 
 import { axiosInstance } from "../../axios-instance";
+
+/**
+ * Leçons récemment ajoutées (fil « Nouveautés »).
+
+Filtrées au niveau de l'enfant et aux leçons publiées, triées par date de
+création décroissante. Défini avant `/{lesson_id}` pour éviter la collision
+de route.
+ * @summary Recent Lessons
+ */
+export const recentLessonsApiV1LessonsRecentGet = (
+  params?: RecentLessonsApiV1LessonsRecentGetParams,
+  signal?: AbortSignal
+) => {
+  return axiosInstance<RecentLessonResponse[]>({
+    url: `/api/v1/lessons/recent`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
+
+export const getRecentLessonsApiV1LessonsRecentGetQueryKey = (
+  params?: RecentLessonsApiV1LessonsRecentGetParams
+) => {
+  return [`/api/v1/lessons/recent`, ...(params ? [params] : [])] as const;
+};
+
+export const getRecentLessonsApiV1LessonsRecentGetQueryOptions = <
+  TData = Awaited<ReturnType<typeof recentLessonsApiV1LessonsRecentGet>>,
+  TError = HTTPValidationError,
+>(
+  params?: RecentLessonsApiV1LessonsRecentGetParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof recentLessonsApiV1LessonsRecentGet>>,
+        TError,
+        TData
+      >
+    >;
+  }
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getRecentLessonsApiV1LessonsRecentGetQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof recentLessonsApiV1LessonsRecentGet>>
+  > = ({ signal }) => recentLessonsApiV1LessonsRecentGet(params, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof recentLessonsApiV1LessonsRecentGet>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type RecentLessonsApiV1LessonsRecentGetQueryResult = NonNullable<
+  Awaited<ReturnType<typeof recentLessonsApiV1LessonsRecentGet>>
+>;
+export type RecentLessonsApiV1LessonsRecentGetQueryError = HTTPValidationError;
+
+export function useRecentLessonsApiV1LessonsRecentGet<
+  TData = Awaited<ReturnType<typeof recentLessonsApiV1LessonsRecentGet>>,
+  TError = HTTPValidationError,
+>(
+  params: undefined | RecentLessonsApiV1LessonsRecentGetParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof recentLessonsApiV1LessonsRecentGet>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof recentLessonsApiV1LessonsRecentGet>>,
+          TError,
+          Awaited<ReturnType<typeof recentLessonsApiV1LessonsRecentGet>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useRecentLessonsApiV1LessonsRecentGet<
+  TData = Awaited<ReturnType<typeof recentLessonsApiV1LessonsRecentGet>>,
+  TError = HTTPValidationError,
+>(
+  params?: RecentLessonsApiV1LessonsRecentGetParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof recentLessonsApiV1LessonsRecentGet>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof recentLessonsApiV1LessonsRecentGet>>,
+          TError,
+          Awaited<ReturnType<typeof recentLessonsApiV1LessonsRecentGet>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useRecentLessonsApiV1LessonsRecentGet<
+  TData = Awaited<ReturnType<typeof recentLessonsApiV1LessonsRecentGet>>,
+  TError = HTTPValidationError,
+>(
+  params?: RecentLessonsApiV1LessonsRecentGetParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof recentLessonsApiV1LessonsRecentGet>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Recent Lessons
+ */
+
+export function useRecentLessonsApiV1LessonsRecentGet<
+  TData = Awaited<ReturnType<typeof recentLessonsApiV1LessonsRecentGet>>,
+  TError = HTTPValidationError,
+>(
+  params?: RecentLessonsApiV1LessonsRecentGetParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof recentLessonsApiV1LessonsRecentGet>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getRecentLessonsApiV1LessonsRecentGetQueryOptions(
+    params,
+    options
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * Liste les leçons avec filtres optionnels

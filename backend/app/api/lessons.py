@@ -10,9 +10,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session, joinedload
 
 from app.api.auth import get_current_active_user
-from app.api.subjects import require_admin
+from app.api.subjects import child_content_level, require_admin
 from app.core.database import get_db
-from app.models.content import Exercise, LearningPath, Lesson
+from app.models.content import Exercise, LearningPath, Lesson, Subject
 from app.models.progress import ProgressStatus, UserProgress
 from app.models.user import User
 from app.schemas.exercise import ExerciseResponse
@@ -21,9 +21,47 @@ from app.schemas.lesson import (
     LessonResponse,
     LessonUpdate,
     LessonWithExercises,
+    RecentLessonResponse,
 )
 
 router = APIRouter()
+
+
+@router.get("/recent", response_model=list[RecentLessonResponse])
+async def recent_lessons(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Annotated[Session, Depends(get_db)],
+    limit: int = Query(8, ge=1, le=30),
+) -> list[RecentLessonResponse]:
+    """
+    Leçons récemment ajoutées (fil « Nouveautés »).
+
+    Filtrées au niveau de l'enfant et aux leçons publiées, triées par date de
+    création décroissante. Défini avant `/{lesson_id}` pour éviter la collision
+    de route.
+    """
+    level = child_content_level(current_user, db)
+    query = (
+        db.query(Lesson, Subject)
+        .join(LearningPath, Lesson.path_id == LearningPath.id)
+        .join(Subject, LearningPath.subject_id == Subject.id)
+        .filter(Lesson.is_published.is_(True))
+    )
+    if level is not None:
+        query = query.filter(LearningPath.level == level)
+    rows = query.order_by(Lesson.created_at.desc()).limit(limit).all()
+    return [
+        RecentLessonResponse(
+            id=lesson.id,
+            name=lesson.name,
+            subject_id=subject.id,
+            subject_name=subject.name,
+            subject_icon=subject.icon,
+            subject_color=subject.color,
+            created_at=lesson.created_at,
+        )
+        for lesson, subject in rows
+    ]
 
 
 @router.get("", response_model=list[LessonResponse])

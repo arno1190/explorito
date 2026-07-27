@@ -16,6 +16,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    func,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
@@ -142,6 +143,9 @@ class Lesson(Base):
     estimated_duration = Column(Integer, nullable=True)  # en minutes
     cover_image = Column(String, nullable=True)
     is_published = Column(Boolean, default=False)
+    created_at = Column(
+        DateTime, nullable=False, default=datetime.utcnow, server_default=func.now()
+    )  # pour le fil "Nouveautés"
 
     # Relations
     path = relationship("LearningPath", back_populates="lessons")
