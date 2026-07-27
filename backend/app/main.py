@@ -82,6 +82,7 @@ from app.api import (  # noqa: E402
     gamification,
     lessons,
     progress,
+    pythagore,
     subjects,
 )
 
@@ -101,6 +102,11 @@ app.include_router(
     collection.router,
     prefix=f"{settings.API_PREFIX}/collection",
     tags=["collection"],
+)
+app.include_router(
+    pythagore.router,
+    prefix=f"{settings.API_PREFIX}/pythagore",
+    tags=["pythagore"],
 )
 
 if __name__ == "__main__":

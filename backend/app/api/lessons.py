@@ -23,6 +23,7 @@ from app.schemas.lesson import (
     LessonWithExercises,
     RecentLessonResponse,
 )
+from app.services.progression import lesson_locked
 
 router = APIRouter()
 
@@ -51,30 +52,6 @@ async def recent_lessons(
         query = query.filter(LearningPath.level == level)
     rows = query.order_by(Lesson.created_at.desc()).limit(limit).all()
 
-    def is_locked(lesson: Lesson) -> bool:
-        # Verrouillée si un palier inférieur (même parcours) n'est pas entièrement
-        # terminé par l'enfant. Palier 1 / parent / admin : jamais verrouillée.
-        if level is None:
-            return False
-        lower_ids = {
-            row[0]
-            for row in db.query(Lesson.id).filter(
-                Lesson.path_id == lesson.path_id,
-                Lesson.order_index < lesson.order_index,
-            )
-        }
-        if not lower_ids:
-            return False
-        completed_ids = {
-            row[0]
-            for row in db.query(UserProgress.lesson_id).filter(
-                UserProgress.user_id == current_user.id,
-                UserProgress.lesson_id.in_(lower_ids),
-                UserProgress.status == ProgressStatus.COMPLETED,
-            )
-        }
-        return not lower_ids.issubset(completed_ids)
-
     return [
         RecentLessonResponse(
             id=lesson.id,
@@ -84,7 +61,7 @@ async def recent_lessons(
             subject_icon=subject.icon,
             subject_color=subject.color,
             created_at=lesson.created_at,
-            locked=is_locked(lesson),
+            locked=lesson_locked(current_user.id, lesson, level, db),
         )
         for lesson, subject in rows
     ]

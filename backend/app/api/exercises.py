@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.auth import get_current_active_user
-from app.api.subjects import require_admin
+from app.api.subjects import child_content_level, require_admin
 from app.core.database import get_db
 from app.models.content import Exercise, ExerciseType, Lesson
 from app.models.progress import ExerciseResult
@@ -25,6 +25,7 @@ from app.schemas.exercise import (
     UnlockedAchievement,
 )
 from app.services.gamification import process_exercise_result
+from app.services.progression import lesson_locked
 
 router = APIRouter()
 
@@ -295,6 +296,15 @@ async def submit_exercise(
     exercise = db.query(Exercise).filter(Exercise.id == exercise_id).first()
     if not exercise:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Exercice non trouvé")
+
+    # Verrou côté serveur : un enfant ne peut pas valider un exercice d'une leçon
+    # verrouillée (palier inférieur non terminé), même via un lien direct.
+    level = child_content_level(current_user, db)
+    if level is not None and lesson_locked(current_user.id, exercise.lesson, level, db):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cette leçon est verrouillée : termine d'abord le niveau précédent.",
+        )
 
     # Vérifier la réponse
     is_correct = check_answer_correctness(exercise, submission.answer)

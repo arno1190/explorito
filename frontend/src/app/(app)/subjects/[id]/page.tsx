@@ -114,8 +114,9 @@ export default function SubjectDetailPage() {
   }
 
   // Group lessons into tiers by order_index. Within a tier, lessons are freely
-  // pickable (any order). A tier unlocks only once every lesson of all lower
-  // tiers is completed.
+  // pickable (any order). Whether a lesson is locked is decided by the backend
+  // (server-computed `locked`, the single source of truth) — we never recompute
+  // tier gating client-side. Lessons in the same tier share the same lock state.
   const tierMap = new Map<number, LessonResponse[]>();
   for (const l of lessons) {
     const t = l.order_index ?? 0;
@@ -123,10 +124,6 @@ export default function SubjectDetailPage() {
     tierMap.get(t)!.push(l);
   }
   const tierKeys = [...tierMap.keys()].sort((a, b) => a - b);
-  const isTierComplete = (t: number) =>
-    (tierMap.get(t) ?? []).every((l) => lessonProgress.get(l.id)?.isCompleted);
-  const isTierUnlocked = (idx: number) =>
-    idx === 0 || tierKeys.slice(0, idx).every(isTierComplete);
   const tierLabel = (t: number) =>
     ({
       1: "Niveau 1 · Découverte",
@@ -163,9 +160,9 @@ export default function SubjectDetailPage() {
 
       {/* Lessons grouped by tier — free order within a tier, tiers gate */}
       <div className="max-w-3xl mx-auto space-y-8">
-        {tierKeys.map((tier, tierIdx) => {
-          const unlocked = isTierUnlocked(tierIdx);
+        {tierKeys.map((tier) => {
           const tierLessons = tierMap.get(tier) ?? [];
+          const unlocked = !tierLessons.some((l) => l.locked);
           return (
             <section key={tier}>
               <div className="mb-3 flex items-center gap-2">
@@ -183,7 +180,7 @@ export default function SubjectDetailPage() {
                 {tierLessons.map((lesson) => {
                   const progress = lessonProgress.get(lesson.id);
                   const isCompleted = progress?.isCompleted || false;
-                  const isLocked = !unlocked;
+                  const isLocked = lesson.locked ?? false;
                   return (
                     <button
                       key={lesson.id}

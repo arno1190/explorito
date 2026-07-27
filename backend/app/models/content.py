@@ -143,9 +143,10 @@ class Lesson(Base):
     estimated_duration = Column(Integer, nullable=True)  # en minutes
     cover_image = Column(String, nullable=True)
     is_published = Column(Boolean, default=False)
-    created_at = Column(
-        DateTime, nullable=False, default=datetime.utcnow, server_default=func.now()
-    )  # pour le fil "Nouveautés"
+    # Horodatage assigné par la BASE (server_default) pour éviter les incohérences
+    # de fuseau entre datetime.utcnow() (Python, UTC naïf) et func.now() (heure
+    # serveur) — sinon l'ordre "Nouveautés" est faussé.
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
 
     # Relations
     path = relationship("LearningPath", back_populates="lessons")

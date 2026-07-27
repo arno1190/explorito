@@ -87,6 +87,10 @@ class LessonResponse(LessonBase):
     id: UUID
     path_id: UUID
     subject_id: UUID | None = Field(None, description="ID de la matière (via le parcours)")
+    locked: bool = Field(
+        default=False,
+        description="Verrouillée pour l'enfant tant que le palier inférieur n'est pas terminé",
+    )
 
     class Config:
         from_attributes = True

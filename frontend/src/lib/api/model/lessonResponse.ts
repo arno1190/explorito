@@ -40,4 +40,6 @@ export interface LessonResponse {
   path_id: string;
   /** ID de la matière (via le parcours) */
   subject_id?: string | null;
+  /** Verrouillée pour l'enfant tant que le palier inférieur n'est pas terminé */
+  locked?: boolean;
 }

@@ -391,9 +391,47 @@ def process_exercise_result(
     new_achievements: list[Achievement] = []
 
     if is_correct:
-        # XP par exercice réussi + mise à jour de la série
-        xp_awarded += settings.XP_PER_EXERCISE
-        total_xp = award_xp(user_id, settings.XP_PER_EXERCISE, subject_id, db)
+        # XP par exercice, anti-farm : le résultat courant est déjà persisté par
+        # l'endpoint avant cet appel, donc les décomptes ci-dessous l'incluent.
+        # - première réussite au tout premier essai  -> plein tarif
+        # - première réussite après un ou des échecs  -> tarif réduit (redo)
+        # - exercice déjà réussi auparavant           -> 0 (anti-farm)
+        result_count = (
+            db.query(func.count(ExerciseResult.id))
+            .filter(
+                ExerciseResult.user_id == user_id,
+                ExerciseResult.exercise_id == exercise.id,
+            )
+            .scalar()
+            or 0
+        )
+        correct_count = (
+            db.query(func.count(ExerciseResult.id))
+            .filter(
+                ExerciseResult.user_id == user_id,
+                ExerciseResult.exercise_id == exercise.id,
+                ExerciseResult.is_correct.is_(True),
+            )
+            .scalar()
+            or 0
+        )
+        prior_correct = int(correct_count) - 1  # hors résultat courant
+        prior_attempts = int(result_count) - 1
+        if prior_correct > 0:
+            exercise_xp = 0
+        elif prior_attempts > 0:
+            exercise_xp = int(settings.XP_PER_EXERCISE * settings.XP_REDO_DISCOUNT)
+        else:
+            exercise_xp = settings.XP_PER_EXERCISE
+
+        if exercise_xp > 0:
+            xp_awarded += exercise_xp
+            total_xp = award_xp(user_id, exercise_xp, subject_id, db)
+        else:
+            # Pas d'XP à attribuer, mais renvoyer le total courant.
+            total_xp = (
+                db.query(func.sum(SubjectProgress.total_xp)).filter(SubjectProgress.user_id == user_id).scalar() or 0
+            )
         streak = update_streak(user_id, db)
         current_streak = int(streak.current_streak)
 

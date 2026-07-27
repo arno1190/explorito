@@ -14,6 +14,7 @@ from app.models.content import LearningPath, Lesson, LevelEnum, Subject
 from app.models.user import Profile, User, UserRole
 from app.schemas.lesson import LessonResponse
 from app.schemas.subject import SubjectCreate, SubjectResponse, SubjectUpdate
+from app.services.progression import lesson_locked
 
 router = APIRouter()
 
@@ -266,7 +267,7 @@ async def get_subject_lessons(
     subject_id: UUID,
     current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
-) -> list[Lesson]:
+) -> list[LessonResponse]:
     """
     Récupère les leçons d'une matière (filtrées au niveau de l'enfant).
 
@@ -300,4 +301,13 @@ async def get_subject_lessons(
             lessons_query = lessons_query.filter(Lesson.is_published.is_(True))
         lessons.extend(lessons_query.order_by(Lesson.order_index).all())
 
-    return lessons
+    # ``locked`` calculé côté serveur : source de vérité unique du verrouillage.
+    return [
+        LessonResponse.model_validate(lesson).model_copy(
+            update={
+                "subject_id": subject_id,
+                "locked": lesson_locked(current_user.id, lesson, level, db),
+            }
+        )
+        for lesson in lessons
+    ]

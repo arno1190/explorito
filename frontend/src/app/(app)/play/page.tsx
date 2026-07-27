@@ -142,6 +142,25 @@ export default function PlayPage() {
         </div>
       </div>
 
+      {/* Défi Pythagore — mini-jeu pour gagner de l'XP libre */}
+      <div className="max-w-4xl mx-auto mb-8">
+        <button
+          onClick={() => router.push("/pythagore")}
+          className="flex w-full items-center gap-4 rounded-3xl bg-gradient-to-r from-fun-sun to-fun-violet p-5 text-left candy-shadow transition-all hover:scale-[1.01] active:scale-95"
+        >
+          <div className="text-5xl">✖️</div>
+          <div className="flex-1">
+            <div className="text-xl font-extrabold text-white">
+              Défi des tables
+            </div>
+            <div className="text-sm font-semibold text-white/90">
+              Enchaîne les bonnes réponses et gagne des ⚡ XP bonus !
+            </div>
+          </div>
+          <div className="text-3xl">→</div>
+        </button>
+      </div>
+
       {/* Nouveautés — leçons récemment ajoutées */}
       {recent && recent.length > 0 && (
         <div className="max-w-4xl mx-auto mb-8">

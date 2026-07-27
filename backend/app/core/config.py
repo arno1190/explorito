@@ -50,6 +50,17 @@ class Settings(BaseSettings):
     XP_PER_EXERCISE: int = 10
     XP_PER_LESSON: int = 50
     XP_LEVEL_MULTIPLIER: int = 100  # Level N = N * 100 XP
+    # Anti-farm : refaire un exercice déjà raté ne rapporte qu'une fraction de
+    # l'XP (0.0–1.0) ; un exercice déjà réussi ne rapporte plus rien.
+    XP_REDO_DISCOUNT: float = 0.5
+    # Défi Pythagore : XP de base par bonne réponse selon la difficulté, bonus de
+    # série, pénalité par erreur, et plafond quotidien anti-farm.
+    PYTHAGORE_BASE_XP_EASY: int = 2
+    PYTHAGORE_BASE_XP_MEDIUM: int = 3
+    PYTHAGORE_BASE_XP_HARD: int = 4
+    PYTHAGORE_STREAK_BONUS: int = 1  # +XP par bonne réponse au-delà de 2 d'affilée
+    PYTHAGORE_FAILURE_PENALTY: int = 1  # −XP par erreur (payout planché à 0)
+    PYTHAGORE_DAILY_XP_CAP: int = 100  # XP max/jour gagnable via les défis Pythagore
 
     @model_validator(mode="after")
     def _enforce_secure_secret_key(self) -> "Settings":
