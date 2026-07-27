@@ -4,6 +4,7 @@
  * Explorito - Application Éducative
  * OpenAPI spec version: 1.0.0
  */
+import type { LevelEnum } from "./levelEnum";
 
 /**
  * Schéma pour la réponse avec les informations d'un enfant
@@ -11,7 +12,8 @@
 export interface ChildResponse {
   id: string;
   name: string;
-  birth_date: string;
+  birth_date?: string | null;
   parent_id: string;
+  level?: LevelEnum | null;
   created_at: string;
 }

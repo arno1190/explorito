@@ -4,6 +4,7 @@
  * Explorito - Application Éducative
  * OpenAPI spec version: 1.0.0
  */
+import type { LevelEnum } from "./levelEnum";
 
 /**
  * Schéma pour la mise à jour d'un profil enfant.
@@ -17,4 +18,6 @@ export interface ChildUpdate {
   birth_date?: string | null;
   /** Nouveau mot de passe */
   password?: string | null;
+  /** Niveau scolaire (PS à CM2) */
+  level?: LevelEnum | null;
 }

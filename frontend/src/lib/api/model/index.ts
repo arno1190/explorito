@@ -49,6 +49,7 @@ export * from "./lessonUpdate";
 export * from "./lessonUpdateUnlockCriteria";
 export * from "./lessonWithExercises";
 export * from "./lessonWithExercisesUnlockCriteria";
+export * from "./levelEnum";
 export * from "./listAchievementsApiV1GamificationAchievementsGetParams";
 export * from "./listExercisesApiV1ExercisesGetParams";
 export * from "./listLessonsApiV1LessonsGetParams";

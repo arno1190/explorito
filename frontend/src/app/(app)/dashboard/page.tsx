@@ -6,8 +6,10 @@ import {
   createChildApiV1ChildrenPost,
   deleteChildApiV1ChildrenChildIdDelete,
   getChildrenApiV1ChildrenGet,
+  updateChildApiV1ChildrenChildIdPut,
 } from "@/lib/api/generated/children/children";
 import { getChildStatsApiV1GamificationChildIdStatsGet } from "@/lib/api/generated/gamification/gamification";
+import type { LevelEnum } from "@/lib/api/model";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -30,6 +32,17 @@ import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Play, TrendingUp } from "lucide-react";
 import type { ChildResponse, ChildStatsResponse } from "@/lib/api/model";
 
+const LEVELS: { value: LevelEnum; label: string }[] = [
+  { value: "ps", label: "Petite Section" },
+  { value: "ms", label: "Moyenne Section" },
+  { value: "gs", label: "Grande Section" },
+  { value: "cp", label: "CP" },
+  { value: "ce1", label: "CE1" },
+  { value: "ce2", label: "CE2" },
+  { value: "cm1", label: "CM1" },
+  { value: "cm2", label: "CM2" },
+];
+
 export default function DashboardPage() {
   const { user, impersonateChild } = useAuth();
   const [children, setChildren] = useState<ChildResponse[]>([]);
@@ -42,6 +55,7 @@ export default function DashboardPage() {
   const [birthDate, setBirthDate] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [level, setLevel] = useState<LevelEnum>("cp");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -92,12 +106,14 @@ export default function DashboardPage() {
         birth_date: birthDate,
         email,
         password,
+        level,
       });
       setDialogOpen(false);
       setName("");
       setBirthDate("");
       setEmail("");
       setPassword("");
+      setLevel("cp");
       loadChildren();
     } catch (err: any) {
       setError(
@@ -116,6 +132,19 @@ export default function DashboardPage() {
       loadChildren();
     } catch (err) {
       console.error("Failed to delete child:", err);
+    }
+  };
+
+  const handleChangeLevel = async (id: string, newLevel: LevelEnum) => {
+    // Optimistic UI, then persist.
+    setChildren((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, level: newLevel } : c))
+    );
+    try {
+      await updateChildApiV1ChildrenChildIdPut(id, { level: newLevel });
+    } catch (err) {
+      console.error("Failed to change level:", err);
+      loadChildren(); // revert to server truth
     }
   };
 
@@ -207,6 +236,21 @@ export default function DashboardPage() {
                     minLength={8}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="level">Niveau scolaire</Label>
+                  <select
+                    id="level"
+                    value={level}
+                    onChange={(e) => setLevel(e.target.value as LevelEnum)}
+                    className="h-11 w-full rounded-xl border-2 border-fun-border bg-white px-3 text-fun-text outline-none focus:border-fun-sky"
+                  >
+                    {LEVELS.map((l) => (
+                      <option key={l.value} value={l.value}>
+                        {l.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <DialogFooter>
                 <Button type="submit">Add Child</Button>
@@ -250,10 +294,33 @@ export default function DashboardPage() {
                     </Button>
                   </div>
                   <CardDescription>
-                    Age: {calculateAge(child.birth_date)}
+                    {child.birth_date
+                      ? `Âge : ${calculateAge(child.birth_date)}`
+                      : "Âge non renseigné"}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
+                  {/* Niveau scolaire (modifiable par le parent) */}
+                  <div className="flex items-center justify-between gap-2 rounded-xl bg-fun-sky-light px-3 py-2">
+                    <span className="text-sm font-semibold text-fun-text">
+                      Niveau
+                    </span>
+                    <select
+                      value={child.level ?? ""}
+                      onChange={(e) =>
+                        handleChangeLevel(child.id, e.target.value as LevelEnum)
+                      }
+                      className="h-9 rounded-lg border-2 border-fun-border bg-white px-2 text-sm font-semibold text-fun-text outline-none focus:border-fun-sky"
+                    >
+                      {!child.level && <option value="">Choisir…</option>}
+                      {LEVELS.map((l) => (
+                        <option key={l.value} value={l.value}>
+                          {l.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
                   {/* Stats Display */}
                   {stats && (
                     <div className="grid grid-cols-2 gap-2 py-3 px-2 bg-muted rounded-lg">

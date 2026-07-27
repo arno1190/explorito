@@ -4,6 +4,7 @@
  * Explorito - Application Éducative
  * OpenAPI spec version: 1.0.0
  */
+import type { LevelEnum } from "./levelEnum";
 
 /**
  * Schéma pour la création d'un profil enfant
@@ -24,4 +25,6 @@ export interface ChildCreate {
    * @minLength 8
    */
   password: string;
+  /** Niveau scolaire (PS à CM2) */
+  level?: LevelEnum | null;
 }

@@ -22,4 +22,6 @@ export const ExerciseType = {
   fill_blanks: "fill_blanks",
   reveal: "reveal",
   pythagore: "pythagore",
+  math_problem: "math_problem",
+  reading: "reading",
 } as const;

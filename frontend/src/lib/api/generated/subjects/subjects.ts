@@ -679,14 +679,16 @@ export const useDeleteSubjectApiV1SubjectsSubjectIdDelete = <
   );
 };
 /**
- * Récupère toutes les leçons d'une matière
+ * Récupère les leçons d'une matière (filtrées au niveau de l'enfant).
 
 Args:
     subject_id: ID de la matière
+    current_user: Utilisateur authentifié
     db: Session de base de données
 
 Returns:
-    Liste des leçons de toutes les learning paths de cette matière
+    Leçons des parcours de cette matière ; pour un enfant, limitées à son
+    niveau scolaire et aux leçons publiées.
 
 Raises:
     HTTPException: Si la matière n'existe pas
