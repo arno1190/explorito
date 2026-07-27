@@ -16,4 +16,5 @@ export interface RecentLessonResponse {
   subject_icon?: string | null;
   subject_color?: string | null;
   created_at: string;
+  locked?: boolean;
 }

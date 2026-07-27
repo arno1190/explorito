@@ -152,20 +152,33 @@ export default function PlayPage() {
             {recent.map((lz) => (
               <button
                 key={lz.id}
-                onClick={() => router.push(`/lessons/${lz.id}`)}
-                className="flex-shrink-0 w-44 text-left bg-white rounded-2xl candy-shadow hover:candy-shadow-lg hover:scale-[1.02] transition-all p-4 border-2"
+                onClick={() => !lz.locked && router.push(`/lessons/${lz.id}`)}
+                disabled={lz.locked}
+                className={`w-44 flex-shrink-0 rounded-2xl border-2 bg-white p-4 text-left candy-shadow transition-all ${
+                  lz.locked
+                    ? "cursor-not-allowed opacity-60"
+                    : "hover:scale-[1.02] hover:candy-shadow-lg"
+                }`}
                 style={{ borderColor: lz.subject_color ?? undefined }}
               >
-                <div className="text-4xl mb-2">{lz.subject_icon}</div>
+                <div className="mb-2 text-4xl">
+                  {lz.locked ? "🔒" : lz.subject_icon}
+                </div>
                 <div className="text-xs font-semibold text-fun-text-muted">
                   {lz.subject_name}
                 </div>
-                <div className="font-bold text-fun-text leading-tight">
+                <div className="font-bold leading-tight text-fun-text">
                   {lz.name}
                 </div>
-                <div className="mt-2 inline-block rounded-full bg-fun-violet-light px-2 py-0.5 text-xs font-bold text-fun-violet">
-                  Nouveau
-                </div>
+                {lz.locked ? (
+                  <div className="mt-2 inline-block rounded-full bg-fun-border px-2 py-0.5 text-xs font-bold text-fun-text-muted">
+                    À débloquer
+                  </div>
+                ) : (
+                  <div className="mt-2 inline-block rounded-full bg-fun-violet-light px-2 py-0.5 text-xs font-bold text-fun-violet">
+                    Nouveau
+                  </div>
+                )}
               </button>
             ))}
           </div>

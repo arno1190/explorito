@@ -21,6 +21,7 @@ class RecentLessonResponse(BaseModel):
     subject_icon: str | None = None
     subject_color: str | None = None
     created_at: datetime
+    locked: bool = False  # verrouillée si un palier inférieur n'est pas terminé
 
 
 class LessonBase(BaseModel):
