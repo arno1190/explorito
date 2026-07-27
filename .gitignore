@@ -35,9 +35,9 @@ out/
 *.tsbuildinfo
 next-env.d.ts
 
-# Generated API client (Orval)
-frontend/src/lib/api/generated/
-frontend/src/lib/api/model/
+# Generated API client (Orval) is committed so clones/CI can build the frontend
+# without a running backend. Regenerate with `pnpm generate:api` after backend
+# contract changes.
 
 # Environment
 .env
