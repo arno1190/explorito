@@ -29,6 +29,15 @@ export interface PythagoreContent {
   blanks?: number;
 }
 
+export interface MathProblemContent {
+  unit?: string | null;
+}
+
+export interface ReadingContent {
+  text: string;
+  image?: string | null;
+}
+
 /** Réponse prête pour l'API `POST /exercises/{id}/submit` (champ `answer`). */
 export type AnswerPayload = Record<string, unknown> | null;
 

@@ -2,14 +2,18 @@
 
 import type { ExerciseResponse } from "@/lib/api/model";
 import { FillBlanks } from "./FillBlanks";
+import { MathProblem } from "./MathProblem";
 import { MultipleChoice } from "./MultipleChoice";
 import { Pythagore } from "./Pythagore";
+import { Reading } from "./Reading";
 import { Reveal } from "./Reveal";
 import type {
   AnswerPayload,
   FillBlanksContent,
+  MathProblemContent,
   MultipleChoiceContent,
   PythagoreContent,
+  ReadingContent,
   RevealContent,
 } from "./types";
 
@@ -59,6 +63,12 @@ export function ExerciseRenderer({
       return <Reveal {...shared} content={content as RevealContent} />;
     case "pythagore":
       return <Pythagore {...shared} content={content as PythagoreContent} />;
+    case "math_problem":
+      return (
+        <MathProblem {...shared} content={content as MathProblemContent} />
+      );
+    case "reading":
+      return <Reading {...shared} content={content as ReadingContent} />;
     default:
       return (
         <div className="rounded-xl bg-fun-sun-light p-4 text-fun-text">
