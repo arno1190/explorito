@@ -109,5 +109,11 @@ jobs:
 
       - name: Smoke test
         run: |
-          sleep 8
-          curl -fsS -m 30 https://api.explorito.example.com/health && echo " OK"
+          # The backend container is recreated and runs migrations on start,
+          # so retry with backoff instead of a single eager request.
+          for i in $(seq 1 20); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' -m 15 https://api.explorito.example.com/health || true)
+            if [ "$code" = "200" ]; then echo "healthy after $i attempt(s)"; exit 0; fi
+            echo "attempt $i: HTTP $code — retrying in 6s"; sleep 6
+          done
+          echo "health check never returned 200"; exit 1
