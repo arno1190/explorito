@@ -113,6 +113,27 @@ export default function SubjectDetailPage() {
     );
   }
 
+  // Group lessons into tiers by order_index. Within a tier, lessons are freely
+  // pickable (any order). A tier unlocks only once every lesson of all lower
+  // tiers is completed.
+  const tierMap = new Map<number, LessonResponse[]>();
+  for (const l of lessons) {
+    const t = l.order_index ?? 0;
+    if (!tierMap.has(t)) tierMap.set(t, []);
+    tierMap.get(t)!.push(l);
+  }
+  const tierKeys = [...tierMap.keys()].sort((a, b) => a - b);
+  const isTierComplete = (t: number) =>
+    (tierMap.get(t) ?? []).every((l) => lessonProgress.get(l.id)?.isCompleted);
+  const isTierUnlocked = (idx: number) =>
+    idx === 0 || tierKeys.slice(0, idx).every(isTierComplete);
+  const tierLabel = (t: number) =>
+    ({
+      1: "Niveau 1 · Découverte",
+      2: "Niveau 2 · Entraînement",
+      3: "Niveau 3 · Défi",
+    })[t] ?? `Niveau ${t}`;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-fun-sky-light via-white to-fun-violet-light p-4">
       {/* Header */}
@@ -140,134 +161,100 @@ export default function SubjectDetailPage() {
         </div>
       </div>
 
-      {/* Lesson Tree - Duolingo Style */}
-      <div className="max-w-md mx-auto relative">
-        {lessons.map((lesson, index) => {
-          const progress = lessonProgress.get(lesson.id);
-          const isCompleted = progress?.isCompleted || false;
-
-          // A lesson is unlocked if:
-          // 1. It's the first lesson (index === 0), OR
-          // 2. The previous lesson is completed
-          const previousLesson = index > 0 ? lessons[index - 1] : null;
-          const previousProgress = previousLesson
-            ? lessonProgress.get(previousLesson.id)
-            : null;
-          const isLocked = index > 0 && !previousProgress?.isCompleted;
-
+      {/* Lessons grouped by tier — free order within a tier, tiers gate */}
+      <div className="max-w-3xl mx-auto space-y-8">
+        {tierKeys.map((tier, tierIdx) => {
+          const unlocked = isTierUnlocked(tierIdx);
+          const tierLessons = tierMap.get(tier) ?? [];
           return (
-            <div key={lesson.id} className="mb-12 relative">
-              {/* Connecting line to next lesson */}
-              {index < lessons.length - 1 && (
-                <div
-                  className="absolute top-full left-1/2 w-1 h-12 -translate-x-1/2 bg-gradient-to-b from-fun-green/40 to-transparent"
-                  style={{ zIndex: 0 }}
-                />
-              )}
-
-              {/* Lesson Node */}
-              <div
-                className="flex flex-col items-center relative"
-                style={{ zIndex: 1 }}
-              >
-                <button
-                  onClick={() =>
-                    !isLocked && router.push(`/lessons/${lesson.id}`)
-                  }
-                  disabled={isLocked}
-                  className="relative group"
-                >
-                  {/* Lesson Circle */}
-                  <div
-                    className={`w-24 h-24 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg transition-all ${
-                      isLocked
-                        ? "bg-fun-border cursor-not-allowed"
-                        : isCompleted
-                          ? "bg-gradient-to-br from-fun-green to-fun-green-dark hover:scale-110"
-                          : "bg-gradient-to-br from-fun-green to-fun-sky hover:scale-110 animate-[candy-glow_2s_infinite]"
-                    }`}
-                  >
-                    {isLocked ? (
-                      <Lock className="h-10 w-10" />
-                    ) : isCompleted ? (
-                      <CheckCircle className="h-10 w-10" />
-                    ) : (
-                      <BookOpen className="h-10 w-10" />
-                    )}
-                  </div>
-
-                  {/* Stars for completed lessons */}
-                  {isCompleted && (
-                    <div className="absolute -top-2 -right-2 flex gap-1">
-                      {[1, 2, 3].map((star) => (
-                        <span key={star} className="text-2xl">
-                          ⭐
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </button>
-
-                {/* Lesson Info */}
-                <div className="mt-4 bg-white rounded-2xl candy-shadow p-4 max-w-xs">
-                  <h3 className="text-xl font-bold text-center mb-2 text-fun-text">
-                    {lesson.name}
-                  </h3>
-                  <p className="text-sm text-fun-text-muted text-center mb-3">
-                    {lesson.description}
-                  </p>
-
-                  {!isLocked && progress && progress.totalExercises > 0 && (
-                    <div className="mb-3">
-                      {/* Progress bar */}
-                      <div className="flex items-center justify-between text-xs text-fun-text-muted mb-1">
-                        <span>
-                          {progress.completedExercises}/
-                          {progress.totalExercises} exercices
-                        </span>
-                        <span>
-                          {Math.round(
-                            (progress.completedExercises /
-                              progress.totalExercises) *
-                              100
-                          )}
-                          %
-                        </span>
-                      </div>
-                      <div className="w-full bg-fun-green-light rounded-full h-2">
-                        <div
-                          className="bg-fun-green h-2 rounded-full transition-all"
-                          style={{
-                            width: `${(progress.completedExercises / progress.totalExercises) * 100}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {!isLocked && (
-                    <div className="flex items-center justify-center gap-4 text-sm text-fun-text-muted">
-                      {(lesson.xp_reward ?? 0) > 0 && (
-                        <span className="flex items-center gap-1">
-                          ⚡ +{lesson.xp_reward} XP
-                        </span>
-                      )}
-                      {lesson.estimated_duration && (
-                        <span className="flex items-center gap-1">
-                          ⏱️ {lesson.estimated_duration} min
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  {isLocked && (
-                    <div className="text-center text-sm text-fun-text-muted mt-2">
-                      🔒 Termine la leçon précédente pour débloquer
-                    </div>
-                  )}
-                </div>
+            <section key={tier}>
+              <div className="mb-3 flex items-center gap-2">
+                <h2 className="text-xl font-extrabold text-fun-text">
+                  {tierLabel(tier)}
+                </h2>
+                {!unlocked && (
+                  <span className="inline-flex items-center gap-1 text-sm font-semibold text-fun-text-muted">
+                    <Lock className="h-4 w-4" /> Termine le niveau précédent
+                  </span>
+                )}
               </div>
-            </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {tierLessons.map((lesson) => {
+                  const progress = lessonProgress.get(lesson.id);
+                  const isCompleted = progress?.isCompleted || false;
+                  const isLocked = !unlocked;
+                  return (
+                    <button
+                      key={lesson.id}
+                      onClick={() =>
+                        !isLocked && router.push(`/lessons/${lesson.id}`)
+                      }
+                      disabled={isLocked}
+                      className={`rounded-2xl border-2 bg-white p-4 text-left candy-shadow transition-all ${
+                        isLocked
+                          ? "cursor-not-allowed border-fun-border opacity-60"
+                          : isCompleted
+                            ? "border-fun-green hover:candy-shadow-lg"
+                            : "border-fun-sky hover:scale-[1.02] hover:candy-shadow-lg"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-bold text-fun-text">
+                          {lesson.name}
+                        </h3>
+                        {isLocked ? (
+                          <Lock className="h-5 w-5 shrink-0 text-fun-text-muted" />
+                        ) : isCompleted ? (
+                          <CheckCircle className="h-5 w-5 shrink-0 text-fun-green" />
+                        ) : (
+                          <BookOpen className="h-5 w-5 shrink-0 text-fun-sky" />
+                        )}
+                      </div>
+
+                      {lesson.description && (
+                        <p className="mt-1 text-sm text-fun-text-muted">
+                          {lesson.description}
+                        </p>
+                      )}
+
+                      {!isLocked && progress && progress.totalExercises > 0 && (
+                        <div className="mt-3">
+                          <div className="mb-1 flex justify-between text-xs text-fun-text-muted">
+                            <span>
+                              {progress.completedExercises}/
+                              {progress.totalExercises} exercices
+                            </span>
+                            <span>
+                              {Math.round(
+                                (progress.completedExercises /
+                                  progress.totalExercises) *
+                                  100
+                              )}
+                              %
+                            </span>
+                          </div>
+                          <div className="h-2 w-full rounded-full bg-fun-green-light">
+                            <div
+                              className="h-2 rounded-full bg-fun-green transition-all"
+                              style={{
+                                width: `${(progress.completedExercises / progress.totalExercises) * 100}%`,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {!isLocked && (lesson.xp_reward ?? 0) > 0 && (
+                        <div className="mt-2 text-sm text-fun-text-muted">
+                          ⚡ +{lesson.xp_reward} XP {isCompleted && "· ⭐⭐⭐"}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
           );
         })}
       </div>
