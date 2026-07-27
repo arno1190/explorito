@@ -83,5 +83,9 @@ addopts = "-v --tb=short"
 
 [dependency-groups]
 dev = [
+    "pytest>=7.4.4",
+    "pytest-cov>=4.1.0",
+    "httpx>=0.26.0",
+    "mypy>=1.10.0",
     "ruff>=0.14.14",
 ]
