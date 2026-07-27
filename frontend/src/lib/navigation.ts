@@ -16,6 +16,7 @@ const CHILD_PREFIXES = [
   "/lessons",
   "/exercises",
   "/pokedex",
+  "/pythagore",
 ];
 
 export function resolveActingRole(

@@ -10,7 +10,10 @@ import {
   getLessonApiV1LessonsLessonIdGet,
   getLessonExercisesApiV1LessonsLessonIdExercisesGet,
 } from "@/lib/api/generated/lessons/lessons";
-import { getSubjectLessonsApiV1SubjectsSubjectIdLessonsGet } from "@/lib/api/generated/subjects/subjects";
+import {
+  getSubjectApiV1SubjectsSubjectIdGet,
+  getSubjectLessonsApiV1SubjectsSubjectIdLessonsGet,
+} from "@/lib/api/generated/subjects/subjects";
 import { getCompletedExercisesApiV1ProgressLessonsLessonIdCompletedExercisesGet } from "@/lib/api/generated/progress/progress";
 import type {
   ExerciseResponse,
@@ -81,19 +84,28 @@ export default function LessonDetailPage() {
           }
         }
 
-        // Use subject_id from lesson data if available
+        // Charger la vraie matière (nom, icône, couleur) via son id — sinon le
+        // bouton « Retour à … » afficherait toujours la même matière.
         const subjectId = lessonData.subject_id || lessonData.path_id;
-        setSubject({
-          id: subjectId,
-          name: "Français",
-          slug: "francais",
-          description: "",
-          icon: "📖",
-          color: "#3B82F6",
-          order_index: 0,
-          is_active: true,
-          lesson_count: 0,
-        });
+        try {
+          const subjectData =
+            await getSubjectApiV1SubjectsSubjectIdGet(subjectId);
+          setSubject(subjectData);
+        } catch (subjectErr) {
+          console.warn("Could not load subject:", subjectErr);
+          // Repli neutre (jamais une matière codée en dur).
+          setSubject({
+            id: subjectId,
+            name: "les matières",
+            slug: "",
+            description: "",
+            icon: "📚",
+            color: null,
+            order_index: 0,
+            is_active: true,
+            lesson_count: 0,
+          });
+        }
 
         // Determine the next lesson in the same subject (for "Niveau suivant").
         if (lessonData.subject_id) {
