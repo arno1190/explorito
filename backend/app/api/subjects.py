@@ -5,7 +5,7 @@ Endpoints de gestion des matières
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.auth import get_current_active_user
@@ -30,6 +30,39 @@ def child_content_level(current_user: User, db: Session) -> LevelEnum | None:
         return None
     profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
     return profile.level if profile else None
+
+
+def acting_child(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Annotated[Session, Depends(get_db)],
+    x_acting_child_id: Annotated[str | None, Header()] = None,
+) -> User:
+    """
+    Utilisateur dont la perspective de contenu s'applique (niveau + verrouillage).
+
+    - Un enfant : lui-même.
+    - Un parent (ou admin) « incarnant » un enfant via l'en-tête
+      ``X-Acting-Child-Id`` : cet enfant, à condition que le parent le possède
+      (l'admin peut incarner n'importe quel enfant). Sinon, l'utilisateur courant
+      (aucun filtrage/verrouillage).
+    """
+    if current_user.role == UserRole.CHILD:
+        return current_user
+    if not x_acting_child_id:
+        return current_user
+    try:
+        child_id = UUID(x_acting_child_id)
+    except ValueError:
+        return current_user
+    child = db.query(User).filter(User.id == child_id, User.role == UserRole.CHILD).first()
+    if child is None:
+        return current_user
+    if current_user.role == UserRole.ADMIN:
+        return child
+    profile = db.query(Profile).filter(Profile.user_id == child.id).first()
+    if profile is not None and profile.parent_id == current_user.id:
+        return child
+    return current_user
 
 
 def require_admin(
@@ -57,7 +90,7 @@ def require_admin(
 
 @router.get("", response_model=list[SubjectResponse])
 async def list_subjects(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    acting: Annotated[User, Depends(acting_child)],
     db: Annotated[Session, Depends(get_db)],
     skip: int = Query(0, ge=0, description="Nombre d'éléments à ignorer"),
     limit: int = Query(100, ge=1, le=100, description="Nombre maximum d'éléments à retourner"),
@@ -77,7 +110,7 @@ async def list_subjects(
     """
     from sqlalchemy import func
 
-    level = child_content_level(current_user, db)
+    level = child_content_level(acting, db)
 
     query = db.query(Subject).order_by(Subject.order_index, Subject.name)
 
@@ -265,7 +298,7 @@ async def delete_subject(
 @router.get("/{subject_id}/lessons", response_model=list[LessonResponse])
 async def get_subject_lessons(
     subject_id: UUID,
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    acting: Annotated[User, Depends(acting_child)],
     db: Annotated[Session, Depends(get_db)],
 ) -> list[LessonResponse]:
     """
@@ -287,7 +320,7 @@ async def get_subject_lessons(
     if not subject:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Matière non trouvée")
 
-    level = child_content_level(current_user, db)
+    level = child_content_level(acting, db)
 
     paths_query = db.query(LearningPath).filter(LearningPath.subject_id == subject_id)
     if level is not None:
@@ -306,7 +339,7 @@ async def get_subject_lessons(
         LessonResponse.model_validate(lesson).model_copy(
             update={
                 "subject_id": subject_id,
-                "locked": lesson_locked(current_user.id, lesson, level, db),
+                "locked": lesson_locked(acting.id, lesson, level, db),
             }
         )
         for lesson in lessons

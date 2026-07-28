@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session, joinedload
 
 from app.api.auth import get_current_active_user
-from app.api.subjects import child_content_level, require_admin
+from app.api.subjects import acting_child, child_content_level, require_admin
 from app.core.database import get_db
 from app.models.content import Exercise, LearningPath, Lesson, Subject
 from app.models.progress import ProgressStatus, UserProgress
@@ -30,7 +30,7 @@ router = APIRouter()
 
 @router.get("/recent", response_model=list[RecentLessonResponse])
 async def recent_lessons(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    acting: Annotated[User, Depends(acting_child)],
     db: Annotated[Session, Depends(get_db)],
     limit: int = Query(8, ge=1, le=30),
 ) -> list[RecentLessonResponse]:
@@ -41,7 +41,7 @@ async def recent_lessons(
     création décroissante. Défini avant `/{lesson_id}` pour éviter la collision
     de route.
     """
-    level = child_content_level(current_user, db)
+    level = child_content_level(acting, db)
     query = (
         db.query(Lesson, Subject)
         .join(LearningPath, Lesson.path_id == LearningPath.id)
@@ -61,7 +61,7 @@ async def recent_lessons(
             subject_icon=subject.icon,
             subject_color=subject.color,
             created_at=lesson.created_at,
-            locked=lesson_locked(current_user.id, lesson, level, db),
+            locked=lesson_locked(acting.id, lesson, level, db),
         )
         for lesson, subject in rows
     ]

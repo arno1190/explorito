@@ -126,3 +126,56 @@ def test_parent_is_never_locked(client: TestClient, db_session: Session):
     h = _auth(client, "parent@x.fr")
     lessons = client.get(f"/api/v1/subjects/{subject.id}/lessons", headers=h).json()
     assert all(lz["locked"] is False for lz in lessons)
+
+
+def _link_child(db: Session, child: User, parent: User) -> None:
+    prof = db.query(Profile).filter(Profile.user_id == child.id).first()
+    prof.parent_id = parent.id
+    db.commit()
+
+
+def test_impersonating_parent_sees_child_level_and_locks(client: TestClient, db_session: Session):
+    # Un parent « incarne » son enfant CP : le contenu est filtré à son niveau et
+    # verrouillé selon SA progression (via l'en-tête X-Acting-Child-Id).
+    parent = _make_user(db_session, "papa@x.fr", UserRole.PARENT)
+    child = _make_user(db_session, "kid@x.fr", UserRole.CHILD, level=LevelEnum.CP)
+    _link_child(db_session, child, parent)
+    subject, l1, _e1, l2, _e2 = _seed_two_tiers(db_session)  # contenu CP
+    # une matière d'un autre niveau ne doit pas apparaître pour l'enfant CP
+    other = Subject(name="Histoire", slug="histoire")
+    db_session.add(other)
+    db_session.flush()
+    ce2_path = LearningPath(subject_id=other.id, name="Hist CE2", level=LevelEnum.CE2)
+    db_session.add(ce2_path)
+    db_session.flush()
+    db_session.add(Lesson(path_id=ce2_path.id, name="Hist P1", order_index=1, is_published=True))
+    db_session.commit()
+
+    h = _auth(client, "papa@x.fr")
+    h_imp = {**h, "X-Acting-Child-Id": str(child.id)}
+
+    subjects = client.get("/api/v1/subjects", headers=h_imp).json()
+    names = {s["name"] for s in subjects}
+    assert "Maths" in names
+    assert "Histoire" not in names  # pas de contenu CP
+
+    lessons = client.get(f"/api/v1/subjects/{subject.id}/lessons", headers=h_imp).json()
+    by_id = {lz["id"]: lz for lz in lessons}
+    assert by_id[str(l1.id)]["locked"] is False
+    assert by_id[str(l2.id)]["locked"] is True
+
+
+def test_impersonation_header_ignored_for_non_owned_child(client: TestClient, db_session: Session):
+    # Un parent ne peut pas incarner un enfant qu'il ne possède pas : l'en-tête
+    # est ignoré et il retrouve sa vue de parent (non filtrée, non verrouillée).
+    _make_user(db_session, "stranger@x.fr", UserRole.PARENT)
+    real_parent = _make_user(db_session, "owner@x.fr", UserRole.PARENT)
+    child = _make_user(db_session, "kid2@x.fr", UserRole.CHILD, level=LevelEnum.CP)
+    _link_child(db_session, child, real_parent)
+    subject, _l1, _e1, l2, _e2 = _seed_two_tiers(db_session)
+
+    h = _auth(client, "stranger@x.fr")
+    h_imp = {**h, "X-Acting-Child-Id": str(child.id)}
+    lessons = client.get(f"/api/v1/subjects/{subject.id}/lessons", headers=h_imp).json()
+    # Vue parent : rien n'est verrouillé (l'en-tête a été ignoré).
+    assert all(lz["locked"] is False for lz in lessons)

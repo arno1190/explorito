@@ -18,6 +18,18 @@ instance.interceptors.request.use((config) => {
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // En mode incarnation (parent « joue en tant que » un enfant), on indique
+    // l'enfant actif au backend pour qu'il filtre/verrouille le contenu selon
+    // SON niveau et SA progression, et non ceux du parent.
+    const impersonated = localStorage.getItem("impersonated_child");
+    if (impersonated) {
+      try {
+        const child = JSON.parse(impersonated);
+        if (child?.id) config.headers["X-Acting-Child-Id"] = String(child.id);
+      } catch {
+        // ignore un JSON invalide
+      }
+    }
   }
   return config;
 });
