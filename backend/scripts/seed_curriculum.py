@@ -123,6 +123,29 @@ def reading(question: str, text: str) -> dict[str, Any]:
     return {"type": "reading", "question": question, "content": {"text": text}, "correct_answer": {}}
 
 
+def soroban(
+    question: str,
+    value: int,
+    *,
+    mode: str = "read",
+    columns: int | None = None,
+    explanation: str | None = None,
+) -> dict[str, Any]:
+    """Exercice de boulier : ``mode`` ``read`` (lire) ou ``build`` (construire) ``value``."""
+    content: dict[str, Any] = {"mode": mode, "value": value}
+    if columns is not None:
+        content["columns"] = columns
+    ex: dict[str, Any] = {
+        "type": "soroban",
+        "question": question,
+        "content": content,
+        "correct_answer": {"value": value},
+    }
+    if explanation:
+        ex["explanation"] = explanation
+    return ex
+
+
 def pythagore(question: str, tables: list[int], blanks: int = 6) -> dict[str, Any]:
     """Mini-jeu de tables de multiplication (produits calculés à la correction)."""
     return {

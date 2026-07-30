@@ -7,6 +7,7 @@ import { MultipleChoice } from "./MultipleChoice";
 import { Pythagore } from "./Pythagore";
 import { Reading } from "./Reading";
 import { Reveal } from "./Reveal";
+import { Soroban } from "./Soroban";
 import type {
   AnswerPayload,
   FillBlanksContent,
@@ -15,6 +16,7 @@ import type {
   PythagoreContent,
   ReadingContent,
   RevealContent,
+  SorobanContent,
 } from "./types";
 
 interface ExerciseRendererProps {
@@ -69,6 +71,8 @@ export function ExerciseRenderer({
       );
     case "reading":
       return <Reading {...shared} content={content as ReadingContent} />;
+    case "soroban":
+      return <Soroban {...shared} content={content as SorobanContent} />;
     default:
       return (
         <div className="rounded-xl bg-fun-sun-light p-4 text-fun-text">

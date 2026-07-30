@@ -87,6 +87,15 @@ def check_answer_correctness(exercise: Exercise, user_answer: dict[str, Any]) ->
         tolerance = float(correct_answer.get("tolerance", 0.0)) + 1e-9
         return abs(user_value - float(correct_value)) <= tolerance
 
+    if exercise.type == ExerciseType.SOROBAN.value:
+        # Boulier : le nombre lu ou construit doit être exactement le nombre attendu.
+        try:
+            user_value = int(float(str(user_answer.get("value"))))
+        except (TypeError, ValueError):
+            return False
+        correct_value = correct_answer.get("value")
+        return correct_value is not None and user_value == int(correct_value)
+
     if exercise.type == ExerciseType.PYTHAGORE.value:
         # Mini-jeu : chaque case "AxB" doit valoir A*B ; toutes correctes -> gagné
         cells = user_answer.get("cells")

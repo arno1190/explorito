@@ -24,4 +24,5 @@ export const ExerciseType = {
   pythagore: "pythagore",
   math_problem: "math_problem",
   reading: "reading",
+  soroban: "soroban",
 } as const;

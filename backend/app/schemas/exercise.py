@@ -101,6 +101,26 @@ class ReadingContent(BaseModel):
     image: str | None = None
 
 
+class SorobanContent(BaseModel):
+    """
+    Contenu d'un exercice de boulier (soroban).
+
+    - ``mode`` ``read`` : le boulier affiche ``value``, l'enfant lit le nombre.
+    - ``mode`` ``build`` : l'enfant construit ``value`` en déplaçant les boules.
+    - ``columns`` : nombre de tiges affichées (par défaut, dérivé de ``value``).
+    """
+
+    mode: str = Field(default="read", pattern="^(read|build)$")
+    value: int = Field(..., ge=0, le=999999999)
+    columns: int | None = Field(default=None, ge=1, le=9)
+
+
+class SorobanAnswer(BaseModel):
+    """Réponse d'un exercice de boulier : le nombre lu ou construit."""
+
+    value: int = Field(..., ge=0)
+
+
 BLANK_MARKER = "___"
 
 
@@ -156,6 +176,13 @@ def validate_exercise_payload(
     elif exercise_type == ExerciseType.READING:
         ReadingContent.model_validate(content)
         # Bloc de lecture : pas de bonne réponse (toujours validé).
+
+    elif exercise_type == ExerciseType.SOROBAN:
+        soroban_content = SorobanContent.model_validate(content)
+        soroban_answer = SorobanAnswer.model_validate(correct_answer)
+        # La réponse attendue doit correspondre au nombre affiché/à construire.
+        if soroban_answer.value != soroban_content.value:
+            raise ValueError("correct_answer.value doit être égal à content.value pour un exercice soroban")
 
 
 # --------------------------------------------------------------------------- #

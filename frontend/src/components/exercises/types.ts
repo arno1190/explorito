@@ -38,6 +38,14 @@ export interface ReadingContent {
   image?: string | null;
 }
 
+export interface SorobanContent {
+  /** "read" : lire le nombre affiché ; "build" : construire le nombre cible. */
+  mode: "read" | "build";
+  value: number;
+  /** Nombre de tiges affichées (par défaut, dérivé de `value`). */
+  columns?: number | null;
+}
+
 /** Réponse prête pour l'API `POST /exercises/{id}/submit` (champ `answer`). */
 export type AnswerPayload = Record<string, unknown> | null;
 
