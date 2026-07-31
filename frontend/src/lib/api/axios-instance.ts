@@ -31,6 +31,11 @@ instance.interceptors.request.use((config) => {
       }
     }
   }
+  // Pour un envoi multipart (upload), laisser axios définir le Content-Type
+  // avec la bonne « boundary » plutôt que le JSON par défaut de l'instance.
+  if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+    delete config.headers["Content-Type"];
+  }
   return config;
 });
 
@@ -48,6 +53,18 @@ instance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+/** Upload d'un fichier (multipart) via l'instance authentifiée. */
+export async function uploadFile<T = unknown>(
+  url: string,
+  file: File,
+  field = "file"
+): Promise<T> {
+  const form = new FormData();
+  form.append(field, file);
+  const { data } = await instance.post<T>(url, form);
+  return data;
+}
 
 // Custom instance for Orval - named export required
 export const axiosInstance = <T>(config: AxiosRequestConfig): Promise<T> => {

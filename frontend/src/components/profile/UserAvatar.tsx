@@ -2,7 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { initialsOf, isImageAvatar } from "@/lib/avatars";
+import { initialsOf, isImageAvatar, resolveAvatarSrc } from "@/lib/avatars";
 
 /**
  * Avatar d'un utilisateur : image si `avatar` est une URL, emoji s'il en est un,
@@ -22,7 +22,7 @@ export function UserAvatar({
   if (isImageAvatar(avatar)) {
     return (
       <Avatar className={className}>
-        <AvatarImage src={avatar!} alt={name ?? ""} />
+        <AvatarImage src={resolveAvatarSrc(avatar!)} alt={name ?? ""} />
         <AvatarFallback className="bg-fun-green-light font-bold text-fun-green">
           {initialsOf(name)}
         </AvatarFallback>

@@ -5,7 +5,7 @@ Endpoints pour la gestion des profils enfants
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.api.auth import get_current_user
@@ -13,6 +13,7 @@ from app.core.database import get_db
 from app.core.security import get_password_hash
 from app.models.user import Profile, User, UserRole
 from app.schemas.children import ChildCreate, ChildResponse, ChildUpdate
+from app.services.uploads import save_avatar
 
 router = APIRouter()
 
@@ -231,6 +232,38 @@ async def update_child(
     db.commit()
     db.refresh(profile)
 
+    return ChildResponse(
+        id=profile.user_id,
+        name=profile.display_name,
+        birth_date=profile.date_of_birth,
+        parent_id=profile.parent_id,
+        level=profile.level,
+        avatar_url=profile.avatar_url,
+        created_at=profile.created_at,
+    )
+
+
+@router.post("/{child_id}/avatar", response_model=ChildResponse)
+async def upload_child_avatar(
+    child_id: UUID,
+    file: Annotated[UploadFile, File(description="Image d'avatar (PNG, JPEG, WebP, GIF)")],
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> ChildResponse:
+    """
+    Téléverse une image comme avatar d'un enfant du parent connecté.
+
+    Args:
+        child_id: ID de l'utilisateur enfant.
+        file: Fichier image (multipart).
+
+    Returns:
+        Profil de l'enfant mis à jour.
+    """
+    profile = _require_owned_child(child_id, current_user, db)
+    profile.avatar_url = save_avatar(file)
+    db.commit()
+    db.refresh(profile)
     return ChildResponse(
         id=profile.user_id,
         name=profile.display_name,

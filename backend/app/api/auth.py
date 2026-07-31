@@ -5,7 +5,7 @@ Endpoints d'authentification JWT
 from datetime import timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -26,6 +26,7 @@ from app.schemas.auth import (
     UserRegister,
     UserResponse,
 )
+from app.services.uploads import save_avatar
 
 router = APIRouter()
 
@@ -377,6 +378,32 @@ async def update_my_profile(
         profile.display_name = data.display_name
     if data.avatar_url is not None:
         profile.avatar_url = data.avatar_url or None
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
+@router.post("/me/avatar", response_model=UserResponse)
+async def upload_my_avatar(
+    file: Annotated[UploadFile, File(description="Image d'avatar (PNG, JPEG, WebP, GIF)")],
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> User:
+    """
+    Téléverse une image comme avatar de son propre profil.
+
+    Args:
+        file: Fichier image (multipart).
+        current_user: Utilisateur authentifié.
+        db: Session de base de données.
+
+    Returns:
+        L'utilisateur avec l'avatar mis à jour.
+    """
+    profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
+    if profile is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Profil non trouvé")
+    profile.avatar_url = save_avatar(file)
     db.commit()
     db.refresh(current_user)
     return current_user

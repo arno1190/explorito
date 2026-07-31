@@ -31,6 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserAvatar } from "@/components/profile/UserAvatar";
 import { AvatarPicker } from "@/components/profile/AvatarPicker";
+import { uploadFile } from "@/lib/api/axios-instance";
 import { Plus, Trash2, Play, TrendingUp } from "lucide-react";
 import type { ChildResponse, ChildStatsResponse } from "@/lib/api/model";
 
@@ -161,6 +162,11 @@ export default function DashboardPage() {
       console.error("Failed to change avatar:", err);
       loadChildren();
     }
+  };
+
+  const handleUploadChildAvatar = async (id: string, file: File) => {
+    await uploadFile(`/api/v1/children/${id}/avatar`, file);
+    loadChildren();
   };
 
   const calculateAge = (birthDate: string) => {
@@ -328,6 +334,7 @@ export default function DashboardPage() {
                     onOpenChange={(o) => !o && setAvatarChildId(null)}
                     current={child.avatar_url}
                     onSelect={(a) => handleChangeAvatar(child.id, a)}
+                    uploader={(f) => handleUploadChildAvatar(child.id, f)}
                     title={`Avatar de ${child.name}`}
                   />
                   <CardDescription>

@@ -21,6 +21,7 @@ import {
 import { UserAvatar } from "@/components/profile/UserAvatar";
 import { AvatarPicker } from "@/components/profile/AvatarPicker";
 import { useUpdateMyProfileApiV1AuthMePatch as useUpdateProfile } from "@/lib/api/generated/auth/auth";
+import { uploadFile } from "@/lib/api/axios-instance";
 import { useGetUserCollectionApiV1CollectionMeGet as useMyCollection } from "@/lib/api/generated/collection/collection";
 import { LogOut, ArrowLeft, Smile } from "lucide-react";
 
@@ -71,6 +72,11 @@ export function Header() {
     } catch (err) {
       console.error("Failed to update avatar:", err);
     }
+  };
+
+  const handleUploadAvatar = async (file: File) => {
+    await uploadFile("/api/v1/auth/me/avatar", file);
+    await refreshUser();
   };
 
   const homeHref = actingRole ? actingRoleHome(actingRole) : "/";
@@ -188,6 +194,7 @@ export function Header() {
                   onOpenChange={setPickerOpen}
                   current={currentAvatar}
                   onSelect={handleSelectAvatar}
+                  uploader={handleUploadAvatar}
                 />
               </>
             ) : (
