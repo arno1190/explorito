@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth";
@@ -17,8 +18,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LogOut, ArrowLeft } from "lucide-react";
+import { UserAvatar } from "@/components/profile/UserAvatar";
+import { AvatarPicker } from "@/components/profile/AvatarPicker";
+import { useUpdateMyProfileApiV1AuthMePatch as useUpdateProfile } from "@/lib/api/generated/auth/auth";
+import { useGetUserCollectionApiV1CollectionMeGet as useMyCollection } from "@/lib/api/generated/collection/collection";
+import { LogOut, ArrowLeft, Smile } from "lucide-react";
 
 const NAV_LINKS: Record<ActingRole, { href: string; label: string }[]> = {
   child: [
@@ -37,21 +41,36 @@ export function Header() {
   const {
     user,
     logout,
+    refreshUser,
     isAuthenticated,
     impersonatedChild,
     stopImpersonation,
   } = useAuth();
   const actingRole = useActingRole();
   const pathname = usePathname();
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const updateProfile = useUpdateProfile();
 
-  const getInitials = (name?: string) => {
-    if (!name) return "U";
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
+  // Solde XP affiché dans la barre : uniquement en contexte enfant (l'enfant
+  // connecté, ou le parent qui l'incarne — l'en-tête X-Acting-Child-Id renvoie
+  // alors le porte-monnaie de l'enfant).
+  const isChildContext = actingRole === "child";
+  const { data: wallet } = useMyCollection({
+    query: { enabled: isAuthenticated && isChildContext },
+  });
+
+  const displayName = impersonatedChild?.name || user?.profile?.display_name;
+  const currentAvatar = impersonatedChild
+    ? impersonatedChild.avatar_url
+    : user?.profile?.avatar_url;
+
+  const handleSelectAvatar = async (avatar: string) => {
+    try {
+      await updateProfile.mutateAsync({ data: { avatar_url: avatar } });
+      await refreshUser();
+    } catch (err) {
+      console.error("Failed to update avatar:", err);
+    }
   };
 
   const homeHref = actingRole ? actingRoleHome(actingRole) : "/";
@@ -109,29 +128,34 @@ export function Header() {
                   );
                 })}
 
+                {isChildContext && (
+                  <div
+                    className="flex items-center gap-2 rounded-full bg-fun-sun-light px-3 py-1.5"
+                    title="XP à dépenser · XP total gagné"
+                  >
+                    <span className="text-sm font-extrabold text-fun-sun">
+                      ⚡ {wallet?.balance ?? 0}
+                    </span>
+                    <span className="text-xs font-bold text-fun-text-muted">
+                      ⭐ {wallet?.total_earned ?? 0}
+                    </span>
+                  </div>
+                )}
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
                       className="relative h-10 w-10 rounded-full"
                     >
-                      <Avatar>
-                        <AvatarFallback className="bg-fun-green-light text-fun-green font-bold">
-                          {getInitials(
-                            impersonatedChild?.name ||
-                              user?.profile?.display_name
-                          )}
-                        </AvatarFallback>
-                      </Avatar>
+                      <UserAvatar avatar={currentAvatar} name={displayName} />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuLabel>
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">
-                          {impersonatedChild?.name ||
-                            user?.profile?.display_name ||
-                            user?.email}
+                          {displayName || user?.email}
                         </p>
                         <p className="text-xs leading-none text-muted-foreground">
                           {user?.email}
@@ -139,6 +163,12 @@ export function Header() {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    {!impersonatedChild && (
+                      <DropdownMenuItem onClick={() => setPickerOpen(true)}>
+                        <Smile className="mr-2 h-4 w-4" />
+                        <span>Choisir mon avatar</span>
+                      </DropdownMenuItem>
+                    )}
                     {impersonatedChild ? (
                       <DropdownMenuItem onClick={stopImpersonation}>
                         <ArrowLeft className="mr-2 h-4 w-4" />
@@ -152,6 +182,13 @@ export function Header() {
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
+
+                <AvatarPicker
+                  open={pickerOpen}
+                  onOpenChange={setPickerOpen}
+                  current={currentAvatar}
+                  onSelect={handleSelectAvatar}
+                />
               </>
             ) : (
               <>

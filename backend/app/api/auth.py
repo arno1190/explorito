@@ -19,6 +19,7 @@ from app.core.security import (
 )
 from app.models.user import Profile, User
 from app.schemas.auth import (
+    ProfileUpdate,
     RefreshTokenRequest,
     Token,
     UserLogin,
@@ -349,6 +350,35 @@ async def get_current_user_info(
     Returns:
         Informations complètes de l'utilisateur avec son profil
     """
+    return current_user
+
+
+@router.patch("/me", response_model=UserResponse)
+async def update_my_profile(
+    data: ProfileUpdate,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> User:
+    """
+    Met à jour son propre profil (avatar, nom d'affichage).
+
+    Args:
+        data: Champs à modifier (seuls ceux fournis sont appliqués).
+        current_user: Utilisateur authentifié.
+        db: Session de base de données.
+
+    Returns:
+        L'utilisateur avec son profil mis à jour.
+    """
+    profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
+    if profile is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Profil non trouvé")
+    if data.display_name is not None:
+        profile.display_name = data.display_name
+    if data.avatar_url is not None:
+        profile.avatar_url = data.avatar_url or None
+    db.commit()
+    db.refresh(current_user)
     return current_user
 
 

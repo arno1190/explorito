@@ -43,6 +43,7 @@ class ChildUpdate(BaseModel):
     birth_date: date | None = Field(None, description="Date de naissance")
     password: str | None = Field(None, min_length=8, description="Nouveau mot de passe")
     level: LevelEnum | None = Field(None, description="Niveau scolaire (PS à CM2)")
+    avatar_url: str | None = Field(None, max_length=512, description="Avatar (emoji ou URL d'image)")
 
     class Config:
         json_schema_extra = {"example": {"name": "Alice", "birth_date": "2015-06-15"}}
@@ -58,6 +59,7 @@ class ChildResponse(BaseModel):
     birth_date: date | None = None
     parent_id: UUID
     level: LevelEnum | None = None
+    avatar_url: str | None = None
     created_at: datetime
 
     class Config:

@@ -57,6 +57,7 @@ export * from "./listSubjectsApiV1SubjectsGetParams";
 export * from "./pokedexEntry";
 export * from "./pokedexGridEntry";
 export * from "./profileResponse";
+export * from "./profileUpdate";
 export * from "./progressDashboard";
 export * from "./progressStatus";
 export * from "./purchaseRequest";

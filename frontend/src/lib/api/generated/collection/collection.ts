@@ -48,7 +48,7 @@ export const getGetUserCollectionApiV1CollectionMeGetQueryKey = () => {
 
 export const getGetUserCollectionApiV1CollectionMeGetQueryOptions = <
   TData = Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(options?: {
   query?: Partial<
     UseQueryOptions<
@@ -78,11 +78,12 @@ export const getGetUserCollectionApiV1CollectionMeGetQueryOptions = <
 export type GetUserCollectionApiV1CollectionMeGetQueryResult = NonNullable<
   Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>
 >;
-export type GetUserCollectionApiV1CollectionMeGetQueryError = unknown;
+export type GetUserCollectionApiV1CollectionMeGetQueryError =
+  HTTPValidationError;
 
 export function useGetUserCollectionApiV1CollectionMeGet<
   TData = Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options: {
     query: Partial<
@@ -107,7 +108,7 @@ export function useGetUserCollectionApiV1CollectionMeGet<
 };
 export function useGetUserCollectionApiV1CollectionMeGet<
   TData = Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -132,7 +133,7 @@ export function useGetUserCollectionApiV1CollectionMeGet<
 };
 export function useGetUserCollectionApiV1CollectionMeGet<
   TData = Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -153,7 +154,7 @@ export function useGetUserCollectionApiV1CollectionMeGet<
 
 export function useGetUserCollectionApiV1CollectionMeGet<
   TData = Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -197,7 +198,7 @@ export const getGetPokedexApiV1CollectionPokedexGetQueryKey = () => {
 
 export const getGetPokedexApiV1CollectionPokedexGetQueryOptions = <
   TData = Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(options?: {
   query?: Partial<
     UseQueryOptions<
@@ -226,11 +227,11 @@ export const getGetPokedexApiV1CollectionPokedexGetQueryOptions = <
 export type GetPokedexApiV1CollectionPokedexGetQueryResult = NonNullable<
   Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>
 >;
-export type GetPokedexApiV1CollectionPokedexGetQueryError = unknown;
+export type GetPokedexApiV1CollectionPokedexGetQueryError = HTTPValidationError;
 
 export function useGetPokedexApiV1CollectionPokedexGet<
   TData = Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options: {
     query: Partial<
@@ -255,7 +256,7 @@ export function useGetPokedexApiV1CollectionPokedexGet<
 };
 export function useGetPokedexApiV1CollectionPokedexGet<
   TData = Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -280,7 +281,7 @@ export function useGetPokedexApiV1CollectionPokedexGet<
 };
 export function useGetPokedexApiV1CollectionPokedexGet<
   TData = Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -301,7 +302,7 @@ export function useGetPokedexApiV1CollectionPokedexGet<
 
 export function useGetPokedexApiV1CollectionPokedexGet<
   TData = Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<

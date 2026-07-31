@@ -15,5 +15,6 @@ export interface ChildResponse {
   birth_date?: string | null;
   parent_id: string;
   level?: LevelEnum | null;
+  avatar_url?: string | null;
   created_at: string;
 }

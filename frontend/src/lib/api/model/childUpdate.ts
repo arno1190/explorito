@@ -20,4 +20,6 @@ export interface ChildUpdate {
   password?: string | null;
   /** Niveau scolaire (PS à CM2) */
   level?: LevelEnum | null;
+  /** Avatar (emoji ou URL d'image) */
+  avatar_url?: string | null;
 }

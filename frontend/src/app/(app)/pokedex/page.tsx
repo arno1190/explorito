@@ -21,11 +21,21 @@ export default function PokedexPage() {
   const [celebrating, setCelebrating] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<PokedexGridEntry | null>(null);
+  const [filter, setFilter] = useState<"all" | "owned" | "locked">("all");
 
   const balance = meQuery.data?.balance ?? 0;
   const ownedCount = meQuery.data?.unlocked_count ?? 0;
   const total = meQuery.data?.total_count ?? pokedexQuery.data?.length ?? 0;
   const pokedex = pokedexQuery.data ?? [];
+  const filtered = pokedex.filter((p) =>
+    filter === "owned" ? p.owned : filter === "locked" ? !p.owned : true
+  );
+
+  const FILTERS: { key: typeof filter; label: string }[] = [
+    { key: "all", label: `Tous (${total})` },
+    { key: "owned", label: `Ma collection (${ownedCount})` },
+    { key: "locked", label: `À débloquer (${total - ownedCount})` },
+  ];
 
   const buy = async (entry: PokedexGridEntry) => {
     setError(null);
@@ -108,9 +118,28 @@ export default function PokedexPage() {
         </div>
       )}
 
+      {/* Filtre : tous / possédés / à débloquer */}
+      <div className="mb-4 flex flex-wrap gap-2">
+        {FILTERS.map((f) => (
+          <button
+            key={f.key}
+            type="button"
+            onClick={() => setFilter(f.key)}
+            className={cn(
+              "min-h-[40px] rounded-full px-4 py-2 text-sm font-bold transition-all active:scale-95",
+              filter === f.key
+                ? "bg-fun-green text-white"
+                : "bg-white text-fun-text candy-shadow hover:bg-fun-green-light"
+            )}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
       {/* Grid */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-        {pokedex.map((p) => {
+        {filtered.map((p) => {
           const affordable = balance >= p.price;
           return (
             <div
@@ -190,6 +219,14 @@ export default function PokedexPage() {
           );
         })}
       </div>
+
+      {filtered.length === 0 && (
+        <div className="mt-8 text-center text-fun-text-muted">
+          {filter === "owned"
+            ? "Tu n'as pas encore de Pokémon. Gagne de l'XP pour en débloquer !"
+            : "Aucun Pokémon dans cette catégorie."}
+        </div>
+      )}
 
       <PokemonCardModal
         id={selected?.id ?? null}

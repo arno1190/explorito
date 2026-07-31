@@ -21,6 +21,7 @@ interface AuthContextType {
   login: (data: UserLogin) => Promise<void>;
   register: (data: UserRegister) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
   isAuthenticated: boolean;
   impersonatedChild: ChildResponse | null;
   impersonateChild: (child: ChildResponse) => void;
@@ -89,6 +90,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await login({ email: data.email, password: data.password });
   };
 
+  const refreshUser = async () => {
+    if (!localStorage.getItem("access_token")) return;
+    try {
+      setUser(await getCurrentUserInfoApiV1AuthMeGet());
+    } catch (error) {
+      console.error("Failed to refresh user:", error);
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("impersonated_child");
@@ -117,6 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         register,
         logout,
+        refreshUser,
         isAuthenticated: !!user,
         impersonatedChild,
         impersonateChild,

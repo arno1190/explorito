@@ -105,6 +105,13 @@ class ProfileResponse(BaseModel):
         from_attributes = True
 
 
+class ProfileUpdate(BaseModel):
+    """Mise à jour de son propre profil (avatar, nom d'affichage)."""
+
+    display_name: str | None = Field(None, min_length=1, max_length=100, description="Nom d'affichage")
+    avatar_url: str | None = Field(None, max_length=512, description="Avatar (emoji ou URL d'image)")
+
+
 class UserResponse(BaseModel):
     """
     Schéma pour la réponse avec les informations utilisateur

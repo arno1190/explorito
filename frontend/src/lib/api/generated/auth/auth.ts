@@ -23,6 +23,7 @@ import type {
 import type {
   BodyLoginFormApiV1AuthLoginFormPost,
   HTTPValidationError,
+  ProfileUpdate,
   RefreshTokenRequest,
   Token,
   UserLogin,
@@ -614,6 +615,101 @@ export function useGetCurrentUserInfoApiV1AuthMeGet<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
+/**
+ * Met à jour son propre profil (avatar, nom d'affichage).
+
+Args:
+    data: Champs à modifier (seuls ceux fournis sont appliqués).
+    current_user: Utilisateur authentifié.
+    db: Session de base de données.
+
+Returns:
+    L'utilisateur avec son profil mis à jour.
+ * @summary Update My Profile
+ */
+export const updateMyProfileApiV1AuthMePatch = (
+  profileUpdate: ProfileUpdate,
+  signal?: AbortSignal
+) => {
+  return axiosInstance<UserResponse>({
+    url: `/api/v1/auth/me`,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    data: profileUpdate,
+    signal,
+  });
+};
+
+export const getUpdateMyProfileApiV1AuthMePatchMutationOptions = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateMyProfileApiV1AuthMePatch>>,
+    TError,
+    { data: ProfileUpdate },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateMyProfileApiV1AuthMePatch>>,
+  TError,
+  { data: ProfileUpdate },
+  TContext
+> => {
+  const mutationKey = ["updateMyProfileApiV1AuthMePatch"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateMyProfileApiV1AuthMePatch>>,
+    { data: ProfileUpdate }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return updateMyProfileApiV1AuthMePatch(data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateMyProfileApiV1AuthMePatchMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateMyProfileApiV1AuthMePatch>>
+>;
+export type UpdateMyProfileApiV1AuthMePatchMutationBody = ProfileUpdate;
+export type UpdateMyProfileApiV1AuthMePatchMutationError = HTTPValidationError;
+
+/**
+ * @summary Update My Profile
+ */
+export const useUpdateMyProfileApiV1AuthMePatch = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateMyProfileApiV1AuthMePatch>>,
+      TError,
+      { data: ProfileUpdate },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateMyProfileApiV1AuthMePatch>>,
+  TError,
+  { data: ProfileUpdate },
+  TContext
+> => {
+  return useMutation(
+    getUpdateMyProfileApiV1AuthMePatchMutationOptions(options),
+    queryClient
+  );
+};
 /**
  * Déconnexion de l'utilisateur
 

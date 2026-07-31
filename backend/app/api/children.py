@@ -77,6 +77,7 @@ async def get_children(
                 birth_date=profile.date_of_birth,
                 parent_id=profile.parent_id,
                 level=profile.level,
+                avatar_url=profile.avatar_url,
                 created_at=profile.created_at,
             )
         )
@@ -126,6 +127,7 @@ async def get_child(
         birth_date=profile.date_of_birth,
         parent_id=profile.parent_id,
         level=profile.level,
+        avatar_url=profile.avatar_url,
         created_at=profile.created_at,
     )
 
@@ -189,6 +191,7 @@ async def create_child(
         birth_date=child_profile.date_of_birth,
         parent_id=child_profile.parent_id,
         level=child_profile.level,
+        avatar_url=child_profile.avatar_url,
         created_at=child_profile.created_at,
     )
 
@@ -218,6 +221,8 @@ async def update_child(
         profile.date_of_birth = child_data.birth_date
     if child_data.level is not None:
         profile.level = child_data.level
+    if child_data.avatar_url is not None:
+        profile.avatar_url = child_data.avatar_url or None
     if child_data.password is not None:
         child_user = db.query(User).filter(User.id == child_id).first()
         if child_user is not None:
@@ -232,6 +237,7 @@ async def update_child(
         birth_date=profile.date_of_birth,
         parent_id=profile.parent_id,
         level=profile.level,
+        avatar_url=profile.avatar_url,
         created_at=profile.created_at,
     )
 

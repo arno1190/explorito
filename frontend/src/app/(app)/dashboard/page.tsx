@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { UserAvatar } from "@/components/profile/UserAvatar";
+import { AvatarPicker } from "@/components/profile/AvatarPicker";
 import { Plus, Trash2, Play, TrendingUp } from "lucide-react";
 import type { ChildResponse, ChildStatsResponse } from "@/lib/api/model";
 
@@ -57,6 +59,7 @@ export default function DashboardPage() {
   const [password, setPassword] = useState("");
   const [level, setLevel] = useState<LevelEnum>("cp");
   const [error, setError] = useState("");
+  const [avatarChildId, setAvatarChildId] = useState<string | null>(null);
 
   useEffect(() => {
     loadChildren();
@@ -145,6 +148,18 @@ export default function DashboardPage() {
     } catch (err) {
       console.error("Failed to change level:", err);
       loadChildren(); // revert to server truth
+    }
+  };
+
+  const handleChangeAvatar = async (id: string, avatar: string) => {
+    setChildren((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, avatar_url: avatar } : c))
+    );
+    try {
+      await updateChildApiV1ChildrenChildIdPut(id, { avatar_url: avatar });
+    } catch (err) {
+      console.error("Failed to change avatar:", err);
+      loadChildren();
     }
   };
 
@@ -284,7 +299,22 @@ export default function DashboardPage() {
               <Card key={child.id} className="overflow-hidden candy-shadow">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-xl">{child.name}</CardTitle>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setAvatarChildId(child.id)}
+                        title="Changer l'avatar"
+                        className="rounded-full ring-fun-green transition-all hover:ring-2 active:scale-95"
+                      >
+                        <UserAvatar
+                          avatar={child.avatar_url}
+                          name={child.name}
+                          className="h-12 w-12"
+                          textClassName="text-2xl"
+                        />
+                      </button>
+                      <CardTitle className="text-xl">{child.name}</CardTitle>
+                    </div>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -293,6 +323,13 @@ export default function DashboardPage() {
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
+                  <AvatarPicker
+                    open={avatarChildId === child.id}
+                    onOpenChange={(o) => !o && setAvatarChildId(null)}
+                    current={child.avatar_url}
+                    onSelect={(a) => handleChangeAvatar(child.id, a)}
+                    title={`Avatar de ${child.name}`}
+                  />
                   <CardDescription>
                     {child.birth_date
                       ? `Âge : ${calculateAge(child.birth_date)}`
