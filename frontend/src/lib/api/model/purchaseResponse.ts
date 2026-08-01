@@ -4,14 +4,16 @@
  * Explorito - Application Éducative
  * OpenAPI spec version: 1.0.0
  */
-import type { PokedexEntry } from "./pokedexEntry";
+import type { CatalogItem } from "./catalogItem";
 
 /**
  * Résultat d'un achat.
  */
 export interface PurchaseResponse {
-  pokemon: PokedexEntry;
+  item: CatalogItem;
+  catalog: string;
   /** Nouveau solde XP après achat */
   balance: number;
+  /** Objets débloqués dans ce catalogue */
   unlocked_count: number;
 }

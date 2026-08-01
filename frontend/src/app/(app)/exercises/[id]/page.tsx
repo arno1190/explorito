@@ -20,7 +20,7 @@ import {
   useGetLessonApiV1LessonsLessonIdGet as useLesson,
   useGetLessonExercisesApiV1LessonsLessonIdExercisesGet as useLessonExercises,
 } from "@/lib/api/generated/lessons/lessons";
-import { getGetUserCollectionApiV1CollectionMeGetQueryKey } from "@/lib/api/generated/collection/collection";
+import { getGetWalletApiV1CollectionMeGetQueryKey } from "@/lib/api/generated/collection/collection";
 import type { ExerciseSubmitResponse } from "@/lib/api/model";
 
 export default function ExercisePage() {
@@ -80,7 +80,7 @@ export default function ExercisePage() {
     // gain a lieu, sans recharger la page.
     if (res.xp_awarded) {
       queryClient.invalidateQueries({
-        queryKey: getGetUserCollectionApiV1CollectionMeGetQueryKey(),
+        queryKey: getGetWalletApiV1CollectionMeGetQueryKey(),
       });
     }
   };

@@ -1,0 +1,121 @@
+[
+  {
+    "id": 1,
+    "name_fr": "Le Soleil",
+    "price": 20,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Solar_prominence_from_STEREO_spacecraft_September_29%2C_2008.jpg/330px-Solar_prominence_from_STEREO_spacecraft_September_29%2C_2008.jpg",
+    "fact": "Le Soleil est l’étoile de type naine jaune du Système solaire, qui se situe dans le bras d'Orion, à environ 8 kpc du centre galactique de la Voie lactée.…"
+  },
+  {
+    "id": 2,
+    "name_fr": "Mercure",
+    "price": 20,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Mercury_in_color_-_Prockter07_centered.jpg/330px-Mercury_in_color_-_Prockter07_centered.jpg",
+    "fact": "Mercure est la planète la plus proche du Soleil et la moins massive du Système solaire.…"
+  },
+  {
+    "id": 3,
+    "name_fr": "Vénus",
+    "price": 25,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/PIA23791-Venus-RealAndEnhancedContrastViews-20200608_%28cropped%29.jpg/330px-PIA23791-Venus-RealAndEnhancedContrastViews-20200608_%28cropped%29.jpg",
+    "fact": "Vénus est la deuxième planète du Système solaire par ordre d'éloignement au Soleil, et la sixième plus grosse aussi bien par la masse que par le diamètre."
+  },
+  {
+    "id": 4,
+    "name_fr": "La Terre",
+    "price": 30,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/The_Blue_Marble_%28remastered%29.jpg/330px-The_Blue_Marble_%28remastered%29.jpg",
+    "fact": "La Terre est la troisième planète par ordre d'éloignement au Soleil et la cinquième plus grande du Système solaire aussi bien par la masse que par le diamètre.…"
+  },
+  {
+    "id": 5,
+    "name_fr": "La Lune",
+    "price": 40,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/FullMoon2010.jpg/330px-FullMoon2010.jpg",
+    "fact": "La Lune, ou Terre I, est l'unique satellite naturel permanent de la planète Terre.…"
+  },
+  {
+    "id": 6,
+    "name_fr": "Mars",
+    "price": 50,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Mars_Valles_Marineris_EDIT.jpg/330px-Mars_Valles_Marineris_EDIT.jpg",
+    "fact": "Mars est la quatrième planète du Système solaire par ordre croissant de la distance au Soleil et la deuxième par ordre croissant de la taille et de la masse.…"
+  },
+  {
+    "id": 7,
+    "name_fr": "Jupiter",
+    "price": 55,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Hubble%E2%80%99s_observation_of_Jupiter_in_2021_%2851688147562%29.jpg/330px-Hubble%E2%80%99s_observation_of_Jupiter_in_2021_%2851688147562%29.jpg",
+    "fact": "Jupiter est la cinquième planète du Système solaire par ordre d'éloignement au Soleil, et la plus grande par la taille et la masse devant Saturne, qui est comme elle une planète géante gazeuse.…"
+  },
+  {
+    "id": 8,
+    "name_fr": "Saturne",
+    "price": 70,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Saturn_during_Equinox.jpg/330px-Saturn_during_Equinox.jpg",
+    "fact": "Saturne est la sixième planète du Système solaire par ordre d'éloignement au Soleil, et la deuxième plus grande par la taille et la masse après Jupiter. C'est une planète géante gazeuse comme Jupiter.…"
+  },
+  {
+    "id": 9,
+    "name_fr": "Uranus",
+    "price": 80,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Uranus2.jpg/330px-Uranus2.jpg",
+    "fact": "Uranus est la septième planète du Système solaire par ordre d'éloignement du Soleil.…"
+  },
+  {
+    "id": 10,
+    "name_fr": "Neptune",
+    "price": 90,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Neptune_Voyager2_color_calibrated.png/330px-Neptune_Voyager2_color_calibrated.png",
+    "fact": "Neptune est la huitième planète par ordre d'éloignement du Soleil et la plus éloignée de l'étoile dans le Système solaire qui soit connue.…"
+  },
+  {
+    "id": 11,
+    "name_fr": "Pluton",
+    "price": 105,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Pluto_in_True_Color_-_High-Res.jpg/330px-Pluto_in_True_Color_-_High-Res.jpg",
+    "fact": "Pluton, officiellement désignée par (134340) Pluton, est une planète naine, la plus volumineuse connue dans le Système solaire, et la deuxième en ce qui concerne sa masse.…"
+  },
+  {
+    "id": 12,
+    "name_fr": "Cérès",
+    "price": 120,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Ceres_-_RC3_-_Haulani_Crater_%2822381131691%29.jpg/330px-Ceres_-_RC3_-_Haulani_Crater_%2822381131691%29.jpg",
+    "fact": "(1) Cérès est un astéroïde et une planète naine du Système solaire. C'est la seule planète naine située dans la ceinture d'astéroïdes, dont elle constitue environ un tiers de la masse totale.…"
+  },
+  {
+    "id": 13,
+    "name_fr": "Io",
+    "price": 135,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Io_highest_resolution_true_color.jpg/330px-Io_highest_resolution_true_color.jpg",
+    "fact": "Io, ou Jupiter I, est un satellite naturel de Jupiter. C'est la troisième plus grande lune galiléenne et celle ayant l'orbite la plus proche de Jupiter, possédant un demi-grand axe de 421 800 km et une période de révolut…"
+  },
+  {
+    "id": 14,
+    "name_fr": "Europe",
+    "price": 150,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/JUNO_Europe.jpg/330px-JUNO_Europe.jpg",
+    "fact": "Europe, ou Jupiter II, est un satellite naturel de Jupiter. C'est la plus petite lune galiléenne et la sixième lune la plus proche de la planète parmi les 115 connues de Jupiter.…"
+  },
+  {
+    "id": 15,
+    "name_fr": "Ganymède",
+    "price": 165,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Ganymede_-_Perijove_34_Composite.png/330px-Ganymede_-_Perijove_34_Composite.png",
+    "fact": "Ganymède, de nom international Jupiter III Ganymede, est un satellite naturel de Jupiter.…"
+  },
+  {
+    "id": 16,
+    "name_fr": "Titan",
+    "price": 180,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/PIA21923-Titan-SaturnMoon-InfraredViews-20180718.jpg/330px-PIA21923-Titan-SaturnMoon-InfraredViews-20180718.jpg",
+    "fact": "Titan, aussi appelé Saturne VI, est le plus grand satellite naturel de Saturne.…"
+  },
+  {
+    "id": 17,
+    "name_fr": "La comète de Halley",
+    "price": 200,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Lspn_comet_halley.jpg/330px-Lspn_comet_halley.jpg",
+    "fact": "La comète de Halley, dont la désignation officielle est 1P/Halley, est la plus connue de toutes les comètes.…"
+  }
+]

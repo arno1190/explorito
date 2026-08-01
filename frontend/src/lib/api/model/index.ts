@@ -8,6 +8,11 @@
 export * from "./achievementRarity";
 export * from "./achievementResponse";
 export * from "./bodyLoginFormApiV1AuthLoginFormPost";
+export * from "./bodyUploadChildAvatarApiV1ChildrenChildIdAvatarPost";
+export * from "./bodyUploadMyAvatarApiV1AuthMeAvatarPost";
+export * from "./catalogGridItem";
+export * from "./catalogInfo";
+export * from "./catalogItem";
 export * from "./childCreate";
 export * from "./childResponse";
 export * from "./childStatsResponse";
@@ -85,3 +90,4 @@ export * from "./userRegister";
 export * from "./userResponse";
 export * from "./userRole";
 export * from "./validationError";
+export * from "./walletSummary";

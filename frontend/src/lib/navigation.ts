@@ -15,6 +15,7 @@ const CHILD_PREFIXES = [
   "/subjects",
   "/lessons",
   "/exercises",
+  "/collection",
   "/pokedex",
   "/pythagore",
 ];

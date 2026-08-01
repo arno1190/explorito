@@ -22,14 +22,14 @@ import { UserAvatar } from "@/components/profile/UserAvatar";
 import { AvatarPicker } from "@/components/profile/AvatarPicker";
 import { useUpdateMyProfileApiV1AuthMePatch as useUpdateProfile } from "@/lib/api/generated/auth/auth";
 import { uploadFile } from "@/lib/api/axios-instance";
-import { useGetUserCollectionApiV1CollectionMeGet as useMyCollection } from "@/lib/api/generated/collection/collection";
+import { useGetWalletApiV1CollectionMeGet as useMyCollection } from "@/lib/api/generated/collection/collection";
 import { LogOut, ArrowLeft, Smile } from "lucide-react";
 
 const NAV_LINKS: Record<ActingRole, { href: string; label: string }[]> = {
   child: [
     { href: "/play", label: "Jouer" },
     { href: "/subjects", label: "Matières" },
-    { href: "/pokedex", label: "Pokédex" },
+    { href: "/collection", label: "Collections" },
   ],
   parent: [{ href: "/dashboard", label: "Tableau de bord" }],
   admin: [

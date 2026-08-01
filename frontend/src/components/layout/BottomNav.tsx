@@ -7,7 +7,7 @@ import { useActingRole } from "@/lib/navigation";
 const CHILD_TABS = [
   { href: "/play", icon: Gamepad2, label: "Jouer" },
   { href: "/subjects", icon: BookOpen, label: "Matières" },
-  { href: "/pokedex", icon: BookMarked, label: "Pokédex" },
+  { href: "/collection", icon: BookMarked, label: "Collections" },
 ];
 
 const PARENT_TABS = [

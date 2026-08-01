@@ -1,0 +1,282 @@
+[
+  {
+    "id": 1,
+    "name_fr": "Tyrannosaure",
+    "price": 20,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Sues_skeleton.jpg/330px-Sues_skeleton.jpg",
+    "fact": "Tyrannosaurus, communément appelé Tyrannosaure, est un genre fossile de dinosaures théropodes appartenant à la famille des Tyrannosauridae et ayant vécu au Maastrichtien, dernier étage du Crétacé, il y a environ 69 à 66…"
+  },
+  {
+    "id": 2,
+    "name_fr": "Tricératops",
+    "price": 20,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Triceratops_mount.jpg/330px-Triceratops_mount.jpg",
+    "fact": "Triceratops est un genre fossile de dinosaures herbivores de la famille des cératopsidés qui a vécu à la fin du Maastrichtien, au Crétacé supérieur, il y a 68 à 66 millions d'années, dans ce qui est maintenant l'Amérique…"
+  },
+  {
+    "id": 3,
+    "name_fr": "Vélociraptor",
+    "price": 20,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Velociraptor_skeleton_white_background.jpg/330px-Velociraptor_skeleton_white_background.jpg",
+    "fact": "Velociraptor, souvent francisé sous le terme vélociraptor, est un genre éteint de dinosaures théropodes appartenant à la famille des droméosauridés, ayant vécu durant le Crétacé supérieur dans ce qui est aujourd'hui l'As…"
+  },
+  {
+    "id": 4,
+    "name_fr": "Diplodocus",
+    "price": 25,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Berlin_Diplodocus.jpg/330px-Berlin_Diplodocus.jpg",
+    "fact": "Diplodocus est un genre fossile de très grands dinosaures herbivores sauropodes de la famille des Diplodocidés ayant vécu au Jurassique supérieur, il y a environ entre 154 et 152 Ma, en Amérique du Nord où il a été décou…"
+  },
+  {
+    "id": 5,
+    "name_fr": "Stégosaure",
+    "price": 25,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Stegosaurus_BW.jpg/330px-Stegosaurus_BW.jpg",
+    "fact": "Le stégosaure, nom vernaculaire du genre fossile Stegosaurus, désigne des dinosaures herbivores caractérisés par de grandes plaques osseuses alternées en deux rangées sur leur dos, de formes et tailles différentes selon…"
+  },
+  {
+    "id": 6,
+    "name_fr": "Brachiosaure",
+    "price": 25,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/FMNH_Brachiosaurus.JPG/330px-FMNH_Brachiosaurus.JPG",
+    "fact": "Brachiosaurus est un genre fossile de dinosaures appartenant au groupe des sauropodes et à la famille des brachiosauridés."
+  },
+  {
+    "id": 7,
+    "name_fr": "Spinosaure",
+    "price": 30,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/FSAC-KK-11888.jpg/330px-FSAC-KK-11888.jpg",
+    "fact": "Spinosaurus est un genre fossile de dinosaures théropodes appartenant à la famille fossile des Spinosauridae et ayant vécu à l'Albien et au Cénomanien, dans ce qui est actuellement l'Afrique du Nord."
+  },
+  {
+    "id": 8,
+    "name_fr": "Ankylosaure",
+    "price": 30,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Ankylosaurus_magniventris_reconstruction.png/330px-Ankylosaurus_magniventris_reconstruction.png",
+    "fact": "Ankylosaurus est un genre fossile de dinosaure ornithischien herbivore de l'infra-ordre des Ankylosauria et de la famille des Ankylosauridae. Son nom signifie « lézard rigide »."
+  },
+  {
+    "id": 9,
+    "name_fr": "Allosaure",
+    "price": 35,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Allosaurus_SDNHM_%281%29.jpg/330px-Allosaurus_SDNHM_%281%29.jpg",
+    "fact": "Allosaurus, également francisé allosaure, est un genre fossile de grands dinosaures théropodes ayant vécu durant les étages Kimméridgien et Tithonien du Jurassique supérieur, il y a entre 155 et 145 millions d’années, da…"
+  },
+  {
+    "id": 10,
+    "name_fr": "Iguanodon",
+    "price": 35,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Iguanodon_new_NT.jpg/330px-Iguanodon_new_NT.jpg",
+    "fact": "Iguanodon est un genre fossile de dinosaures de l'ordre des ornithischiens, c'est-à-dire des dinosaures caractérisés par un bassin semblable à celui d'un oiseau, du sous-ordre des ornithopodes."
+  },
+  {
+    "id": 11,
+    "name_fr": "Parasaurolophus",
+    "price": 40,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Parasaurolophus_cyrtocristatus.jpg/330px-Parasaurolophus_cyrtocristatus.jpg",
+    "fact": "Parasaurolophus est un genre fossile de dinosaures appartenant à l'ordre des ornithischiens, au sous-ordre des ornithopodes et à la famille des hadrosauridés.…"
+  },
+  {
+    "id": 12,
+    "name_fr": "Ptéranodon",
+    "price": 45,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Pteranodon_longiceps_mmartyniuk_wiki.png/330px-Pteranodon_longiceps_mmartyniuk_wiki.png",
+    "fact": "Le ptéranodon, du grec ancien πτερόν / pterón (« aile ») et ἀνόδων / an- (« sans ») et odon (« dents ») est un genre fossile de ptérosaure ayant vécu au Crétacé supérieur, il y a entre 86 et 84,5 millions d’années."
+  },
+  {
+    "id": 13,
+    "name_fr": "Archéoptéryx",
+    "price": 45,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Archaeopteryx_NT.jpg/330px-Archaeopteryx_NT.jpg",
+    "fact": "Archaeopteryx est un genre fossile de dinosaures à plumes disparus.…"
+  },
+  {
+    "id": 14,
+    "name_fr": "Compsognathus",
+    "price": 50,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Compsognathus_BW.jpg/330px-Compsognathus_BW.jpg",
+    "fact": "Compsognathus est un genre fossile de petits dinosaures carnivores de l'ordre des saurischiens, du sous-ordre des théropodes et de la famille des compsognathidés d'environ un mètre de long.…"
+  },
+  {
+    "id": 15,
+    "name_fr": "Gallimimus",
+    "price": 55,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Gallimimus_Steveoc86_%28flipped%29.jpg/330px-Gallimimus_Steveoc86_%28flipped%29.jpg",
+    "fact": "Gallimimus est un genre fossile de dinosaures ornithomimosauriens de grande taille de la famille des ornithomimidés ayant vécu à la fin du Crétacé et découvert dans la formation de Nemegt en Mongolie.…"
+  },
+  {
+    "id": 16,
+    "name_fr": "Deinonychus",
+    "price": 60,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Deinonychus_FMNH.jpg/330px-Deinonychus_FMNH.jpg",
+    "fact": "Deinonychus est un genre fossile de dinosaures carnivores de la famille des Dromaeosauridae, dont une seule espèce est connue, Deinonychus antirrhopus.…"
+  },
+  {
+    "id": 17,
+    "name_fr": "Carnotaure",
+    "price": 65,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Carnotaurus_2017.png/330px-Carnotaurus_2017.png",
+    "fact": "Le Carnotaure (Carnotaurus), est un genre fossile de dinosaures saurischiens prédateurs, de la famille des Abelisauridae.…"
+  },
+  {
+    "id": 18,
+    "name_fr": "Dilophosaure",
+    "price": 70,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/DilophosaurusROM1.JPG/330px-DilophosaurusROM1.JPG",
+    "fact": "Le dilophosaure ou Dilophosaurus est un genre fossile de grands dinosaures théropodes carnivores, découvert en Chine et en Arizona où il vivait au Jurassique inférieur, il y a environ entre 199 et 183 Ma, au cours des ét…"
+  },
+  {
+    "id": 19,
+    "name_fr": "Mosasaure",
+    "price": 70,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Mosasaurus_hoffmannii_-_skeleton.jpg/330px-Mosasaurus_hoffmannii_-_skeleton.jpg",
+    "fact": "Mosasaurus est un genre fossile de grands squamates marins de la famille des mosasauridés dont il est le genre type, ayant vécu durant le Crétacé supérieur, entre 82 et 66 millions d'années avant notre ère.…"
+  },
+  {
+    "id": 20,
+    "name_fr": "Plésiosaure",
+    "price": 75,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Plesiosaurus_3DB.jpg/330px-Plesiosaurus_3DB.jpg",
+    "fact": "Plesiosaurus est un genre fossile de grand reptiles aquatiques du super-ordre des Sauropterygia.…"
+  },
+  {
+    "id": 21,
+    "name_fr": "Brontosaure",
+    "price": 80,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Yale_brontosaurus.jpg/330px-Yale_brontosaurus.jpg",
+    "fact": "Brontosaurus est un genre fossile de dinosaures herbivores sauropodes de grande taille de la famille des diplodocidés. Éteint, il a vécu en Amérique du Nord au Jurassique supérieur entre 156,3 et 146,8 Ma environ.…"
+  },
+  {
+    "id": 22,
+    "name_fr": "Apatosaure",
+    "price": 85,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Apatosaurus33.jpg/330px-Apatosaurus33.jpg",
+    "fact": "Apatosaurus est un genre fossile de dinosaures herbivores sauropodes géants de la famille des diplodocidés. Il a vécu en Amérique du Nord au Jurassique supérieur, il y a environ entre 156,3 et 146,8 Ma.…"
+  },
+  {
+    "id": 23,
+    "name_fr": "Ptérodactyle",
+    "price": 90,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Pterodactylus_kochi_1.JPG/330px-Pterodactylus_kochi_1.JPG",
+    "fact": "Le ptérodactyle est un genre fossile de ptérosaures ayant vécu de l'Angulata du Jurassique supérieur au Valanginien inférieur du Crétacé inférieur en Europe, il y a environ 150 Ma."
+  },
+  {
+    "id": 24,
+    "name_fr": "Cératosaure",
+    "price": 95,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Ceratosaurus_nasicornis_DB.jpg/330px-Ceratosaurus_nasicornis_DB.jpg",
+    "fact": "Ceratosaurus est un genre fossile de dinosaure théropode qui a vécu dans l'Utah, le Colorado, au Portugal et en Tanzanie pendant le Jurassique supérieur.…"
+  },
+  {
+    "id": 25,
+    "name_fr": "Baryonyx",
+    "price": 105,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Baryonyx_walkeri_mount_NMNS.jpg/330px-Baryonyx_walkeri_mount_NMNS.jpg",
+    "fact": "Baryonyx est un genre fossile de dinosaures théropodes ayant vécu durant l'étage Barrémien du Crétacé inférieur, il y a entre 130 et 125 millions d'années, dans l'actuel Angleterre.…"
+  },
+  {
+    "id": 26,
+    "name_fr": "Giganotosaure",
+    "price": 110,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Giganotosaurus_AustMus_email_white_background.jpg/330px-Giganotosaurus_AustMus_email_white_background.jpg",
+    "fact": "Giganotosaurus est un genre fossile de dinosaures de la famille des Carcharodontosauridés, qui vivait en Amérique du Sud il y a entre 99 et 95 millions d'années.…"
+  },
+  {
+    "id": 27,
+    "name_fr": "Thérizinosaure",
+    "price": 115,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Therizinosaurus.png/330px-Therizinosaurus.png",
+    "fact": "Therizinosaurus est un genre fossile de dinosaures théropodes de la famille des Therizinosauridae.…"
+  },
+  {
+    "id": 28,
+    "name_fr": "Pachycéphalosaure",
+    "price": 120,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Pachycephalosaurus_skull.JPG/330px-Pachycephalosaurus_skull.JPG",
+    "fact": "Pachycephalosaurus, en français pachycéphalosaure, est un genre fossile de dinosaures ornithischiens herbivores de la famille des pachycephalosauridés.…"
+  },
+  {
+    "id": 29,
+    "name_fr": "Styracosaure",
+    "price": 125,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Styracosaurus_dinosaur.png/330px-Styracosaurus_dinosaur.png",
+    "fact": "Styracosaurus est un genre fossile de dinosaures cératopsiens du Crétacé supérieur (Campanien), ayant vécu en Amérique du Nord."
+  },
+  {
+    "id": 30,
+    "name_fr": "Oviraptor",
+    "price": 130,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Oviraptor_philoceratops_skeleton.jpg/330px-Oviraptor_philoceratops_skeleton.jpg",
+    "fact": "Oviraptor est un genre fossile de petits dinosaures théropodes de Mongolie décrit pour la première fois en 1924 par Henry Fairfield Osborn. Il a vécu au Crétacé supérieur.…"
+  },
+  {
+    "id": 31,
+    "name_fr": "Microraptor",
+    "price": 140,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Microraptor_Restoration.png/330px-Microraptor_Restoration.png",
+    "fact": "Microraptor est un genre fossile de petits dinosaures saurischiens de la famille des Dromaeosauridae du biote de Jehol de Chine, datant du Crétacé inférieur, il y a 120 millions d'années.…"
+  },
+  {
+    "id": 32,
+    "name_fr": "Utahraptor",
+    "price": 145,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Utahraptor_Restoration.png/330px-Utahraptor_Restoration.png",
+    "fact": "Utahraptor est un genre fossile de dinosaures à plumes, des théropodes paraviens de la famille des Dromaeosauridae du Crétacé inférieur, âgés d'environ 125 millions d'années."
+  },
+  {
+    "id": 33,
+    "name_fr": "Corythosaure",
+    "price": 150,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Corythosaurus_casuarius%2C_Dinosaur_Provincial_Park%2C_Alberta%2C_Canada%2C_Late_Cretaceous_-_Royal_Ontario_Museum_-_DSC00023.JPG/330px-Corythosaurus_casuarius%2C_Dinosaur_Provincial_Park%2C_Alberta%2C_Canada%2C_Late_Cretaceous_-_Royal_Ontario_Museum_-_DSC00023.JPG",
+    "fact": "Corythosaurus est un genre fossile de dinosaures ornithopodes de la famille des hadrosauridés. Il a vécu au Crétacé supérieur (Campanien), il y a environ 76 à 75 Ma, en actuelle Amérique du Nord.…"
+  },
+  {
+    "id": 34,
+    "name_fr": "Edmontosaure",
+    "price": 160,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Edmontosaurusskel.jpg/330px-Edmontosaurusskel.jpg",
+    "fact": "Edmontosaurus est un genre fossile de grands dinosaures herbivores « à bec de canard » du sous-ordre des ornithopodes et de la famille des hadrosauridés.…"
+  },
+  {
+    "id": 35,
+    "name_fr": "Elasmosaure",
+    "price": 165,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Elasomosaurus_Face_Clean.png/330px-Elasomosaurus_Face_Clean.png",
+    "fact": "Elasmosaurus, francisé élasmosaure, est un genre fossile de grands plésiosaures ayant vécu durant l'étage Campanien du Crétacé supérieur, il y a entre 80,6 et 77 millions d'années, dans l'actuelle Amérique du Nord.…"
+  },
+  {
+    "id": 36,
+    "name_fr": "Quetzalcoatlus",
+    "price": 170,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Gfp-quetzalcaotlus.jpg/330px-Gfp-quetzalcaotlus.jpg",
+    "fact": "Quetzalcoatlus est un genre fossile de ptérosaures de la famille des azhdarchidés. Il vivait à la fin du Crétacé supérieur en Amérique du Nord, il y a environ entre 70 et 66 Ma."
+  },
+  {
+    "id": 37,
+    "name_fr": "Argentinosaure",
+    "price": 180,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Argentinosaurus_BW.jpg/330px-Argentinosaurus_BW.jpg",
+    "fact": "Argentinosaurus est un genre fossile de dinosaures sauropodes du groupe des Titanosauria, et l'un des plus grands dinosaures jamais découverts.…"
+  },
+  {
+    "id": 38,
+    "name_fr": "Protocératops",
+    "price": 185,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Carnegie_Protoceratops_andrewsi.jpg/330px-Carnegie_Protoceratops_andrewsi.jpg",
+    "fact": "Le protocératops ou Protoceratops est un genre fossile de petit dinosaure herbivore de la famille des Cératopsiens ayant vécu au Crétacé supérieur en Chine et en Mongolie dans la formation géologique de Djadokhta de la r…"
+  },
+  {
+    "id": 39,
+    "name_fr": "Maiasaura",
+    "price": 195,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Maiasaura_nest_%282%29.jpg/330px-Maiasaura_nest_%282%29.jpg",
+    "fact": "Maiasaura est un genre fossile de « dinosaures à bec de canards » herbivores de la famille des Hadrosauridés. Ses fossiles ont été retrouvés au Montana dans la formation de Two Medicine.…"
+  },
+  {
+    "id": 40,
+    "name_fr": "Pachyrhinosaure",
+    "price": 200,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Pachyrhinosaurus_perotorum_skeleton.jpg/330px-Pachyrhinosaurus_perotorum_skeleton.jpg",
+    "fact": "Pachyrhinosaurus, en français, pachyrhinosaure est un genre éteint de dinosaures ornithischiens qui a vécu aux États-Unis et au Canada vers la fin du Crétacé supérieur il y a entre 73 et 68 millions d’années."
+  }
+]

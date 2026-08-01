@@ -1,8 +1,9 @@
 """
-Endpoints de la collection Pokémon (récompense en XP).
+Endpoints des collections (récompenses en XP), multi-catalogue.
 
-L'utilisateur authentifié agit sur sa propre collection (enfant qui dépense son
-XP). Le catalogue et les prix font autorité côté serveur.
+Le porte-monnaie XP est partagé entre tous les catalogues. Les endpoints sont
+« acting-child aware » : un parent qui incarne un enfant agit sur la collection
+de l'enfant (en-tête ``X-Acting-Child-Id``).
 """
 
 from typing import Annotated
@@ -14,59 +15,66 @@ from app.api.subjects import acting_child
 from app.core.database import get_db
 from app.models.user import User
 from app.schemas.collection import (
-    CollectionSummary,
-    PokedexEntry,
-    PokedexGridEntry,
+    CatalogGridItem,
     PurchaseRequest,
     PurchaseResponse,
+    WalletSummary,
 )
 from app.services.collection import (
     AlreadyOwnedError,
+    CatalogNotFoundError,
     InsufficientBalanceError,
-    PokemonNotFoundError,
+    ItemNotFoundError,
+    catalog_infos,
     get_balance,
     get_spent_xp,
     get_total_earned_xp,
     get_unlocked_ids,
-    load_pokedex,
-    purchase_pokemon,
+    load_catalog,
+    purchase_item,
 )
 
 router = APIRouter()
 
 
-@router.get("/me", response_model=CollectionSummary)
-async def get_user_collection(
+@router.get("/me", response_model=WalletSummary)
+async def get_wallet(
     acting: Annotated[User, Depends(acting_child)],
     db: Annotated[Session, Depends(get_db)],
-) -> CollectionSummary:
-    """Porte-monnaie XP + Pokémon débloqués de l'utilisateur courant."""
-    pokedex = load_pokedex()
-    unlocked_ids = get_unlocked_ids(acting.id, db)
+) -> WalletSummary:
+    """Porte-monnaie XP partagé + avancement par catalogue."""
     total_earned = get_total_earned_xp(acting.id, db)
     spent = get_spent_xp(acting.id, db)
-    collection = [PokedexEntry(**pokedex[pid]) for pid in unlocked_ids if pid in pokedex]
-    return CollectionSummary(
+    return WalletSummary(
         total_earned=total_earned,
         spent=spent,
         balance=max(0, total_earned - spent),
-        total_count=len(pokedex),
-        unlocked_count=len(collection),
-        collection=collection,
+        catalogs=catalog_infos(acting.id, db),
     )
 
 
-@router.get("/pokedex", response_model=list[PokedexGridEntry])
-async def get_pokedex(
+@router.get("/catalogs/{slug}", response_model=list[CatalogGridItem])
+async def get_catalog(
+    slug: str,
     acting: Annotated[User, Depends(acting_child)],
     db: Annotated[Session, Depends(get_db)],
-) -> list[PokedexGridEntry]:
-    """Catalogue complet avec l'état de possession de l'utilisateur courant."""
-    pokedex = load_pokedex()
-    owned = set(get_unlocked_ids(acting.id, db))
+) -> list[CatalogGridItem]:
+    """Catalogue complet avec l'état de possession de l'utilisateur."""
+    try:
+        catalog = load_catalog(slug)
+    except CatalogNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    owned = set(get_unlocked_ids(acting.id, slug, db))
     return [
-        PokedexGridEntry(**entry, owned=entry["id"] in owned)
-        for entry in sorted(pokedex.values(), key=lambda e: e["id"])
+        CatalogGridItem(
+            id=int(entry["id"]),
+            name_fr=entry["name_fr"],
+            price=int(entry["price"]),
+            image_url=entry["image_url"],
+            fact=entry.get("fact"),
+            owned=int(entry["id"]) in owned,
+        )
+        for entry in sorted(catalog.values(), key=lambda e: e["id"])
     ]
 
 
@@ -76,10 +84,10 @@ async def purchase(
     acting: Annotated[User, Depends(acting_child)],
     db: Annotated[Session, Depends(get_db)],
 ) -> PurchaseResponse:
-    """Débloque un Pokémon en dépensant l'XP de l'utilisateur courant."""
+    """Débloque un objet d'un catalogue en dépensant l'XP de l'utilisateur."""
     try:
-        entry = purchase_pokemon(acting.id, body.pokemon_id, db)
-    except PokemonNotFoundError as exc:
+        item = purchase_item(acting.id, body.catalog, body.item_id, db)
+    except (CatalogNotFoundError, ItemNotFoundError) as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     except AlreadyOwnedError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
@@ -87,7 +95,8 @@ async def purchase(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
     return PurchaseResponse(
-        pokemon=PokedexEntry(**entry),
+        item=item,
+        catalog=body.catalog,
         balance=get_balance(acting.id, db),
-        unlocked_count=len(get_unlocked_ids(acting.id, db)),
+        unlocked_count=len(get_unlocked_ids(acting.id, body.catalog, db)),
     )

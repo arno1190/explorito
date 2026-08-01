@@ -1,26 +1,28 @@
 """
-Modèle de collection Pokémon (récompense en XP).
+Modèle des collections (récompenses en XP).
 
-Chaque ligne = un Pokémon débloqué par un utilisateur, avec le prix payé.
-Le "porte-monnaie" XP dépensable est dérivé : solde = XP total gagné − Σ prix payés.
-Le catalogue (id → nom FR, prix, artwork) vit dans ``app/data/pokedex.json``.
+Chaque ligne = un objet débloqué par un utilisateur dans un catalogue donné
+(``pokemon``, ``dinosaurs``, ``solar_system``…), avec le prix payé. Le
+« porte-monnaie » XP dépensable est dérivé et **partagé entre tous les
+catalogues** : solde = XP total gagné − Σ prix payés (tous catalogues confondus).
+Les catalogues (id → nom FR, prix, image, anecdote) vivent dans ``app/data``.
 """
 
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, UniqueConstraint
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
 
 
-class PokemonUnlock(Base):
-    """Un Pokémon débloqué par un utilisateur."""
+class CollectibleUnlock(Base):
+    """Un objet de collection débloqué par un utilisateur (tous catalogues)."""
 
-    __tablename__ = "pokemon_unlocks"
-    __table_args__ = (UniqueConstraint("user_id", "pokemon_id", name="uq_user_pokemon"),)
+    __tablename__ = "collectible_unlocks"
+    __table_args__ = (UniqueConstraint("user_id", "catalog", "item_id", name="uq_user_catalog_item"),)
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     user_id = Column(
@@ -29,11 +31,12 @@ class PokemonUnlock(Base):
         nullable=False,
         index=True,
     )
-    pokemon_id = Column(Integer, nullable=False)
+    catalog = Column(String, nullable=False, default="pokemon")
+    item_id = Column(Integer, nullable=False)
     price_paid = Column(Integer, nullable=False)
     unlocked_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
-    user = relationship("User", back_populates="pokemon_unlocks")
+    user = relationship("User", back_populates="collectible_unlocks")
 
     def __repr__(self):
-        return f"<PokemonUnlock user={self.user_id} pokemon={self.pokemon_id}>"
+        return f"<CollectibleUnlock user={self.user_id} {self.catalog}#{self.item_id}>"

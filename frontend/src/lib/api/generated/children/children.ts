@@ -21,6 +21,7 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  BodyUploadChildAvatarApiV1ChildrenChildIdAvatarPost,
   ChildCreate,
   ChildResponse,
   ChildUpdate,
@@ -626,6 +627,129 @@ export const useDeleteChildApiV1ChildrenChildIdDelete = <
 > => {
   return useMutation(
     getDeleteChildApiV1ChildrenChildIdDeleteMutationOptions(options),
+    queryClient
+  );
+};
+/**
+ * Téléverse une image comme avatar d'un enfant du parent connecté.
+
+Args:
+    child_id: ID de l'utilisateur enfant.
+    file: Fichier image (multipart).
+
+Returns:
+    Profil de l'enfant mis à jour.
+ * @summary Upload Child Avatar
+ */
+export const uploadChildAvatarApiV1ChildrenChildIdAvatarPost = (
+  childId: string,
+  bodyUploadChildAvatarApiV1ChildrenChildIdAvatarPost: BodyUploadChildAvatarApiV1ChildrenChildIdAvatarPost,
+  signal?: AbortSignal
+) => {
+  const formData = new FormData();
+  formData.append(
+    `file`,
+    bodyUploadChildAvatarApiV1ChildrenChildIdAvatarPost.file
+  );
+
+  return axiosInstance<ChildResponse>({
+    url: `/api/v1/children/${childId}/avatar`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    signal,
+  });
+};
+
+export const getUploadChildAvatarApiV1ChildrenChildIdAvatarPostMutationOptions =
+  <TError = HTTPValidationError, TContext = unknown>(options?: {
+    mutation?: UseMutationOptions<
+      Awaited<
+        ReturnType<typeof uploadChildAvatarApiV1ChildrenChildIdAvatarPost>
+      >,
+      TError,
+      {
+        childId: string;
+        data: BodyUploadChildAvatarApiV1ChildrenChildIdAvatarPost;
+      },
+      TContext
+    >;
+  }): UseMutationOptions<
+    Awaited<ReturnType<typeof uploadChildAvatarApiV1ChildrenChildIdAvatarPost>>,
+    TError,
+    {
+      childId: string;
+      data: BodyUploadChildAvatarApiV1ChildrenChildIdAvatarPost;
+    },
+    TContext
+  > => {
+    const mutationKey = ["uploadChildAvatarApiV1ChildrenChildIdAvatarPost"];
+    const { mutation: mutationOptions } = options
+      ? options.mutation &&
+        "mutationKey" in options.mutation &&
+        options.mutation.mutationKey
+        ? options
+        : { ...options, mutation: { ...options.mutation, mutationKey } }
+      : { mutation: { mutationKey } };
+
+    const mutationFn: MutationFunction<
+      Awaited<
+        ReturnType<typeof uploadChildAvatarApiV1ChildrenChildIdAvatarPost>
+      >,
+      {
+        childId: string;
+        data: BodyUploadChildAvatarApiV1ChildrenChildIdAvatarPost;
+      }
+    > = (props) => {
+      const { childId, data } = props ?? {};
+
+      return uploadChildAvatarApiV1ChildrenChildIdAvatarPost(childId, data);
+    };
+
+    return { mutationFn, ...mutationOptions };
+  };
+
+export type UploadChildAvatarApiV1ChildrenChildIdAvatarPostMutationResult =
+  NonNullable<
+    Awaited<ReturnType<typeof uploadChildAvatarApiV1ChildrenChildIdAvatarPost>>
+  >;
+export type UploadChildAvatarApiV1ChildrenChildIdAvatarPostMutationBody =
+  BodyUploadChildAvatarApiV1ChildrenChildIdAvatarPost;
+export type UploadChildAvatarApiV1ChildrenChildIdAvatarPostMutationError =
+  HTTPValidationError;
+
+/**
+ * @summary Upload Child Avatar
+ */
+export const useUploadChildAvatarApiV1ChildrenChildIdAvatarPost = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<
+        ReturnType<typeof uploadChildAvatarApiV1ChildrenChildIdAvatarPost>
+      >,
+      TError,
+      {
+        childId: string;
+        data: BodyUploadChildAvatarApiV1ChildrenChildIdAvatarPost;
+      },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof uploadChildAvatarApiV1ChildrenChildIdAvatarPost>>,
+  TError,
+  {
+    childId: string;
+    data: BodyUploadChildAvatarApiV1ChildrenChildIdAvatarPost;
+  },
+  TContext
+> => {
+  return useMutation(
+    getUploadChildAvatarApiV1ChildrenChildIdAvatarPostMutationOptions(options),
     queryClient
   );
 };

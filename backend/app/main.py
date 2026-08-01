@@ -16,13 +16,13 @@ from app.core.config import settings
 # (autogénération Alembic, tests).
 from app.models import (  # noqa: F401
     Achievement,
+    CollectibleUnlock,
     DailyGoal,
     Exercise,
     ExerciseResult,
     LearningPath,
     Lesson,
     Media,
-    PokemonUnlock,
     Profile,
     ReviewQueue,
     Reward,

@@ -1,13 +1,13 @@
 """
-Service de collection Pokémon.
+Service des collections (récompenses en XP), multi-catalogue.
 
-Porte-monnaie XP à deux registres :
-- ``total_earned`` = somme des ``SubjectProgress.total_xp`` (inchangé, pilote les niveaux)
-- ``spent`` = somme des ``PokemonUnlock.price_paid``
-- ``balance`` = total_earned − spent  (XP dépensable)
+Porte-monnaie XP à deux registres, **partagé entre tous les catalogues** :
+- ``total_earned`` = somme des ``SubjectProgress.total_xp`` (pilote les niveaux)
+- ``spent`` = somme des ``CollectibleUnlock.price_paid`` (tous catalogues)
+- ``balance`` = total_earned − spent  (XP dépensable partout)
 
-Le catalogue (id → nom FR, prix, artwork) est chargé depuis
-``app/data/pokedex.json`` (immuable, mis en cache).
+Chaque catalogue (``pokemon``, ``dinosaurs``, ``solar_system``) est un fichier
+JSON (id → nom FR, prix, image, anecdote) chargé et mis en cache.
 """
 
 import functools
@@ -20,43 +20,70 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.models.collection import PokemonUnlock
+from app.models.collection import CollectibleUnlock
 from app.models.progress import SubjectProgress
 
-POKEDEX_PATH = Path(__file__).resolve().parent.parent / "data" / "pokedex.json"
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+
+# Registre des catalogues disponibles : slug -> métadonnées d'affichage + fichier.
+CATALOGS: dict[str, dict[str, str]] = {
+    "pokemon": {"name": "Pokémon", "icon": "📕", "file": "pokedex.json"},
+    "dinosaurs": {"name": "Dinosaures", "icon": "🦕", "file": "dinosaurs.json"},
+    "solar_system": {"name": "Système solaire", "icon": "🪐", "file": "solar_system.json"},
+}
 
 
 class CollectionError(Exception):
     """Erreur métier de collection (mappée en HTTP par l'endpoint)."""
 
 
-class PokemonNotFoundError(CollectionError):
-    """L'ID Pokémon n'existe pas dans le catalogue."""
+class CatalogNotFoundError(CollectionError):
+    """Le catalogue demandé n'existe pas."""
+
+
+class ItemNotFoundError(CollectionError):
+    """L'objet n'existe pas dans le catalogue."""
 
 
 class AlreadyOwnedError(CollectionError):
-    """Le Pokémon est déjà débloqué par l'utilisateur."""
+    """L'objet est déjà débloqué par l'utilisateur."""
 
 
 class InsufficientBalanceError(CollectionError):
     """Solde XP insuffisant pour l'achat."""
 
 
-@functools.lru_cache(maxsize=1)
-def load_pokedex() -> dict[int, dict[str, Any]]:
-    """Charge le catalogue Pokémon indexé par id (mis en cache)."""
-    data = json.loads(POKEDEX_PATH.read_text(encoding="utf-8"))
+def catalog_slugs() -> list[str]:
+    """Slugs des catalogues effectivement disponibles (fichier présent)."""
+    return [slug for slug, meta in CATALOGS.items() if (DATA_DIR / meta["file"]).exists()]
+
+
+@functools.cache
+def load_catalog(slug: str) -> dict[int, dict[str, Any]]:
+    """Charge un catalogue indexé par id (mis en cache). Lève si inconnu."""
+    meta = CATALOGS.get(slug)
+    if meta is None:
+        raise CatalogNotFoundError(f"Catalogue « {slug} » inconnu")
+    path = DATA_DIR / meta["file"]
+    if not path.exists():
+        raise CatalogNotFoundError(f"Catalogue « {slug} » indisponible")
+    data = json.loads(path.read_text(encoding="utf-8"))
     return {int(p["id"]): p for p in data}
 
 
-def _lock_user_purchases(user_id: UUID, db: Session) -> None:
-    """
-    Sérialise les achats d'un même utilisateur pour rendre le contrôle
-    "solde + doublon → insertion" atomique (évite double-dépense concurrente).
+def _item(entry: dict[str, Any]) -> dict[str, Any]:
+    """Projette une entrée brute sur les champs exposés (id, name_fr, price, image, fact)."""
+    return {
+        "id": int(entry["id"]),
+        "name_fr": entry["name_fr"],
+        "price": int(entry["price"]),
+        "image_url": entry["image_url"],
+        "fact": entry.get("fact"),
+    }
 
-    Utilise un verrou consultatif transactionnel Postgres (libéré au commit).
-    Sur SQLite (tests) il n'y a pas de concurrence à sérialiser : no-op.
-    """
+
+def _lock_user_purchases(user_id: UUID, db: Session) -> None:
+    """Sérialise les achats d'un même utilisateur (anti double-dépense concurrente)."""
     if db.get_bind().dialect.name == "postgresql":
         db.execute(select(func.pg_advisory_xact_lock(func.hashtext(str(user_id)))))
 
@@ -68,8 +95,8 @@ def get_total_earned_xp(user_id: UUID, db: Session) -> int:
 
 
 def get_spent_xp(user_id: UUID, db: Session) -> int:
-    """XP dépensé (somme des prix payés)."""
-    spent = db.query(func.sum(PokemonUnlock.price_paid)).filter(PokemonUnlock.user_id == user_id).scalar()
+    """XP dépensé (somme des prix payés, tous catalogues confondus)."""
+    spent = db.query(func.sum(CollectibleUnlock.price_paid)).filter(CollectibleUnlock.user_id == user_id).scalar()
     return int(spent or 0)
 
 
@@ -78,43 +105,74 @@ def get_balance(user_id: UUID, db: Session) -> int:
     return max(0, get_total_earned_xp(user_id, db) - get_spent_xp(user_id, db))
 
 
-def get_unlocked_ids(user_id: UUID, db: Session) -> list[int]:
-    """IDs Pokémon débloqués par l'utilisateur, triés."""
-    rows = db.query(PokemonUnlock.pokemon_id).filter(PokemonUnlock.user_id == user_id).all()
+def get_unlocked_ids(user_id: UUID, catalog: str, db: Session) -> list[int]:
+    """IDs débloqués par l'utilisateur dans un catalogue, triés."""
+    rows = (
+        db.query(CollectibleUnlock.item_id)
+        .filter(CollectibleUnlock.user_id == user_id, CollectibleUnlock.catalog == catalog)
+        .all()
+    )
     return sorted(int(r[0]) for r in rows)
 
 
-def purchase_pokemon(user_id: UUID, pokemon_id: int, db: Session) -> dict[str, Any]:
+def unlocked_counts(user_id: UUID, db: Session) -> dict[str, int]:
+    """Nombre d'objets débloqués par catalogue pour l'utilisateur."""
+    rows = (
+        db.query(CollectibleUnlock.catalog, func.count(CollectibleUnlock.id))
+        .filter(CollectibleUnlock.user_id == user_id)
+        .group_by(CollectibleUnlock.catalog)
+        .all()
+    )
+    return {str(cat): int(n) for cat, n in rows}
+
+
+def catalog_infos(user_id: UUID, db: Session) -> list[dict[str, Any]]:
+    """Résumé de chaque catalogue disponible (total + débloqués)."""
+    counts = unlocked_counts(user_id, db)
+    infos: list[dict[str, Any]] = []
+    for slug in catalog_slugs():
+        meta = CATALOGS[slug]
+        infos.append(
+            {
+                "slug": slug,
+                "name": meta["name"],
+                "icon": meta["icon"],
+                "total": len(load_catalog(slug)),
+                "unlocked": counts.get(slug, 0),
+            }
+        )
+    return infos
+
+
+def purchase_item(user_id: UUID, catalog: str, item_id: int, db: Session) -> dict[str, Any]:
     """
-    Achète un Pokémon du pool verrouillé et l'ajoute à la collection.
+    Achète un objet d'un catalogue et l'ajoute à la collection de l'utilisateur.
 
     Args:
         user_id: ID de l'utilisateur (enfant) acheteur.
-        pokemon_id: ID du Pokémon choisi (doit être valide, non possédé, abordable).
+        catalog: Slug du catalogue.
+        item_id: ID de l'objet (valide, non possédé, abordable).
         db: Session de base de données.
 
     Returns:
-        L'objet catalogue complet du Pokémon débloqué (id, name_fr, price, image_url).
+        L'objet débloqué (id, name_fr, price, image_url, fact).
 
     Raises:
-        PokemonNotFoundError: id absent du catalogue.
-        AlreadyOwnedError: déjà débloqué.
-        InsufficientBalanceError: solde insuffisant.
+        CatalogNotFoundError, ItemNotFoundError, AlreadyOwnedError, InsufficientBalanceError.
     """
-    pokedex = load_pokedex()
-    entry = pokedex.get(int(pokemon_id))
+    entry = load_catalog(catalog).get(int(item_id))
     if entry is None:
-        raise PokemonNotFoundError(f"Pokémon #{pokemon_id} inconnu")
+        raise ItemNotFoundError(f"Objet #{item_id} inconnu dans « {catalog} »")
 
-    # Sérialise les achats concurrents du même utilisateur : le contrôle
-    # doublon + solde et l'insertion deviennent atomiques (pas de double-dépense).
+    # Sérialise les achats concurrents du même utilisateur.
     _lock_user_purchases(user_id, db)
 
     already = (
-        db.query(PokemonUnlock)
+        db.query(CollectibleUnlock)
         .filter(
-            PokemonUnlock.user_id == user_id,
-            PokemonUnlock.pokemon_id == int(pokemon_id),
+            CollectibleUnlock.user_id == user_id,
+            CollectibleUnlock.catalog == catalog,
+            CollectibleUnlock.item_id == int(item_id),
         )
         .first()
     )
@@ -125,17 +183,10 @@ def purchase_pokemon(user_id: UUID, pokemon_id: int, db: Session) -> dict[str, A
     if get_balance(user_id, db) < price:
         raise InsufficientBalanceError(f"Il te faut {price} XP pour débloquer {entry['name_fr']}")
 
-    db.add(
-        PokemonUnlock(
-            user_id=user_id,
-            pokemon_id=int(pokemon_id),
-            price_paid=price,
-        )
-    )
+    db.add(CollectibleUnlock(user_id=user_id, catalog=catalog, item_id=int(item_id), price_paid=price))
     try:
         db.commit()
     except IntegrityError as exc:
-        # Filet de sécurité : course sur la contrainte unique (user, pokemon).
         db.rollback()
         raise AlreadyOwnedError(f"{entry['name_fr']} est déjà dans ta collection") from exc
-    return entry
+    return _item(entry)

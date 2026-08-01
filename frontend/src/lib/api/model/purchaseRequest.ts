@@ -6,12 +6,14 @@
  */
 
 /**
- * Requête d'achat d'un Pokémon.
+ * Requête d'achat d'un objet de collection.
  */
 export interface PurchaseRequest {
+  /** Slug du catalogue (pokemon, dinosaurs, solar_system) */
+  catalog: string;
   /**
-   * ID du Pokémon à débloquer
+   * ID de l'objet à débloquer
    * @minimum 1
    */
-  pokemon_id: number;
+  item_id: number;
 }

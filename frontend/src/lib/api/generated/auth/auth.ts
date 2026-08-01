@@ -22,6 +22,7 @@ import type {
 
 import type {
   BodyLoginFormApiV1AuthLoginFormPost,
+  BodyUploadMyAvatarApiV1AuthMeAvatarPost,
   HTTPValidationError,
   ProfileUpdate,
   RefreshTokenRequest,
@@ -707,6 +708,106 @@ export const useUpdateMyProfileApiV1AuthMePatch = <
 > => {
   return useMutation(
     getUpdateMyProfileApiV1AuthMePatchMutationOptions(options),
+    queryClient
+  );
+};
+/**
+ * Téléverse une image comme avatar de son propre profil.
+
+Args:
+    file: Fichier image (multipart).
+    current_user: Utilisateur authentifié.
+    db: Session de base de données.
+
+Returns:
+    L'utilisateur avec l'avatar mis à jour.
+ * @summary Upload My Avatar
+ */
+export const uploadMyAvatarApiV1AuthMeAvatarPost = (
+  bodyUploadMyAvatarApiV1AuthMeAvatarPost: BodyUploadMyAvatarApiV1AuthMeAvatarPost,
+  signal?: AbortSignal
+) => {
+  const formData = new FormData();
+  formData.append(`file`, bodyUploadMyAvatarApiV1AuthMeAvatarPost.file);
+
+  return axiosInstance<UserResponse>({
+    url: `/api/v1/auth/me/avatar`,
+    method: "POST",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    signal,
+  });
+};
+
+export const getUploadMyAvatarApiV1AuthMeAvatarPostMutationOptions = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof uploadMyAvatarApiV1AuthMeAvatarPost>>,
+    TError,
+    { data: BodyUploadMyAvatarApiV1AuthMeAvatarPost },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof uploadMyAvatarApiV1AuthMeAvatarPost>>,
+  TError,
+  { data: BodyUploadMyAvatarApiV1AuthMeAvatarPost },
+  TContext
+> => {
+  const mutationKey = ["uploadMyAvatarApiV1AuthMeAvatarPost"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof uploadMyAvatarApiV1AuthMeAvatarPost>>,
+    { data: BodyUploadMyAvatarApiV1AuthMeAvatarPost }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return uploadMyAvatarApiV1AuthMeAvatarPost(data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UploadMyAvatarApiV1AuthMeAvatarPostMutationResult = NonNullable<
+  Awaited<ReturnType<typeof uploadMyAvatarApiV1AuthMeAvatarPost>>
+>;
+export type UploadMyAvatarApiV1AuthMeAvatarPostMutationBody =
+  BodyUploadMyAvatarApiV1AuthMeAvatarPost;
+export type UploadMyAvatarApiV1AuthMeAvatarPostMutationError =
+  HTTPValidationError;
+
+/**
+ * @summary Upload My Avatar
+ */
+export const useUploadMyAvatarApiV1AuthMeAvatarPost = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof uploadMyAvatarApiV1AuthMeAvatarPost>>,
+      TError,
+      { data: BodyUploadMyAvatarApiV1AuthMeAvatarPost },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof uploadMyAvatarApiV1AuthMeAvatarPost>>,
+  TError,
+  { data: BodyUploadMyAvatarApiV1AuthMeAvatarPost },
+  TContext
+> => {
+  return useMutation(
+    getUploadMyAvatarApiV1AuthMeAvatarPostMutationOptions(options),
     queryClient
   );
 };

@@ -21,38 +21,38 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  CollectionSummary,
+  CatalogGridItem,
   HTTPValidationError,
-  PokedexGridEntry,
   PurchaseRequest,
   PurchaseResponse,
+  WalletSummary,
 } from "../../model";
 
 import { axiosInstance } from "../../axios-instance";
 
 /**
- * Porte-monnaie XP + Pokémon débloqués de l'utilisateur courant.
- * @summary Get User Collection
+ * Porte-monnaie XP partagé + avancement par catalogue.
+ * @summary Get Wallet
  */
-export const getUserCollectionApiV1CollectionMeGet = (signal?: AbortSignal) => {
-  return axiosInstance<CollectionSummary>({
+export const getWalletApiV1CollectionMeGet = (signal?: AbortSignal) => {
+  return axiosInstance<WalletSummary>({
     url: `/api/v1/collection/me`,
     method: "GET",
     signal,
   });
 };
 
-export const getGetUserCollectionApiV1CollectionMeGetQueryKey = () => {
+export const getGetWalletApiV1CollectionMeGetQueryKey = () => {
   return [`/api/v1/collection/me`] as const;
 };
 
-export const getGetUserCollectionApiV1CollectionMeGetQueryOptions = <
-  TData = Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>,
+export const getGetWalletApiV1CollectionMeGetQueryOptions = <
+  TData = Awaited<ReturnType<typeof getWalletApiV1CollectionMeGet>>,
   TError = HTTPValidationError,
 >(options?: {
   query?: Partial<
     UseQueryOptions<
-      Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>,
+      Awaited<ReturnType<typeof getWalletApiV1CollectionMeGet>>,
       TError,
       TData
     >
@@ -61,43 +61,41 @@ export const getGetUserCollectionApiV1CollectionMeGetQueryOptions = <
   const { query: queryOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ??
-    getGetUserCollectionApiV1CollectionMeGetQueryKey();
+    queryOptions?.queryKey ?? getGetWalletApiV1CollectionMeGetQueryKey();
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>
-  > = ({ signal }) => getUserCollectionApiV1CollectionMeGet(signal);
+    Awaited<ReturnType<typeof getWalletApiV1CollectionMeGet>>
+  > = ({ signal }) => getWalletApiV1CollectionMeGet(signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>,
+    Awaited<ReturnType<typeof getWalletApiV1CollectionMeGet>>,
     TError,
     TData
   > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetUserCollectionApiV1CollectionMeGetQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>
+export type GetWalletApiV1CollectionMeGetQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getWalletApiV1CollectionMeGet>>
 >;
-export type GetUserCollectionApiV1CollectionMeGetQueryError =
-  HTTPValidationError;
+export type GetWalletApiV1CollectionMeGetQueryError = HTTPValidationError;
 
-export function useGetUserCollectionApiV1CollectionMeGet<
-  TData = Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>,
+export function useGetWalletApiV1CollectionMeGet<
+  TData = Awaited<ReturnType<typeof getWalletApiV1CollectionMeGet>>,
   TError = HTTPValidationError,
 >(
   options: {
     query: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>,
+        Awaited<ReturnType<typeof getWalletApiV1CollectionMeGet>>,
         TError,
         TData
       >
     > &
       Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>,
+          Awaited<ReturnType<typeof getWalletApiV1CollectionMeGet>>,
           TError,
-          Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>
+          Awaited<ReturnType<typeof getWalletApiV1CollectionMeGet>>
         >,
         "initialData"
       >;
@@ -106,23 +104,23 @@ export function useGetUserCollectionApiV1CollectionMeGet<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetUserCollectionApiV1CollectionMeGet<
-  TData = Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>,
+export function useGetWalletApiV1CollectionMeGet<
+  TData = Awaited<ReturnType<typeof getWalletApiV1CollectionMeGet>>,
   TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>,
+        Awaited<ReturnType<typeof getWalletApiV1CollectionMeGet>>,
         TError,
         TData
       >
     > &
       Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>,
+          Awaited<ReturnType<typeof getWalletApiV1CollectionMeGet>>,
           TError,
-          Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>
+          Awaited<ReturnType<typeof getWalletApiV1CollectionMeGet>>
         >,
         "initialData"
       >;
@@ -131,14 +129,14 @@ export function useGetUserCollectionApiV1CollectionMeGet<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetUserCollectionApiV1CollectionMeGet<
-  TData = Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>,
+export function useGetWalletApiV1CollectionMeGet<
+  TData = Awaited<ReturnType<typeof getWalletApiV1CollectionMeGet>>,
   TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>,
+        Awaited<ReturnType<typeof getWalletApiV1CollectionMeGet>>,
         TError,
         TData
       >
@@ -149,17 +147,17 @@ export function useGetUserCollectionApiV1CollectionMeGet<
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 /**
- * @summary Get User Collection
+ * @summary Get Wallet
  */
 
-export function useGetUserCollectionApiV1CollectionMeGet<
-  TData = Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>,
+export function useGetWalletApiV1CollectionMeGet<
+  TData = Awaited<ReturnType<typeof getWalletApiV1CollectionMeGet>>,
   TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getUserCollectionApiV1CollectionMeGet>>,
+        Awaited<ReturnType<typeof getWalletApiV1CollectionMeGet>>,
         TError,
         TData
       >
@@ -169,8 +167,7 @@ export function useGetUserCollectionApiV1CollectionMeGet<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions =
-    getGetUserCollectionApiV1CollectionMeGetQueryOptions(options);
+  const queryOptions = getGetWalletApiV1CollectionMeGetQueryOptions(options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
@@ -181,71 +178,87 @@ export function useGetUserCollectionApiV1CollectionMeGet<
 }
 
 /**
- * Catalogue complet avec l'état de possession de l'utilisateur courant.
- * @summary Get Pokedex
+ * Catalogue complet avec l'état de possession de l'utilisateur.
+ * @summary Get Catalog
  */
-export const getPokedexApiV1CollectionPokedexGet = (signal?: AbortSignal) => {
-  return axiosInstance<PokedexGridEntry[]>({
-    url: `/api/v1/collection/pokedex`,
+export const getCatalogApiV1CollectionCatalogsSlugGet = (
+  slug: string,
+  signal?: AbortSignal
+) => {
+  return axiosInstance<CatalogGridItem[]>({
+    url: `/api/v1/collection/catalogs/${slug}`,
     method: "GET",
     signal,
   });
 };
 
-export const getGetPokedexApiV1CollectionPokedexGetQueryKey = () => {
-  return [`/api/v1/collection/pokedex`] as const;
+export const getGetCatalogApiV1CollectionCatalogsSlugGetQueryKey = (
+  slug: string
+) => {
+  return [`/api/v1/collection/catalogs/${slug}`] as const;
 };
 
-export const getGetPokedexApiV1CollectionPokedexGetQueryOptions = <
-  TData = Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>,
+export const getGetCatalogApiV1CollectionCatalogsSlugGetQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCatalogApiV1CollectionCatalogsSlugGet>>,
   TError = HTTPValidationError,
->(options?: {
-  query?: Partial<
-    UseQueryOptions<
-      Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>,
-      TError,
-      TData
-    >
-  >;
-}) => {
+>(
+  slug: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getCatalogApiV1CollectionCatalogsSlugGet>>,
+        TError,
+        TData
+      >
+    >;
+  }
+) => {
   const { query: queryOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetPokedexApiV1CollectionPokedexGetQueryKey();
+    queryOptions?.queryKey ??
+    getGetCatalogApiV1CollectionCatalogsSlugGetQueryKey(slug);
 
   const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>
-  > = ({ signal }) => getPokedexApiV1CollectionPokedexGet(signal);
+    Awaited<ReturnType<typeof getCatalogApiV1CollectionCatalogsSlugGet>>
+  > = ({ signal }) => getCatalogApiV1CollectionCatalogsSlugGet(slug, signal);
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>,
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!slug,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCatalogApiV1CollectionCatalogsSlugGet>>,
     TError,
     TData
   > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type GetPokedexApiV1CollectionPokedexGetQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>
+export type GetCatalogApiV1CollectionCatalogsSlugGetQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCatalogApiV1CollectionCatalogsSlugGet>>
 >;
-export type GetPokedexApiV1CollectionPokedexGetQueryError = HTTPValidationError;
+export type GetCatalogApiV1CollectionCatalogsSlugGetQueryError =
+  HTTPValidationError;
 
-export function useGetPokedexApiV1CollectionPokedexGet<
-  TData = Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>,
+export function useGetCatalogApiV1CollectionCatalogsSlugGet<
+  TData = Awaited<ReturnType<typeof getCatalogApiV1CollectionCatalogsSlugGet>>,
   TError = HTTPValidationError,
 >(
+  slug: string,
   options: {
     query: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>,
+        Awaited<ReturnType<typeof getCatalogApiV1CollectionCatalogsSlugGet>>,
         TError,
         TData
       >
     > &
       Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>,
+          Awaited<ReturnType<typeof getCatalogApiV1CollectionCatalogsSlugGet>>,
           TError,
-          Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>
+          Awaited<ReturnType<typeof getCatalogApiV1CollectionCatalogsSlugGet>>
         >,
         "initialData"
       >;
@@ -254,23 +267,24 @@ export function useGetPokedexApiV1CollectionPokedexGet<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetPokedexApiV1CollectionPokedexGet<
-  TData = Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>,
+export function useGetCatalogApiV1CollectionCatalogsSlugGet<
+  TData = Awaited<ReturnType<typeof getCatalogApiV1CollectionCatalogsSlugGet>>,
   TError = HTTPValidationError,
 >(
+  slug: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>,
+        Awaited<ReturnType<typeof getCatalogApiV1CollectionCatalogsSlugGet>>,
         TError,
         TData
       >
     > &
       Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>,
+          Awaited<ReturnType<typeof getCatalogApiV1CollectionCatalogsSlugGet>>,
           TError,
-          Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>
+          Awaited<ReturnType<typeof getCatalogApiV1CollectionCatalogsSlugGet>>
         >,
         "initialData"
       >;
@@ -279,14 +293,15 @@ export function useGetPokedexApiV1CollectionPokedexGet<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetPokedexApiV1CollectionPokedexGet<
-  TData = Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>,
+export function useGetCatalogApiV1CollectionCatalogsSlugGet<
+  TData = Awaited<ReturnType<typeof getCatalogApiV1CollectionCatalogsSlugGet>>,
   TError = HTTPValidationError,
 >(
+  slug: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>,
+        Awaited<ReturnType<typeof getCatalogApiV1CollectionCatalogsSlugGet>>,
         TError,
         TData
       >
@@ -297,17 +312,18 @@ export function useGetPokedexApiV1CollectionPokedexGet<
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 /**
- * @summary Get Pokedex
+ * @summary Get Catalog
  */
 
-export function useGetPokedexApiV1CollectionPokedexGet<
-  TData = Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>,
+export function useGetCatalogApiV1CollectionCatalogsSlugGet<
+  TData = Awaited<ReturnType<typeof getCatalogApiV1CollectionCatalogsSlugGet>>,
   TError = HTTPValidationError,
 >(
+  slug: string,
   options?: {
     query?: Partial<
       UseQueryOptions<
-        Awaited<ReturnType<typeof getPokedexApiV1CollectionPokedexGet>>,
+        Awaited<ReturnType<typeof getCatalogApiV1CollectionCatalogsSlugGet>>,
         TError,
         TData
       >
@@ -317,8 +333,10 @@ export function useGetPokedexApiV1CollectionPokedexGet<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions =
-    getGetPokedexApiV1CollectionPokedexGetQueryOptions(options);
+  const queryOptions = getGetCatalogApiV1CollectionCatalogsSlugGetQueryOptions(
+    slug,
+    options
+  );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
@@ -329,7 +347,7 @@ export function useGetPokedexApiV1CollectionPokedexGet<
 }
 
 /**
- * Débloque un Pokémon en dépensant l'XP de l'utilisateur courant.
+ * Débloque un objet d'un catalogue en dépensant l'XP de l'utilisateur.
  * @summary Purchase
  */
 export const purchaseApiV1CollectionPurchasePost = (
