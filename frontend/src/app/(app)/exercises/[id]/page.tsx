@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, Flame, Star } from "lucide-react";
 
 import { ExerciseFeedback } from "@/components/exercises/ExerciseFeedback";
@@ -19,6 +20,7 @@ import {
   useGetLessonApiV1LessonsLessonIdGet as useLesson,
   useGetLessonExercisesApiV1LessonsLessonIdExercisesGet as useLessonExercises,
 } from "@/lib/api/generated/lessons/lessons";
+import { getGetUserCollectionApiV1CollectionMeGetQueryKey } from "@/lib/api/generated/collection/collection";
 import type { ExerciseSubmitResponse } from "@/lib/api/model";
 
 export default function ExercisePage() {
@@ -53,6 +55,7 @@ export default function ExercisePage() {
   );
 
   const submitMutation = useSubmitExercise();
+  const queryClient = useQueryClient();
 
   const currentIndex = allExercises.findIndex((e) => e.id === exerciseId);
   const nextExercise =
@@ -72,6 +75,13 @@ export default function ExercisePage() {
     if (res.is_correct) {
       setShowConfetti(true);
       setShowXPGain(true);
+    }
+    // Rafraîchir le porte-monnaie XP (compteur de la barre du haut) dès qu'un
+    // gain a lieu, sans recharger la page.
+    if (res.xp_awarded) {
+      queryClient.invalidateQueries({
+        queryKey: getGetUserCollectionApiV1CollectionMeGetQueryKey(),
+      });
     }
   };
 

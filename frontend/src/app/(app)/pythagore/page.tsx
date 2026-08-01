@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useQueryClient } from "@tanstack/react-query";
 import { usePlaySessionApiV1PythagoreSessionPost as usePlaySession } from "@/lib/api/generated/pythagore/pythagore";
+import { getGetUserCollectionApiV1CollectionMeGetQueryKey } from "@/lib/api/generated/collection/collection";
 import { PythagoreDifficulty } from "@/lib/api/model";
 import type { PythagoreItem, PythagoreSessionResponse } from "@/lib/api/model";
 
@@ -66,6 +68,7 @@ export default function PythagorePage() {
   const [result, setResult] = useState<PythagoreSessionResponse | null>(null);
 
   const { mutate, isPending } = usePlaySession();
+  const queryClient = useQueryClient();
 
   const rows = useMemo(
     () => Array.from({ length: config.size }, (_, i) => i + 1),
@@ -100,6 +103,10 @@ export default function PythagorePage() {
         onSuccess: (data) => {
           setResult(data);
           setPhase("done");
+          // Met à jour le compteur d'XP de la barre du haut sans recharger.
+          queryClient.invalidateQueries({
+            queryKey: getGetUserCollectionApiV1CollectionMeGetQueryKey(),
+          });
         },
       }
     );
