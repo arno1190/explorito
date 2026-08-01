@@ -22,6 +22,7 @@ import type {
 
 import type {
   AchievementResponse,
+  ChildHistoryResponse,
   ChildStatsResponse,
   DailyGoalCreate,
   DailyGoalResponse,
@@ -1835,6 +1836,214 @@ export function useGetChildAchievementsApiV1GamificationChildIdAchievementsGet<
 } {
   const queryOptions =
     getGetChildAchievementsApiV1GamificationChildIdAchievementsGetQueryOptions(
+      childId,
+      options
+    );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Historique de progression d'un enfant : activité quotidienne, frise des
+leçons, journal des erreurs et réussite par matière (parent-facing).
+ * @summary Get Child History
+ */
+export const getChildHistoryApiV1GamificationChildIdHistoryGet = (
+  childId: string,
+  signal?: AbortSignal
+) => {
+  return axiosInstance<ChildHistoryResponse>({
+    url: `/api/v1/gamification/${childId}/history`,
+    method: "GET",
+    signal,
+  });
+};
+
+export const getGetChildHistoryApiV1GamificationChildIdHistoryGetQueryKey = (
+  childId: string
+) => {
+  return [`/api/v1/gamification/${childId}/history`] as const;
+};
+
+export const getGetChildHistoryApiV1GamificationChildIdHistoryGetQueryOptions =
+  <
+    TData = Awaited<
+      ReturnType<typeof getChildHistoryApiV1GamificationChildIdHistoryGet>
+    >,
+    TError = HTTPValidationError,
+  >(
+    childId: string,
+    options?: {
+      query?: Partial<
+        UseQueryOptions<
+          Awaited<
+            ReturnType<typeof getChildHistoryApiV1GamificationChildIdHistoryGet>
+          >,
+          TError,
+          TData
+        >
+      >;
+    }
+  ) => {
+    const { query: queryOptions } = options ?? {};
+
+    const queryKey =
+      queryOptions?.queryKey ??
+      getGetChildHistoryApiV1GamificationChildIdHistoryGetQueryKey(childId);
+
+    const queryFn: QueryFunction<
+      Awaited<
+        ReturnType<typeof getChildHistoryApiV1GamificationChildIdHistoryGet>
+      >
+    > = ({ signal }) =>
+      getChildHistoryApiV1GamificationChildIdHistoryGet(childId, signal);
+
+    return {
+      queryKey,
+      queryFn,
+      enabled: !!childId,
+      ...queryOptions,
+    } as UseQueryOptions<
+      Awaited<
+        ReturnType<typeof getChildHistoryApiV1GamificationChildIdHistoryGet>
+      >,
+      TError,
+      TData
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
+  };
+
+export type GetChildHistoryApiV1GamificationChildIdHistoryGetQueryResult =
+  NonNullable<
+    Awaited<
+      ReturnType<typeof getChildHistoryApiV1GamificationChildIdHistoryGet>
+    >
+  >;
+export type GetChildHistoryApiV1GamificationChildIdHistoryGetQueryError =
+  HTTPValidationError;
+
+export function useGetChildHistoryApiV1GamificationChildIdHistoryGet<
+  TData = Awaited<
+    ReturnType<typeof getChildHistoryApiV1GamificationChildIdHistoryGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  childId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getChildHistoryApiV1GamificationChildIdHistoryGet>
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<
+            ReturnType<typeof getChildHistoryApiV1GamificationChildIdHistoryGet>
+          >,
+          TError,
+          Awaited<
+            ReturnType<typeof getChildHistoryApiV1GamificationChildIdHistoryGet>
+          >
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetChildHistoryApiV1GamificationChildIdHistoryGet<
+  TData = Awaited<
+    ReturnType<typeof getChildHistoryApiV1GamificationChildIdHistoryGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  childId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getChildHistoryApiV1GamificationChildIdHistoryGet>
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<
+            ReturnType<typeof getChildHistoryApiV1GamificationChildIdHistoryGet>
+          >,
+          TError,
+          Awaited<
+            ReturnType<typeof getChildHistoryApiV1GamificationChildIdHistoryGet>
+          >
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetChildHistoryApiV1GamificationChildIdHistoryGet<
+  TData = Awaited<
+    ReturnType<typeof getChildHistoryApiV1GamificationChildIdHistoryGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  childId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getChildHistoryApiV1GamificationChildIdHistoryGet>
+        >,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get Child History
+ */
+
+export function useGetChildHistoryApiV1GamificationChildIdHistoryGet<
+  TData = Awaited<
+    ReturnType<typeof getChildHistoryApiV1GamificationChildIdHistoryGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  childId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getChildHistoryApiV1GamificationChildIdHistoryGet>
+        >,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions =
+    getGetChildHistoryApiV1GamificationChildIdHistoryGetQueryOptions(
       childId,
       options
     );

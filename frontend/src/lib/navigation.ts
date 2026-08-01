@@ -47,7 +47,10 @@ export function isPathAllowedForRole(
   role: ActingRole
 ): boolean {
   if (role === "admin") return pathname.startsWith("/admin");
-  if (role === "parent") return pathname.startsWith("/dashboard");
+  if (role === "parent")
+    return (
+      pathname.startsWith("/dashboard") || pathname.startsWith("/progress")
+    );
   // child (ou parent en incarnation)
   return CHILD_PREFIXES.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`)

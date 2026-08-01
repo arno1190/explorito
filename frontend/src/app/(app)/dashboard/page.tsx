@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import {
   createChildApiV1ChildrenPost,
@@ -48,6 +49,7 @@ const LEVELS: { value: LevelEnum; label: string }[] = [
 
 export default function DashboardPage() {
   const { user, impersonateChild } = useAuth();
+  const router = useRouter();
   const [children, setChildren] = useState<ChildResponse[]>([]);
   const [childrenStats, setChildrenStats] = useState<
     Record<string, ChildStatsResponse>
@@ -419,10 +421,7 @@ export default function DashboardPage() {
                     <Button
                       className="w-full"
                       variant="outline"
-                      onClick={() => {
-                        // TODO: Navigate to progress view
-                        console.log("View progress for", child.id);
-                      }}
+                      onClick={() => router.push(`/progress/${child.id}`)}
                     >
                       <TrendingUp className="mr-2 h-4 w-4" />
                       Voir les progrès

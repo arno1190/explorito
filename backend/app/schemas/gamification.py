@@ -10,6 +10,60 @@ from pydantic import BaseModel, Field
 from app.models.gamification import AchievementRarity
 
 
+class DailyActivity(BaseModel):
+    """Activité d'une journée (assiduité)."""
+
+    date: date
+    lessons_completed: int
+    exercises: int
+    correct: int
+    wrong: int
+    minutes: int
+
+
+class LessonHistoryItem(BaseModel):
+    """Une leçon dans l'historique (terminée ou en cours)."""
+
+    lesson_id: UUID
+    lesson_name: str
+    subject_name: str
+    subject_icon: str | None = None
+    status: str
+    score: int | None = None
+    stars: int | None = None
+    attempts: int = 0
+    completed_at: datetime | None = None
+
+
+class ErrorLogItem(BaseModel):
+    """Un exercice raté (journal des erreurs)."""
+
+    exercise_id: UUID
+    question: str
+    lesson_name: str
+    subject_name: str
+    timestamp: datetime
+
+
+class SubjectAccuracy(BaseModel):
+    """Taux de réussite par matière (courbe de progression)."""
+
+    subject_name: str
+    subject_icon: str | None = None
+    attempts: int
+    correct: int
+    accuracy: int  # pourcentage 0-100
+
+
+class ChildHistoryResponse(BaseModel):
+    """Historique de progression d'un enfant (parent-facing)."""
+
+    daily: list[DailyActivity]
+    lessons: list[LessonHistoryItem]
+    errors: list[ErrorLogItem]
+    by_subject: list[SubjectAccuracy]
+
+
 class AchievementResponse(BaseModel):
     """
     Schéma pour un achievement

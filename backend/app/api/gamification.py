@@ -3,16 +3,17 @@ Endpoints de gamification
 """
 
 from datetime import date
-from typing import Annotated
+from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import desc, func
+from sqlalchemy import case, desc, func
 from sqlalchemy.orm import Session
 
 from app.api.auth import get_current_active_user
 from app.api.children import _require_owned_child
 from app.core.database import get_db
+from app.models.content import Exercise, LearningPath, Lesson, Subject
 from app.models.gamification import (
     Achievement,
     DailyGoal,
@@ -20,16 +21,21 @@ from app.models.gamification import (
     Streak,
     UserAchievement,
 )
-from app.models.progress import ProgressStatus, SubjectProgress, UserProgress
+from app.models.progress import ExerciseResult, ProgressStatus, SubjectProgress, UserProgress
 from app.models.user import Profile, User, UserRole
 from app.schemas.gamification import (
     AchievementResponse,
+    ChildHistoryResponse,
     ChildStatsResponse,
+    DailyActivity,
     DailyGoalCreate,
     DailyGoalResponse,
+    ErrorLogItem,
     LeaderboardEntry,
+    LessonHistoryItem,
     RewardResponse,
     StreakResponse,
+    SubjectAccuracy,
     UserAchievementResponse,
 )
 from app.services.gamification import (
@@ -550,3 +556,138 @@ async def get_child_achievements(
     )
 
     return user_achievements
+
+
+def _assert_child_access(child_id: "UUID", current_user: "User", db: "Session") -> None:
+    """Autorise l'admin, le parent propriétaire, ou l'enfant lui-même."""
+    if current_user.role == UserRole.ADMIN:
+        return
+    if current_user.role == UserRole.CHILD:
+        if str(current_user.id) != str(child_id):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès refusé")
+        return
+    if current_user.role == UserRole.PARENT:
+        owned = db.query(Profile).filter(Profile.user_id == child_id, Profile.parent_id == current_user.id).first()
+        if not owned:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Enfant non trouvé")
+        return
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès refusé")
+
+
+@router.get("/{child_id}/history", response_model=ChildHistoryResponse)
+async def get_child_history(
+    child_id: UUID,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> ChildHistoryResponse:
+    """
+    Historique de progression d'un enfant : activité quotidienne, frise des
+    leçons, journal des erreurs et réussite par matière (parent-facing).
+    """
+    _assert_child_access(child_id, current_user, db)
+
+    from datetime import datetime, timedelta
+
+    cutoff = datetime.utcnow() - timedelta(days=14)
+
+    # --- Activité quotidienne (14 derniers jours) ---
+    def _blank() -> dict[str, int]:
+        return {"lessons_completed": 0, "exercises": 0, "correct": 0, "wrong": 0, "minutes": 0}
+
+    daily_map: dict[Any, dict[str, int]] = {}
+    for ts, is_correct in db.query(ExerciseResult.timestamp, ExerciseResult.is_correct).filter(
+        ExerciseResult.user_id == child_id, ExerciseResult.timestamp >= cutoff
+    ):
+        entry = daily_map.setdefault(ts.date(), _blank())
+        entry["exercises"] += 1
+        entry["correct" if is_correct else "wrong"] += 1
+    for completed_at, time_spent in db.query(UserProgress.completed_at, UserProgress.time_spent).filter(
+        UserProgress.user_id == child_id,
+        UserProgress.status == ProgressStatus.COMPLETED,
+        UserProgress.completed_at >= cutoff,
+    ):
+        if completed_at is None:
+            continue
+        entry = daily_map.setdefault(completed_at.date(), _blank())
+        entry["lessons_completed"] += 1
+        entry["minutes"] += int((time_spent or 0) / 60)
+    daily = [DailyActivity(date=d, **v) for d, v in sorted(daily_map.items())]
+
+    # --- Frise des leçons (terminées ou en cours), plus récentes d'abord ---
+    lesson_rows = (
+        db.query(UserProgress, Lesson, Subject)
+        .join(Lesson, UserProgress.lesson_id == Lesson.id)
+        .join(LearningPath, Lesson.path_id == LearningPath.id)
+        .join(Subject, LearningPath.subject_id == Subject.id)
+        .filter(UserProgress.user_id == child_id)
+        .order_by(desc(func.coalesce(UserProgress.completed_at, UserProgress.started_at)))
+        .limit(40)
+        .all()
+    )
+    lessons = [
+        LessonHistoryItem(
+            lesson_id=lesson.id,
+            lesson_name=lesson.name,
+            subject_name=subject.name,
+            subject_icon=subject.icon,
+            status=up.status.value,
+            score=up.score,
+            stars=up.stars,
+            attempts=up.attempts or 0,
+            completed_at=up.completed_at,
+        )
+        for up, lesson, subject in lesson_rows
+    ]
+
+    # --- Journal des erreurs (exercices ratés), plus récents d'abord ---
+    error_rows = (
+        db.query(ExerciseResult, Exercise, Lesson, Subject)
+        .join(Exercise, ExerciseResult.exercise_id == Exercise.id)
+        .join(Lesson, Exercise.lesson_id == Lesson.id)
+        .join(LearningPath, Lesson.path_id == LearningPath.id)
+        .join(Subject, LearningPath.subject_id == Subject.id)
+        .filter(ExerciseResult.user_id == child_id, ExerciseResult.is_correct.is_(False))
+        .order_by(desc(ExerciseResult.timestamp))
+        .limit(40)
+        .all()
+    )
+    errors = [
+        ErrorLogItem(
+            exercise_id=exercise.id,
+            question=exercise.question,
+            lesson_name=lesson.name,
+            subject_name=subject.name,
+            timestamp=result.timestamp,
+        )
+        for result, exercise, lesson, subject in error_rows
+    ]
+
+    # --- Réussite par matière ---
+    subject_rows = (
+        db.query(
+            Subject.name,
+            Subject.icon,
+            func.count(ExerciseResult.id),
+            func.sum(case((ExerciseResult.is_correct, 1), else_=0)),
+        )
+        .join(Exercise, ExerciseResult.exercise_id == Exercise.id)
+        .join(Lesson, Exercise.lesson_id == Lesson.id)
+        .join(LearningPath, Lesson.path_id == LearningPath.id)
+        .join(Subject, LearningPath.subject_id == Subject.id)
+        .filter(ExerciseResult.user_id == child_id)
+        .group_by(Subject.name, Subject.icon)
+        .all()
+    )
+    by_subject = [
+        SubjectAccuracy(
+            subject_name=name,
+            subject_icon=icon,
+            attempts=int(attempts),
+            correct=int(correct or 0),
+            accuracy=round(100 * int(correct or 0) / int(attempts)) if attempts else 0,
+        )
+        for name, icon, attempts, correct in subject_rows
+    ]
+    by_subject.sort(key=lambda s: s.attempts, reverse=True)
+
+    return ChildHistoryResponse(daily=daily, lessons=lessons, errors=errors, by_subject=by_subject)
