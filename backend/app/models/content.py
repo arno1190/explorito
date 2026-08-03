@@ -14,6 +14,7 @@ from sqlalchemy import (
     Enum,
     ForeignKey,
     Integer,
+    SmallInteger,
     String,
     Text,
     func,
@@ -179,7 +180,11 @@ class Exercise(Base):
     hints = Column(JSON, default=[])  # [{text: "...", delay: 10}]
     explanation = Column(Text, nullable=True)  # Explication après réponse
     order_index = Column(Integer, default=0)
-    difficulty = Column(Enum(DifficultyEnum), default=DifficultyEnum.EASY)
+    difficulty = Column(Enum(DifficultyEnum), default=DifficultyEnum.EASY)  # legacy (3 niveaux)
+    # Difficulté fine évaluée par exercice, relative au niveau scolaire : 1 (très
+    # facile) → 5 (très difficile). Pilote l'XP via settings.XP_BY_LEVEL (issue #6).
+    # Nullable : repli sur `difficulty` puis XP_PER_EXERCISE si non renseignée.
+    difficulty_level = Column(SmallInteger, nullable=True)
     media_urls = Column(JSON, default={})  # {images: [...], audio: "..."}
 
     # Relations

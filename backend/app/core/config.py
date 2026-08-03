@@ -50,9 +50,12 @@ class Settings(BaseSettings):
     XP_PER_EXERCISE: int = 10  # tarif par défaut / repli (difficulté « easy »)
     XP_PER_LESSON: int = 50
     XP_LEVEL_MULTIPLIER: int = 100  # Level N = N * 100 XP
-    # XP de base par bonne réponse selon la difficulté de l'exercice (issue #6).
-    # Un exercice plus difficile rapporte davantage de « PV ». Repli sur
-    # XP_PER_EXERCISE si la difficulté est inconnue.
+    # XP de base par bonne réponse selon la difficulté fine de l'exercice
+    # (difficulty_level 1→5, évalué par exercice, relatif au niveau scolaire).
+    # Source de vérité de l'XP par exercice (issue #6).
+    XP_BY_LEVEL: dict[int, int] = {1: 10, 2: 15, 3: 20, 4: 25, 5: 30}
+    # Repli hérité : ancienne difficulté à 3 niveaux, utilisée uniquement si
+    # difficulty_level n'est pas renseignée. Repli final : XP_PER_EXERCISE.
     XP_BY_DIFFICULTY: dict[str, int] = {"easy": 10, "medium": 20, "hard": 30}
     # Bonus forfaitaire à la complétion d'une leçon (lesson.xp_reward). Désactivé
     # par défaut (issue #6) : l'XP provient uniquement des exercices, pondérée par

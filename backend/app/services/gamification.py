@@ -319,16 +319,21 @@ def update_daily_goal_lesson_count(user_id: UUID, db: Session) -> None:
 def xp_for_exercise(exercise: Exercise) -> int:
     """XP de base d'un exercice selon sa difficulté (issue #6).
 
-    Un exercice « hard » rapporte plus qu'un « easy ». La correspondance est
-    configurable via ``settings.XP_BY_DIFFICULTY`` ; on retombe sur
-    ``settings.XP_PER_EXERCISE`` pour toute difficulté inconnue ou absente.
+    Priorité :
+    1. ``difficulty_level`` (1→5, évalué par exercice) via ``XP_BY_LEVEL`` ;
+    2. repli sur l'ancienne ``difficulty`` (easy/medium/hard) via
+       ``XP_BY_DIFFICULTY`` ;
+    3. repli final sur ``XP_PER_EXERCISE``.
 
     Args:
-        exercise: Exercice évalué (sa ``difficulty`` peut être un enum ou None).
+        exercise: Exercice évalué.
 
     Returns:
         Nombre de points de base à attribuer pour une première bonne réponse.
     """
+    level = exercise.difficulty_level
+    if level is not None and int(level) in settings.XP_BY_LEVEL:
+        return settings.XP_BY_LEVEL[int(level)]
     raw = getattr(exercise.difficulty, "value", exercise.difficulty)
     difficulty = str(raw) if raw is not None else ""
     return settings.XP_BY_DIFFICULTY.get(difficulty, settings.XP_PER_EXERCISE)
