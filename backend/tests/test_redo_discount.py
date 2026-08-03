@@ -119,7 +119,8 @@ def test_replaying_completed_lesson_awards_zero(client: TestClient, db_session: 
     assert _submit(client, e1.id, True, h)["xp_awarded"] == settings.XP_PER_EXERCISE
     complete = _submit(client, e2.id, True, h)
     assert complete["lesson_completed"] is True
-    assert complete["xp_awarded"] == settings.XP_PER_EXERCISE + 50  # exo + bonus de leçon (une fois)
+    # Bonus de leçon désactivé par défaut (issue #6) : seulement l'XP de l'exercice.
+    assert complete["xp_awarded"] == settings.XP_PER_EXERCISE
 
     # Rejouer entièrement -> plus rien (exos déjà réussis, bonus non répété).
     assert _submit(client, e1.id, True, h)["xp_awarded"] == 0

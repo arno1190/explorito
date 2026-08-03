@@ -93,7 +93,8 @@ def test_submit_awards_xp_and_completes_lesson(client: TestClient, db_session: S
     assert body1["current_streak"] == 1
     assert body1["lesson_completed"] is False
 
-    # Second exercice réussi : leçon terminée, 3 étoiles, +10 exo +50 bonus.
+    # Second exercice réussi : leçon terminée, 3 étoiles. Pas de bonus forfaitaire
+    # (désactivé par défaut, issue #6) -> seulement l'XP de l'exercice (easy = 10).
     r2 = client.post(
         f"/api/v1/exercises/{e2.id}/submit",
         json={"answer": {"option_ids": ["a"]}, "time_taken": 7},
@@ -105,8 +106,8 @@ def test_submit_awards_xp_and_completes_lesson(client: TestClient, db_session: S
     assert body2["lesson_completed"] is True
     assert body2["lesson_stars"] == 3
     assert body2["lesson_score"] == 100
-    assert body2["xp_awarded"] == 60
-    assert body2["total_xp"] == 70
+    assert body2["xp_awarded"] == 10
+    assert body2["total_xp"] == 20
 
     # Progression persistée en base.
     progress = db_session.query(UserProgress).filter_by(lesson_id=lesson.id).first()

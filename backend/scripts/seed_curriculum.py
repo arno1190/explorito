@@ -59,6 +59,7 @@ def mcq(
     multiple: bool = False,
     emoji: str | None = None,
     explanation: str | None = None,
+    difficulty: str | None = None,
 ) -> dict[str, Any]:
     """QCM. ``correct`` = index (0-based) ou liste d'index des bonnes options."""
     opts = [{"id": str(i + 1), "text": t} for i, t in enumerate(options)]
@@ -73,6 +74,8 @@ def mcq(
         ex["media_urls"] = {"emoji": emoji}
     if explanation:
         ex["explanation"] = explanation
+    if difficulty:
+        ex["difficulty"] = difficulty
     return ex
 
 
@@ -84,6 +87,7 @@ def math_problem(
     tolerance: float = 0.0,
     emoji: str | None = None,
     explanation: str | None = None,
+    difficulty: str | None = None,
 ) -> dict[str, Any]:
     """Problème à réponse numérique (la valeur est calculée en Python)."""
     content: dict[str, Any] = {}
@@ -102,10 +106,19 @@ def math_problem(
         ex["media_urls"] = {"emoji": emoji}
     if explanation:
         ex["explanation"] = explanation
+    if difficulty:
+        ex["difficulty"] = difficulty
     return ex
 
 
-def fill_blanks(question: str, text: str, blanks: list[str], *, explanation: str | None = None) -> dict[str, Any]:
+def fill_blanks(
+    question: str,
+    text: str,
+    blanks: list[str],
+    *,
+    explanation: str | None = None,
+    difficulty: str | None = None,
+) -> dict[str, Any]:
     """Texte à trous : ``text`` contient autant de ``___`` que ``blanks``."""
     ex: dict[str, Any] = {
         "type": "fill_blanks",
@@ -115,6 +128,8 @@ def fill_blanks(question: str, text: str, blanks: list[str], *, explanation: str
     }
     if explanation:
         ex["explanation"] = explanation
+    if difficulty:
+        ex["difficulty"] = difficulty
     return ex
 
 
@@ -130,6 +145,7 @@ def soroban(
     mode: str = "read",
     columns: int | None = None,
     explanation: str | None = None,
+    difficulty: str | None = None,
 ) -> dict[str, Any]:
     """Exercice de boulier : ``mode`` ``read`` (lire) ou ``build`` (construire) ``value``."""
     content: dict[str, Any] = {"mode": mode, "value": value}
@@ -143,17 +159,22 @@ def soroban(
     }
     if explanation:
         ex["explanation"] = explanation
+    if difficulty:
+        ex["difficulty"] = difficulty
     return ex
 
 
-def pythagore(question: str, tables: list[int], blanks: int = 6) -> dict[str, Any]:
+def pythagore(question: str, tables: list[int], blanks: int = 6, *, difficulty: str | None = None) -> dict[str, Any]:
     """Mini-jeu de tables de multiplication (produits calculés à la correction)."""
-    return {
+    ex: dict[str, Any] = {
         "type": "pythagore",
         "question": question,
         "content": {"tables": tables, "blanks": blanks},
         "correct_answer": {},
     }
+    if difficulty:
+        ex["difficulty"] = difficulty
+    return ex
 
 
 def theme(
@@ -878,6 +899,13 @@ def _seed_one(data: dict[str, Any], db: Any, *, dry_run: bool) -> str:
     db.add(lesson)
     db.flush()
     for idx, raw in enumerate(data["exercises"]):
+        # Difficulté = surcharge explicite par exercice (issue #6) sinon défaut du
+        # palier. Elle pilote l'XP attribué (voir xp_for_exercise).
+        difficulty = (
+            DifficultyEnum(raw["difficulty"])
+            if raw.get("difficulty")
+            else TIER_DIFFICULTY.get(tier, DifficultyEnum.EASY)
+        )
         db.add(
             Exercise(
                 lesson_id=lesson.id,
@@ -887,7 +915,7 @@ def _seed_one(data: dict[str, Any], db: Any, *, dry_run: bool) -> str:
                 correct_answer=raw.get("correct_answer", {}),
                 explanation=raw.get("explanation"),
                 order_index=idx,
-                difficulty=TIER_DIFFICULTY.get(tier, DifficultyEnum.EASY),
+                difficulty=difficulty,
                 media_urls=raw.get("media_urls", {}),
             )
         )

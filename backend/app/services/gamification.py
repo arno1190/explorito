@@ -316,6 +316,24 @@ def update_daily_goal_lesson_count(user_id: UUID, db: Session) -> None:
     db.commit()
 
 
+def xp_for_exercise(exercise: Exercise) -> int:
+    """XP de base d'un exercice selon sa difficulté (issue #6).
+
+    Un exercice « hard » rapporte plus qu'un « easy ». La correspondance est
+    configurable via ``settings.XP_BY_DIFFICULTY`` ; on retombe sur
+    ``settings.XP_PER_EXERCISE`` pour toute difficulté inconnue ou absente.
+
+    Args:
+        exercise: Exercice évalué (sa ``difficulty`` peut être un enum ou None).
+
+    Returns:
+        Nombre de points de base à attribuer pour une première bonne réponse.
+    """
+    raw = getattr(exercise.difficulty, "value", exercise.difficulty)
+    difficulty = str(raw) if raw is not None else ""
+    return settings.XP_BY_DIFFICULTY.get(difficulty, settings.XP_PER_EXERCISE)
+
+
 def _stars_from_score(score: int) -> int:
     """Convertit un score (0-100) en nombre d'étoiles (1-3) pour une leçon terminée."""
     if score >= 90:
@@ -417,12 +435,13 @@ def process_exercise_result(
         )
         prior_correct = int(correct_count) - 1  # hors résultat courant
         prior_attempts = int(result_count) - 1
+        base_xp = xp_for_exercise(exercise)  # pondéré par la difficulté (issue #6)
         if prior_correct > 0:
             exercise_xp = 0
         elif prior_attempts > 0:
-            exercise_xp = int(settings.XP_PER_EXERCISE * settings.XP_REDO_DISCOUNT)
+            exercise_xp = int(base_xp * settings.XP_REDO_DISCOUNT)
         else:
-            exercise_xp = settings.XP_PER_EXERCISE
+            exercise_xp = base_xp
 
         if exercise_xp > 0:
             xp_awarded += exercise_xp
@@ -483,9 +502,10 @@ def process_exercise_result(
             # leçons du jour ci-dessous.
             db.flush()
 
-            # Bonus XP de leçon + mise à jour de l'objectif quotidien
+            # Bonus XP forfaitaire de leçon (désactivé par défaut, issue #6) +
+            # mise à jour de l'objectif quotidien.
             lesson_reward = int(lesson.xp_reward or 0)
-            if lesson_reward > 0:
+            if settings.AWARD_LESSON_COMPLETION_BONUS and lesson_reward > 0:
                 xp_awarded += lesson_reward
                 total_xp = award_xp(user_id, lesson_reward, subject_id, db)
             update_daily_goal_lesson_count(user_id, db)

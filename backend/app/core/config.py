@@ -47,9 +47,17 @@ class Settings(BaseSettings):
     MAX_PAGE_SIZE: int = 100
 
     # Gamification
-    XP_PER_EXERCISE: int = 10
+    XP_PER_EXERCISE: int = 10  # tarif par défaut / repli (difficulté « easy »)
     XP_PER_LESSON: int = 50
     XP_LEVEL_MULTIPLIER: int = 100  # Level N = N * 100 XP
+    # XP de base par bonne réponse selon la difficulté de l'exercice (issue #6).
+    # Un exercice plus difficile rapporte davantage de « PV ». Repli sur
+    # XP_PER_EXERCISE si la difficulté est inconnue.
+    XP_BY_DIFFICULTY: dict[str, int] = {"easy": 10, "medium": 20, "hard": 30}
+    # Bonus forfaitaire à la complétion d'une leçon (lesson.xp_reward). Désactivé
+    # par défaut (issue #6) : l'XP provient uniquement des exercices, pondérée par
+    # la difficulté. Passer à True restaure l'ancien comportement.
+    AWARD_LESSON_COMPLETION_BONUS: bool = False
     # Anti-farm : refaire un exercice déjà raté ne rapporte qu'une fraction de
     # l'XP (0.0–1.0) ; un exercice déjà réussi ne rapporte plus rien.
     XP_REDO_DISCOUNT: float = 0.5
