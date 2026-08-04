@@ -97,16 +97,6 @@ export function Header() {
 
   return (
     <>
-      {impersonatedChild && (
-        <div className="bg-fun-sun-light text-fun-text px-4 py-2 text-center border-b-2 border-fun-sun">
-          <div className="container mx-auto flex items-center justify-center gap-4">
-            <span className="font-semibold">
-              Mode enfant&nbsp;: {impersonatedChild.name}
-            </span>
-          </div>
-        </div>
-      )}
-
       <header className="bg-white/80 backdrop-blur-sm border-b-2 border-fun-border sticky top-0 z-40">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <Link
