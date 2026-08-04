@@ -17,14 +17,7 @@ export interface ChildCreate {
    */
   name: string;
   /** Date de naissance */
-  birth_date: string;
-  /** Email de l'enfant (pour créer le compte) */
-  email: string;
-  /**
-   * Mot de passe (minimum 8 caractères)
-   * @minLength 8
-   */
-  password: string;
+  birth_date?: string | null;
   /** Niveau scolaire (PS à CM2) */
   level?: LevelEnum | null;
 }

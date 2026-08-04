@@ -4,28 +4,33 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
+  devLoginApiV1AuthDevLoginPost,
   getCurrentUserInfoApiV1AuthMeGet,
-  loginApiV1AuthLoginPost,
-  registerApiV1AuthRegisterPost,
+  googleLoginApiV1AuthGooglePost,
+  setPinApiV1AuthPinPost,
+  verifyPinApiV1AuthVerifyPinPost,
 } from "@/lib/api/generated/auth/auth";
-import type {
-  ChildResponse,
-  UserLogin,
-  UserRegister,
-  UserResponse,
-} from "@/lib/api/model";
+import type { ChildResponse, UserResponse } from "@/lib/api/model";
+import { actingRoleHome, resolveActingRole } from "@/lib/navigation";
 
 interface AuthContextType {
   user: UserResponse | null;
   loading: boolean;
-  login: (data: UserLogin) => Promise<void>;
-  register: (data: UserRegister) => Promise<void>;
+  isAuthenticated: boolean;
+  /** Connexion via Google (id_token renvoyé par Google Identity Services). */
+  googleLogin: (credential: string) => Promise<void>;
+  /** Connexion de développement (email), active uniquement hors production. */
+  devLogin: (email: string) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
-  isAuthenticated: boolean;
+  /** Définit ou remplace le code PIN parent (4 chiffres). */
+  setPin: (pin: string) => Promise<void>;
+  /** Vérifie le code PIN parent ; renvoie true si correct. */
+  verifyPin: (pin: string) => Promise<boolean>;
   impersonatedChild: ChildResponse | null;
   impersonateChild: (child: ChildResponse) => void;
-  stopImpersonation: () => void;
+  /** Quitte le mode enfant et revient à la vue parent. */
+  exitChildMode: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -59,35 +64,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadUser();
   }, []);
 
-  const login = async (data: UserLogin) => {
-    const token = await loginApiV1AuthLoginPost(data);
-    localStorage.setItem("access_token", token.access_token);
+  const finishLogin = async (accessToken: string) => {
+    localStorage.setItem("access_token", accessToken);
+    localStorage.removeItem("impersonated_child");
+    setImpersonatedChild(null);
     const currentUser = await getCurrentUserInfoApiV1AuthMeGet();
     setUser(currentUser);
-
-    if (currentUser.role !== "parent") {
-      localStorage.removeItem("impersonated_child");
-      setImpersonatedChild(null);
-    }
-
-    switch (currentUser.role) {
-      case "admin":
-        router.push("/admin");
-        break;
-      case "parent":
-        router.push("/dashboard");
-        break;
-      case "child":
-        router.push("/play");
-        break;
-      default:
-        router.push("/dashboard");
-    }
+    const role = resolveActingRole(currentUser.role, false);
+    router.push(role ? actingRoleHome(role) : "/dashboard");
   };
 
-  const register = async (data: UserRegister) => {
-    await registerApiV1AuthRegisterPost(data);
-    await login({ email: data.email, password: data.password });
+  const googleLogin = async (credential: string) => {
+    const token = await googleLoginApiV1AuthGooglePost({ credential });
+    await finishLogin(token.access_token);
+  };
+
+  const devLogin = async (email: string) => {
+    const token = await devLoginApiV1AuthDevLoginPost({ email });
+    await finishLogin(token.access_token);
   };
 
   const refreshUser = async () => {
@@ -107,13 +101,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push("/login");
   };
 
+  const setPin = async (pin: string) => {
+    const updated = await setPinApiV1AuthPinPost({ pin });
+    setUser(updated);
+  };
+
+  const verifyPin = async (pin: string): Promise<boolean> => {
+    try {
+      await verifyPinApiV1AuthVerifyPinPost({ pin });
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const impersonateChild = (child: ChildResponse) => {
     localStorage.setItem("impersonated_child", JSON.stringify(child));
     setImpersonatedChild(child);
     router.push("/play");
   };
 
-  const stopImpersonation = () => {
+  const exitChildMode = () => {
     localStorage.removeItem("impersonated_child");
     setImpersonatedChild(null);
     router.push("/dashboard");
@@ -124,14 +132,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         loading,
-        login,
-        register,
+        isAuthenticated: !!user,
+        googleLogin,
+        devLogin,
         logout,
         refreshUser,
-        isAuthenticated: !!user,
+        setPin,
+        verifyPin,
         impersonatedChild,
         impersonateChild,
-        stopImpersonation,
+        exitChildMode,
       }}
     >
       {children}

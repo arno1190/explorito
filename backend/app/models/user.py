@@ -35,8 +35,15 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    email = Column(String, unique=True, index=True, nullable=False)
-    password_hash = Column(String, nullable=False)
+    # email/password désormais optionnels : seuls les parents s'authentifient
+    # (via Google) ; les enfants sont des comptes sans connexion.
+    email = Column(String, unique=True, index=True, nullable=True)
+    password_hash = Column(String, nullable=True)
+    # Identifiant stable du compte Google (claim `sub`), lié à la 1re connexion.
+    google_sub = Column(String, unique=True, index=True, nullable=True)
+    # Code PIN parent (4 chiffres) hashé (bcrypt) : porte de retour à la vue
+    # parent depuis le mode enfant. Optionnel tant que non défini.
+    pin_hash = Column(String, nullable=True)
     role = Column(Enum(UserRole), nullable=False, default=UserRole.CHILD)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
@@ -59,6 +66,11 @@ class User(Base):
     rewards = relationship("Reward", back_populates="user", cascade="all, delete-orphan")
     review_queue = relationship("ReviewQueue", back_populates="user", cascade="all, delete-orphan")
     collectible_unlocks = relationship("CollectibleUnlock", back_populates="user", cascade="all, delete-orphan")
+
+    @property
+    def has_pin(self) -> bool:
+        """Vrai si un code PIN parent est défini."""
+        return bool(self.pin_hash)
 
     def __repr__(self):
         return f"<User {self.email} ({self.role})>"

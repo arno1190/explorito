@@ -6,7 +6,7 @@ from datetime import timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -15,15 +15,17 @@ from app.core.security import (
     create_access_token,
     decode_access_token,
     get_password_hash,
+    verify_google_id_token,
     verify_password,
 )
-from app.models.user import Profile, User
+from app.models.user import Profile, User, UserRole
 from app.schemas.auth import (
+    DevLoginRequest,
+    GoogleAuthRequest,
+    PinRequest,
     ProfileUpdate,
     RefreshTokenRequest,
     Token,
-    UserLogin,
-    UserRegister,
     UserResponse,
 )
 from app.services.uploads import save_avatar
@@ -31,7 +33,7 @@ from app.services.uploads import save_avatar
 router = APIRouter()
 
 # OAuth2 scheme pour l'extraction du token depuis les headers
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_PREFIX}/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_PREFIX}/auth/dev-login", auto_error=True)
 
 
 def get_user_by_email(db: Session, email: str) -> User | None:
@@ -48,23 +50,63 @@ def get_user_by_email(db: Session, email: str) -> User | None:
     return db.query(User).filter(User.email == email).first()
 
 
-def authenticate_user(db: Session, email: str, password: str) -> User | None:
-    """
-    Authentifie un utilisateur avec email et mot de passe
+def _role_for_email(email: str) -> UserRole:
+    """Rôle attribué à la connexion : admin si l'email est sur l'allowlist."""
+    return UserRole.ADMIN if email.lower() in settings.admin_emails_set else UserRole.PARENT
 
-    Args:
-        db: Session de base de données
-        email: Email de l'utilisateur
-        password: Mot de passe en clair
 
-    Returns:
-        Utilisateur si authentification réussie, None sinon
+def _issue_token(user: User) -> Token:
+    """Émet les jetons applicatifs (accès + rafraîchissement) pour un parent."""
+    access_token = create_access_token(
+        data={"sub": user.email, "role": user.role.value, "user_id": str(user.id)},
+        expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
+    )
+    refresh_token = create_access_token(
+        data={"sub": user.email, "type": "refresh"},
+        expires_delta=timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
+    )
+    return Token(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="bearer",
+        expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+    )
+
+
+def _upsert_parent(
+    db: Session,
+    email: str,
+    *,
+    display_name: str | None = None,
+    google_sub: str | None = None,
+    avatar_url: str | None = None,
+) -> User:
+    """Récupère ou crée le compte parent associé à un email (inscription libre).
+
+    Le rôle est (re)calculé à chaque connexion depuis l'allowlist admin. Un profil
+    parent est créé au premier accès. ``google_sub`` est lié s'il est fourni.
     """
     user = get_user_by_email(db, email)
-    if not user:
-        return None
-    if not verify_password(password, user.password_hash):
-        return None
+    if user is None:
+        user = User(email=email, role=_role_for_email(email), is_active=True, google_sub=google_sub)
+        db.add(user)
+        db.flush()
+        db.add(
+            Profile(
+                user_id=user.id,
+                display_name=display_name or email.split("@")[0],
+                avatar_url=avatar_url,
+                is_child=False,
+                settings={},
+            )
+        )
+    else:
+        # Synchronise le rôle avec l'allowlist et lie l'identité Google.
+        user.role = _role_for_email(email)
+        if google_sub and not user.google_sub:
+            user.google_sub = google_sub
+    db.commit()
+    db.refresh(user)
     return user
 
 
@@ -126,164 +168,77 @@ async def get_current_active_user(
     return current_user
 
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-async def register(user_data: UserRegister, db: Annotated[Session, Depends(get_db)]) -> User:
-    """
-    Inscrit un nouvel utilisateur (parent ou enfant)
+@router.post("/google", response_model=Token)
+async def google_login(payload: GoogleAuthRequest, db: Annotated[Session, Depends(get_db)]) -> Token:
+    """Connexion via Google (flux id_token). Inscription libre des parents.
 
-    Args:
-        user_data: Données d'inscription
-        db: Session de base de données
-
-    Returns:
-        Utilisateur créé avec son profil
+    Vérifie l'``id_token`` Google, exige un email vérifié, puis crée ou récupère
+    le compte parent correspondant et émet un jeton applicatif.
 
     Raises:
-        HTTPException: Si l'email existe déjà ou si des validations échouent
+        HTTPException: 401 si le token Google est invalide ou l'email non vérifié.
     """
-    # Vérifier si l'email existe déjà
-    existing_user = get_user_by_email(db, user_data.email)
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Un utilisateur avec cet email existe déjà",
-        )
-
-    # Vérifier le parent pour les enfants
-    parent_user = None
-    if user_data.role.value == "child" and user_data.parent_email:
-        parent_user = get_user_by_email(db, user_data.parent_email)
-        if not parent_user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Parent non trouvé avec cet email",
-            )
-        if parent_user.role.value != "parent":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="L'email parent doit correspondre à un compte parent",
-            )
-
-    # Créer l'utilisateur
-    hashed_password = get_password_hash(user_data.password)
-    new_user = User(
-        email=user_data.email,
-        password_hash=hashed_password,
-        role=user_data.role,
-        is_active=True,
-    )
-    db.add(new_user)
-    db.flush()  # Pour obtenir l'ID de l'utilisateur
-
-    # Créer le profil
-    profile = Profile(
-        user_id=new_user.id,
-        display_name=user_data.display_name,
-        date_of_birth=user_data.date_of_birth,
-        is_child=(user_data.role.value == "child"),
-        parent_id=parent_user.id if parent_user else None,
-        settings={},
-    )
-    db.add(profile)
-    db.commit()
-    db.refresh(new_user)
-
-    return new_user
-
-
-@router.post("/login", response_model=Token)
-async def login(user_credentials: UserLogin, db: Annotated[Session, Depends(get_db)]) -> Token:
-    """
-    Connecte un utilisateur et retourne un token JWT
-
-    Args:
-        user_credentials: Email et mot de passe
-        db: Session de base de données
-
-    Returns:
-        Token JWT avec durée de validité
-
-    Raises:
-        HTTPException: Si les identifiants sont incorrects
-    """
-    user = authenticate_user(db, user_credentials.email, user_credentials.password)
-    if not user:
+    try:
+        info = verify_google_id_token(payload.credential)
+    except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Email ou mot de passe incorrect",
+            detail="Jeton Google invalide.",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from exc
 
+    email = info.get("email")
+    if not email or not info.get("email_verified"):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Email Google non vérifié.")
+
+    user = _upsert_parent(
+        db,
+        email.lower(),
+        display_name=info.get("name"),
+        google_sub=info.get("sub"),
+        avatar_url=info.get("picture"),
+    )
     if not user.is_active:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Compte utilisateur inactif")
-
-    # Créer le token d'accès
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.email, "role": user.role.value, "user_id": str(user.id)},
-        expires_delta=access_token_expires,
-    )
-
-    # Créer le token de rafraîchissement (durée plus longue)
-    refresh_token_expires = timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
-    refresh_token = create_access_token(
-        data={"sub": user.email, "type": "refresh"}, expires_delta=refresh_token_expires
-    )
-
-    return Token(
-        access_token=access_token,
-        refresh_token=refresh_token,
-        token_type="bearer",
-        expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,  # en secondes
-    )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Compte désactivé.")
+    return _issue_token(user)
 
 
-@router.post("/login/form", response_model=Token)
-async def login_form(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+if settings.DEBUG:
+    # Connexion de développement/tests uniquement (jamais montée en production).
+    @router.post("/dev-login", response_model=Token)
+    async def dev_login(payload: DevLoginRequest, db: Annotated[Session, Depends(get_db)]) -> Token:
+        """Connexion sans Google pour le dev et les tests (email → jeton parent)."""
+        user = _upsert_parent(db, payload.email.lower(), display_name=payload.display_name)
+        return _issue_token(user)
+
+
+@router.post("/pin", response_model=UserResponse)
+async def set_pin(
+    payload: PinRequest,
+    current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
-) -> Token:
-    """
-    Endpoint de connexion compatible OAuth2 pour la documentation interactive
+) -> User:
+    """Définit (ou remplace) le code PIN parent à 4 chiffres."""
+    current_user.pin_hash = get_password_hash(payload.pin)
+    db.commit()
+    db.refresh(current_user)
+    return current_user
 
-    Args:
-        form_data: Formulaire OAuth2 (username = email, password)
-        db: Session de base de données
 
-    Returns:
-        Token JWT
+@router.post("/verify-pin", status_code=status.HTTP_204_NO_CONTENT)
+async def verify_pin(
+    payload: PinRequest,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+) -> None:
+    """Vérifie le code PIN parent (retour à la vue parent depuis le mode enfant).
 
     Raises:
-        HTTPException: Si les identifiants sont incorrects
+        HTTPException: 400 si aucun PIN n'est défini, 401 si le PIN est erroné.
     """
-    user = authenticate_user(db, form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Email ou mot de passe incorrect",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    if not user.is_active:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Compte utilisateur inactif")
-
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.email, "role": user.role.value, "user_id": str(user.id)},
-        expires_delta=access_token_expires,
-    )
-
-    refresh_token_expires = timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
-    refresh_token = create_access_token(
-        data={"sub": user.email, "type": "refresh"}, expires_delta=refresh_token_expires
-    )
-
-    return Token(
-        access_token=access_token,
-        refresh_token=refresh_token,
-        token_type="bearer",
-        expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-    )
+    if not current_user.pin_hash:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Aucun code PIN défini.")
+    if not verify_password(payload.pin, current_user.pin_hash):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Code PIN incorrect.")
 
 
 @router.post("/refresh", response_model=Token)

@@ -12,9 +12,10 @@ import type { UserRole } from "./userRole";
  */
 export interface UserResponse {
   id: string;
-  email: string;
+  email?: string | null;
   role: UserRole;
   is_active: boolean;
+  has_pin?: boolean;
   created_at: string;
   profile?: ProfileResponse | null;
 }

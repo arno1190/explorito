@@ -33,7 +33,9 @@ export function resolveActingRole(
 export function actingRoleHome(role: ActingRole): string {
   switch (role) {
     case "admin":
-      return "/admin";
+      // L'admin (parent-superset) gère aussi ses enfants : on l'amène au
+      // tableau de bord d'où il lance le mode enfant.
+      return "/dashboard";
     case "parent":
       return "/dashboard";
     case "child":
@@ -46,7 +48,14 @@ export function isPathAllowedForRole(
   pathname: string,
   role: ActingRole
 ): boolean {
-  if (role === "admin") return pathname.startsWith("/admin");
+  // L'admin est un sur-ensemble du parent : gestion de contenu (/admin) ET
+  // gestion de famille (/dashboard, /progress).
+  if (role === "admin")
+    return (
+      pathname.startsWith("/admin") ||
+      pathname.startsWith("/dashboard") ||
+      pathname.startsWith("/progress")
+    );
   if (role === "parent")
     return (
       pathname.startsWith("/dashboard") || pathname.startsWith("/progress")

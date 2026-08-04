@@ -11,25 +11,21 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.security import get_password_hash
 from app.models.content import LevelEnum
-from app.models.user import Profile, User, UserRole
+from app.models.user import User
+from tests.helpers import child_headers, make_child
+
+_children: dict[str, User] = {}
 
 
 def _make_child(db: Session, email: str) -> User:
-    user = User(email=email, password_hash=get_password_hash("SecurePass123"), role=UserRole.CHILD, is_active=True)
-    db.add(user)
-    db.flush()
-    db.add(Profile(user_id=user.id, display_name=email.split("@")[0], is_child=True, level=LevelEnum.CE1))
-    db.commit()
-    db.refresh(user)
-    return user
+    child = make_child(db, level=LevelEnum.CE1, name=email.split("@")[0])
+    _children[email] = child
+    return child
 
 
 def _auth(client: TestClient, email: str) -> dict[str, str]:
-    r = client.post("/api/v1/auth/login", json={"email": email, "password": "SecurePass123"})
-    assert r.status_code == 200, r.text
-    return {"Authorization": f"Bearer {r.json()['access_token']}"}
+    return child_headers(client, _children[email])
 
 
 def _session(client: TestClient, h: dict[str, str], difficulty: str, items: list[tuple[int, int, int]]) -> dict:

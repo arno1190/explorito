@@ -10,7 +10,6 @@ from fastapi.testclient import TestClient
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.core.security import get_password_hash
 from app.models.content import (
     DifficultyEnum,
     Exercise,
@@ -20,17 +19,16 @@ from app.models.content import (
     Subject,
 )
 from app.models.progress import ProgressStatus, SubjectProgress, UserProgress
-from app.models.user import Profile, User, UserRole
+from app.models.user import Profile, User
+from tests.helpers import child_headers, make_child
+
+_children: dict[str, User] = {}
 
 
 def _make_child(db: Session, email: str, level: LevelEnum) -> User:
-    user = User(email=email, password_hash=get_password_hash("SecurePass123"), role=UserRole.CHILD, is_active=True)
-    db.add(user)
-    db.flush()
-    db.add(Profile(user_id=user.id, display_name=email.split("@")[0], is_child=True, level=level))
-    db.commit()
-    db.refresh(user)
-    return user
+    child = make_child(db, level=level, name=email.split("@")[0])
+    _children[email] = child
+    return child
 
 
 def _mcq(lesson_id, order_index: int) -> Exercise:
@@ -65,9 +63,7 @@ def _subject_two_tiers(db: Session, name: str, slug: str, level: LevelEnum) -> t
 
 
 def _auth(client: TestClient, email: str) -> dict[str, str]:
-    r = client.post("/api/v1/auth/login", json={"email": email, "password": "SecurePass123"})
-    assert r.status_code == 200, r.text
-    return {"Authorization": f"Bearer {r.json()['access_token']}"}
+    return child_headers(client, _children[email])
 
 
 def test_level_change_preserves_history_and_regates(client: TestClient, db_session: Session):

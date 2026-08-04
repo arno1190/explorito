@@ -21,63 +21,233 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  BodyLoginFormApiV1AuthLoginFormPost,
   BodyUploadMyAvatarApiV1AuthMeAvatarPost,
+  DevLoginRequest,
+  GoogleAuthRequest,
   HTTPValidationError,
+  PinRequest,
   ProfileUpdate,
   RefreshTokenRequest,
   Token,
-  UserLogin,
-  UserRegister,
   UserResponse,
 } from "../../model";
 
 import { axiosInstance } from "../../axios-instance";
 
 /**
- * Inscrit un nouvel utilisateur (parent ou enfant)
+ * Connexion via Google (flux id_token). Inscription libre des parents.
 
-Args:
-    user_data: Données d'inscription
-    db: Session de base de données
-
-Returns:
-    Utilisateur créé avec son profil
+Vérifie l'``id_token`` Google, exige un email vérifié, puis crée ou récupère
+le compte parent correspondant et émet un jeton applicatif.
 
 Raises:
-    HTTPException: Si l'email existe déjà ou si des validations échouent
- * @summary Register
+    HTTPException: 401 si le token Google est invalide ou l'email non vérifié.
+ * @summary Google Login
  */
-export const registerApiV1AuthRegisterPost = (
-  userRegister: UserRegister,
+export const googleLoginApiV1AuthGooglePost = (
+  googleAuthRequest: GoogleAuthRequest,
+  signal?: AbortSignal
+) => {
+  return axiosInstance<Token>({
+    url: `/api/v1/auth/google`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: googleAuthRequest,
+    signal,
+  });
+};
+
+export const getGoogleLoginApiV1AuthGooglePostMutationOptions = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof googleLoginApiV1AuthGooglePost>>,
+    TError,
+    { data: GoogleAuthRequest },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof googleLoginApiV1AuthGooglePost>>,
+  TError,
+  { data: GoogleAuthRequest },
+  TContext
+> => {
+  const mutationKey = ["googleLoginApiV1AuthGooglePost"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof googleLoginApiV1AuthGooglePost>>,
+    { data: GoogleAuthRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return googleLoginApiV1AuthGooglePost(data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GoogleLoginApiV1AuthGooglePostMutationResult = NonNullable<
+  Awaited<ReturnType<typeof googleLoginApiV1AuthGooglePost>>
+>;
+export type GoogleLoginApiV1AuthGooglePostMutationBody = GoogleAuthRequest;
+export type GoogleLoginApiV1AuthGooglePostMutationError = HTTPValidationError;
+
+/**
+ * @summary Google Login
+ */
+export const useGoogleLoginApiV1AuthGooglePost = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof googleLoginApiV1AuthGooglePost>>,
+      TError,
+      { data: GoogleAuthRequest },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof googleLoginApiV1AuthGooglePost>>,
+  TError,
+  { data: GoogleAuthRequest },
+  TContext
+> => {
+  return useMutation(
+    getGoogleLoginApiV1AuthGooglePostMutationOptions(options),
+    queryClient
+  );
+};
+/**
+ * Connexion sans Google pour le dev et les tests (email → jeton parent).
+ * @summary Dev Login
+ */
+export const devLoginApiV1AuthDevLoginPost = (
+  devLoginRequest: DevLoginRequest,
+  signal?: AbortSignal
+) => {
+  return axiosInstance<Token>({
+    url: `/api/v1/auth/dev-login`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: devLoginRequest,
+    signal,
+  });
+};
+
+export const getDevLoginApiV1AuthDevLoginPostMutationOptions = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof devLoginApiV1AuthDevLoginPost>>,
+    TError,
+    { data: DevLoginRequest },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof devLoginApiV1AuthDevLoginPost>>,
+  TError,
+  { data: DevLoginRequest },
+  TContext
+> => {
+  const mutationKey = ["devLoginApiV1AuthDevLoginPost"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof devLoginApiV1AuthDevLoginPost>>,
+    { data: DevLoginRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return devLoginApiV1AuthDevLoginPost(data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DevLoginApiV1AuthDevLoginPostMutationResult = NonNullable<
+  Awaited<ReturnType<typeof devLoginApiV1AuthDevLoginPost>>
+>;
+export type DevLoginApiV1AuthDevLoginPostMutationBody = DevLoginRequest;
+export type DevLoginApiV1AuthDevLoginPostMutationError = HTTPValidationError;
+
+/**
+ * @summary Dev Login
+ */
+export const useDevLoginApiV1AuthDevLoginPost = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof devLoginApiV1AuthDevLoginPost>>,
+      TError,
+      { data: DevLoginRequest },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof devLoginApiV1AuthDevLoginPost>>,
+  TError,
+  { data: DevLoginRequest },
+  TContext
+> => {
+  return useMutation(
+    getDevLoginApiV1AuthDevLoginPostMutationOptions(options),
+    queryClient
+  );
+};
+/**
+ * Définit (ou remplace) le code PIN parent à 4 chiffres.
+ * @summary Set Pin
+ */
+export const setPinApiV1AuthPinPost = (
+  pinRequest: PinRequest,
   signal?: AbortSignal
 ) => {
   return axiosInstance<UserResponse>({
-    url: `/api/v1/auth/register`,
+    url: `/api/v1/auth/pin`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    data: userRegister,
+    data: pinRequest,
     signal,
   });
 };
 
-export const getRegisterApiV1AuthRegisterPostMutationOptions = <
+export const getSetPinApiV1AuthPinPostMutationOptions = <
   TError = HTTPValidationError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof registerApiV1AuthRegisterPost>>,
+    Awaited<ReturnType<typeof setPinApiV1AuthPinPost>>,
     TError,
-    { data: UserRegister },
+    { data: PinRequest },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof registerApiV1AuthRegisterPost>>,
+  Awaited<ReturnType<typeof setPinApiV1AuthPinPost>>,
   TError,
-  { data: UserRegister },
+  { data: PinRequest },
   TContext
 > => {
-  const mutationKey = ["registerApiV1AuthRegisterPost"];
+  const mutationKey = ["setPinApiV1AuthPinPost"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -87,94 +257,87 @@ export const getRegisterApiV1AuthRegisterPostMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof registerApiV1AuthRegisterPost>>,
-    { data: UserRegister }
+    Awaited<ReturnType<typeof setPinApiV1AuthPinPost>>,
+    { data: PinRequest }
   > = (props) => {
     const { data } = props ?? {};
 
-    return registerApiV1AuthRegisterPost(data);
+    return setPinApiV1AuthPinPost(data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type RegisterApiV1AuthRegisterPostMutationResult = NonNullable<
-  Awaited<ReturnType<typeof registerApiV1AuthRegisterPost>>
+export type SetPinApiV1AuthPinPostMutationResult = NonNullable<
+  Awaited<ReturnType<typeof setPinApiV1AuthPinPost>>
 >;
-export type RegisterApiV1AuthRegisterPostMutationBody = UserRegister;
-export type RegisterApiV1AuthRegisterPostMutationError = HTTPValidationError;
+export type SetPinApiV1AuthPinPostMutationBody = PinRequest;
+export type SetPinApiV1AuthPinPostMutationError = HTTPValidationError;
 
 /**
- * @summary Register
+ * @summary Set Pin
  */
-export const useRegisterApiV1AuthRegisterPost = <
+export const useSetPinApiV1AuthPinPost = <
   TError = HTTPValidationError,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof registerApiV1AuthRegisterPost>>,
+      Awaited<ReturnType<typeof setPinApiV1AuthPinPost>>,
       TError,
-      { data: UserRegister },
+      { data: PinRequest },
       TContext
     >;
   },
   queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof registerApiV1AuthRegisterPost>>,
+  Awaited<ReturnType<typeof setPinApiV1AuthPinPost>>,
   TError,
-  { data: UserRegister },
+  { data: PinRequest },
   TContext
 > => {
   return useMutation(
-    getRegisterApiV1AuthRegisterPostMutationOptions(options),
+    getSetPinApiV1AuthPinPostMutationOptions(options),
     queryClient
   );
 };
 /**
- * Connecte un utilisateur et retourne un token JWT
-
-Args:
-    user_credentials: Email et mot de passe
-    db: Session de base de données
-
-Returns:
-    Token JWT avec durée de validité
+ * Vérifie le code PIN parent (retour à la vue parent depuis le mode enfant).
 
 Raises:
-    HTTPException: Si les identifiants sont incorrects
- * @summary Login
+    HTTPException: 400 si aucun PIN n'est défini, 401 si le PIN est erroné.
+ * @summary Verify Pin
  */
-export const loginApiV1AuthLoginPost = (
-  userLogin: UserLogin,
+export const verifyPinApiV1AuthVerifyPinPost = (
+  pinRequest: PinRequest,
   signal?: AbortSignal
 ) => {
-  return axiosInstance<Token>({
-    url: `/api/v1/auth/login`,
+  return axiosInstance<void>({
+    url: `/api/v1/auth/verify-pin`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    data: userLogin,
+    data: pinRequest,
     signal,
   });
 };
 
-export const getLoginApiV1AuthLoginPostMutationOptions = <
+export const getVerifyPinApiV1AuthVerifyPinPostMutationOptions = <
   TError = HTTPValidationError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof loginApiV1AuthLoginPost>>,
+    Awaited<ReturnType<typeof verifyPinApiV1AuthVerifyPinPost>>,
     TError,
-    { data: UserLogin },
+    { data: PinRequest },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof loginApiV1AuthLoginPost>>,
+  Awaited<ReturnType<typeof verifyPinApiV1AuthVerifyPinPost>>,
   TError,
-  { data: UserLogin },
+  { data: PinRequest },
   TContext
 > => {
-  const mutationKey = ["loginApiV1AuthLoginPost"];
+  const mutationKey = ["verifyPinApiV1AuthVerifyPinPost"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -184,185 +347,47 @@ export const getLoginApiV1AuthLoginPostMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof loginApiV1AuthLoginPost>>,
-    { data: UserLogin }
+    Awaited<ReturnType<typeof verifyPinApiV1AuthVerifyPinPost>>,
+    { data: PinRequest }
   > = (props) => {
     const { data } = props ?? {};
 
-    return loginApiV1AuthLoginPost(data);
+    return verifyPinApiV1AuthVerifyPinPost(data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type LoginApiV1AuthLoginPostMutationResult = NonNullable<
-  Awaited<ReturnType<typeof loginApiV1AuthLoginPost>>
+export type VerifyPinApiV1AuthVerifyPinPostMutationResult = NonNullable<
+  Awaited<ReturnType<typeof verifyPinApiV1AuthVerifyPinPost>>
 >;
-export type LoginApiV1AuthLoginPostMutationBody = UserLogin;
-export type LoginApiV1AuthLoginPostMutationError = HTTPValidationError;
+export type VerifyPinApiV1AuthVerifyPinPostMutationBody = PinRequest;
+export type VerifyPinApiV1AuthVerifyPinPostMutationError = HTTPValidationError;
 
 /**
- * @summary Login
+ * @summary Verify Pin
  */
-export const useLoginApiV1AuthLoginPost = <
+export const useVerifyPinApiV1AuthVerifyPinPost = <
   TError = HTTPValidationError,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof loginApiV1AuthLoginPost>>,
+      Awaited<ReturnType<typeof verifyPinApiV1AuthVerifyPinPost>>,
       TError,
-      { data: UserLogin },
+      { data: PinRequest },
       TContext
     >;
   },
   queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof loginApiV1AuthLoginPost>>,
+  Awaited<ReturnType<typeof verifyPinApiV1AuthVerifyPinPost>>,
   TError,
-  { data: UserLogin },
+  { data: PinRequest },
   TContext
 > => {
   return useMutation(
-    getLoginApiV1AuthLoginPostMutationOptions(options),
-    queryClient
-  );
-};
-/**
- * Endpoint de connexion compatible OAuth2 pour la documentation interactive
-
-Args:
-    form_data: Formulaire OAuth2 (username = email, password)
-    db: Session de base de données
-
-Returns:
-    Token JWT
-
-Raises:
-    HTTPException: Si les identifiants sont incorrects
- * @summary Login Form
- */
-export const loginFormApiV1AuthLoginFormPost = (
-  bodyLoginFormApiV1AuthLoginFormPost: BodyLoginFormApiV1AuthLoginFormPost,
-  signal?: AbortSignal
-) => {
-  const formUrlEncoded = new URLSearchParams();
-  if (
-    bodyLoginFormApiV1AuthLoginFormPost.grant_type !== undefined &&
-    bodyLoginFormApiV1AuthLoginFormPost.grant_type !== null
-  ) {
-    formUrlEncoded.append(
-      `grant_type`,
-      bodyLoginFormApiV1AuthLoginFormPost.grant_type
-    );
-  }
-  formUrlEncoded.append(
-    `username`,
-    bodyLoginFormApiV1AuthLoginFormPost.username
-  );
-  formUrlEncoded.append(
-    `password`,
-    bodyLoginFormApiV1AuthLoginFormPost.password
-  );
-  if (bodyLoginFormApiV1AuthLoginFormPost.scope !== undefined) {
-    formUrlEncoded.append(`scope`, bodyLoginFormApiV1AuthLoginFormPost.scope);
-  }
-  if (
-    bodyLoginFormApiV1AuthLoginFormPost.client_id !== undefined &&
-    bodyLoginFormApiV1AuthLoginFormPost.client_id !== null
-  ) {
-    formUrlEncoded.append(
-      `client_id`,
-      bodyLoginFormApiV1AuthLoginFormPost.client_id
-    );
-  }
-  if (
-    bodyLoginFormApiV1AuthLoginFormPost.client_secret !== undefined &&
-    bodyLoginFormApiV1AuthLoginFormPost.client_secret !== null
-  ) {
-    formUrlEncoded.append(
-      `client_secret`,
-      bodyLoginFormApiV1AuthLoginFormPost.client_secret
-    );
-  }
-
-  return axiosInstance<Token>({
-    url: `/api/v1/auth/login/form`,
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    data: formUrlEncoded,
-    signal,
-  });
-};
-
-export const getLoginFormApiV1AuthLoginFormPostMutationOptions = <
-  TError = HTTPValidationError,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof loginFormApiV1AuthLoginFormPost>>,
-    TError,
-    { data: BodyLoginFormApiV1AuthLoginFormPost },
-    TContext
-  >;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof loginFormApiV1AuthLoginFormPost>>,
-  TError,
-  { data: BodyLoginFormApiV1AuthLoginFormPost },
-  TContext
-> => {
-  const mutationKey = ["loginFormApiV1AuthLoginFormPost"];
-  const { mutation: mutationOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof loginFormApiV1AuthLoginFormPost>>,
-    { data: BodyLoginFormApiV1AuthLoginFormPost }
-  > = (props) => {
-    const { data } = props ?? {};
-
-    return loginFormApiV1AuthLoginFormPost(data);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type LoginFormApiV1AuthLoginFormPostMutationResult = NonNullable<
-  Awaited<ReturnType<typeof loginFormApiV1AuthLoginFormPost>>
->;
-export type LoginFormApiV1AuthLoginFormPostMutationBody =
-  BodyLoginFormApiV1AuthLoginFormPost;
-export type LoginFormApiV1AuthLoginFormPostMutationError = HTTPValidationError;
-
-/**
- * @summary Login Form
- */
-export const useLoginFormApiV1AuthLoginFormPost = <
-  TError = HTTPValidationError,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof loginFormApiV1AuthLoginFormPost>>,
-      TError,
-      { data: BodyLoginFormApiV1AuthLoginFormPost },
-      TContext
-    >;
-  },
-  queryClient?: QueryClient
-): UseMutationResult<
-  Awaited<ReturnType<typeof loginFormApiV1AuthLoginFormPost>>,
-  TError,
-  { data: BodyLoginFormApiV1AuthLoginFormPost },
-  TContext
-> => {
-  return useMutation(
-    getLoginFormApiV1AuthLoginFormPostMutationOptions(options),
+    getVerifyPinApiV1AuthVerifyPinPostMutationOptions(options),
     queryClient
   );
 };

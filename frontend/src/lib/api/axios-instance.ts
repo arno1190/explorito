@@ -43,7 +43,12 @@ instance.interceptors.request.use((config) => {
 instance.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    if (error.response?.status === 401) {
+    // La vérification du PIN renvoie 401 en cas de code erroné : c'est une
+    // erreur métier gérée par l'appelant, pas une session expirée -> ne pas
+    // déconnecter ni rediriger.
+    const url = error.config?.url ?? "";
+    const isPinCheck = url.includes("/auth/verify-pin");
+    if (error.response?.status === 401 && !isPinCheck) {
       // Clear token and redirect to login
       if (typeof window !== "undefined") {
         localStorage.removeItem("access_token");
