@@ -103,15 +103,6 @@ export function Header() {
             <span className="font-semibold">
               Mode enfant&nbsp;: {impersonatedChild.name}
             </span>
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={openExitToParent}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Retour au mode parent
-            </Button>
           </div>
         </div>
       )}
