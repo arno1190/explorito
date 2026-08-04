@@ -24,7 +24,10 @@ export function resolveActingRole(
   role: string | undefined,
   isImpersonating: boolean
 ): ActingRole | null {
-  if (isImpersonating && role === "parent") return "child";
+  // Un parent OU un admin en incarnation est traité comme un enfant (il joue
+  // à sa place, avec la bannière de retour protégée par PIN).
+  if (isImpersonating && (role === "parent" || role === "admin"))
+    return "child";
   if (role === "admin" || role === "parent" || role === "child") return role;
   return null;
 }
