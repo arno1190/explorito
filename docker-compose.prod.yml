@@ -30,6 +30,8 @@ services:
       SECRET_KEY: ${SECRET_KEY}
       CORS_ORIGINS: ${CORS_ORIGINS}
       DEBUG: "false"
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      ADMIN_EMAILS: ${ADMIN_EMAILS}
     volumes:
       - uploads_data:/app/uploads
     depends_on:
@@ -47,9 +49,11 @@ services:
       dockerfile: Dockerfile.prod
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
     container_name: explorito_frontend
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
     depends_on:
       - backend
     restart: unless-stopped
