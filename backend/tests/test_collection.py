@@ -7,34 +7,33 @@ solde entre catalogues (pokemon, dinosaures).
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.core.security import get_password_hash
 from app.models.content import Subject
 from app.models.progress import SubjectProgress
-from app.models.user import Profile, User, UserRole
+from app.models.user import User
+from tests.helpers import child_headers, make_child
 
 BULBIZARRE = 1  # pokemon, prix 20
 MEWTWO = 150  # pokemon, prix 200
 TYRANNO = 1  # dinosaurs, prix 20
 
+# Registre email -> enfant, pour conserver la signature _auth(client, email).
+_children: dict[str, User] = {}
+
 
 def _make_child_with_xp(db: Session, email: str, xp: int) -> User:
-    user = User(email=email, password_hash=get_password_hash("SecurePass123"), role=UserRole.CHILD, is_active=True)
-    db.add(user)
-    db.flush()
-    db.add(Profile(user_id=user.id, display_name=email.split("@")[0], is_child=True))
+    child = make_child(db, name=email.split("@")[0])
     subject = Subject(name="Maths", slug=f"maths-{email}")
     db.add(subject)
     db.flush()
-    db.add(SubjectProgress(user_id=user.id, subject_id=subject.id, total_xp=xp))
+    db.add(SubjectProgress(user_id=child.id, subject_id=subject.id, total_xp=xp))
     db.commit()
-    db.refresh(user)
-    return user
+    db.refresh(child)
+    _children[email] = child
+    return child
 
 
 def _auth(client: TestClient, email: str) -> dict[str, str]:
-    resp = client.post("/api/v1/auth/login", json={"email": email, "password": "SecurePass123"})
-    assert resp.status_code == 200, resp.text
-    return {"Authorization": f"Bearer {resp.json()['access_token']}"}
+    return child_headers(client, _children[email])
 
 
 def _buy(client: TestClient, h: dict[str, str], catalog: str, item_id: int):

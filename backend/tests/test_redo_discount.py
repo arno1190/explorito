@@ -5,13 +5,15 @@ Tests de l'XP décoté au redo (issue #4).
 - première réussite après un échec     -> tarif réduit (XP_REDO_DISCOUNT)
 - exercice déjà réussi                 -> 0 (anti-farm)
 - rejouer une leçon déjà terminée      -> ~0 (pas de re-bonus)
+
+Modèle d'auth : on s'authentifie en parent et on incarne l'enfant
+(``X-Acting-Child-Id``) via les helpers de tests.
 """
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.security import get_password_hash
 from app.models.content import (
     DifficultyEnum,
     Exercise,
@@ -20,17 +22,7 @@ from app.models.content import (
     LevelEnum,
     Subject,
 )
-from app.models.user import Profile, User, UserRole
-
-
-def _make_child(db: Session, email: str) -> User:
-    user = User(email=email, password_hash=get_password_hash("SecurePass123"), role=UserRole.CHILD, is_active=True)
-    db.add(user)
-    db.flush()
-    db.add(Profile(user_id=user.id, display_name=email.split("@")[0], is_child=True, level=LevelEnum.CP))
-    db.commit()
-    db.refresh(user)
-    return user
+from tests.helpers import child_headers, make_child
 
 
 def _mcq(lesson_id, order_index: int) -> Exercise:
@@ -64,12 +56,6 @@ def _seed_lesson(db: Session, n_exercises: int, xp_reward: int) -> tuple[Lesson,
     return lesson, exercises
 
 
-def _auth(client: TestClient, email: str) -> dict[str, str]:
-    r = client.post("/api/v1/auth/login", json={"email": email, "password": "SecurePass123"})
-    assert r.status_code == 200, r.text
-    return {"Authorization": f"Bearer {r.json()['access_token']}"}
-
-
 def _submit(client: TestClient, ex_id, correct: bool, h: dict[str, str]) -> dict:
     ans = {"option_ids": ["a"] if correct else ["b"]}
     r = client.post(f"/api/v1/exercises/{ex_id}/submit", json={"answer": ans}, headers=h)
@@ -78,10 +64,10 @@ def _submit(client: TestClient, ex_id, correct: bool, h: dict[str, str]) -> dict
 
 
 def test_first_correct_full_then_redo_zero(client: TestClient, db_session: Session):
-    _make_child(db_session, "a@x.fr")
+    child = make_child(db_session, name="A")
     _lesson, exercises = _seed_lesson(db_session, n_exercises=2, xp_reward=0)
     e1 = exercises[0]
-    h = _auth(client, "a@x.fr")
+    h = child_headers(client, child)
 
     first = _submit(client, e1.id, True, h)
     assert first["xp_awarded"] == settings.XP_PER_EXERCISE
@@ -91,10 +77,10 @@ def test_first_correct_full_then_redo_zero(client: TestClient, db_session: Sessi
 
 
 def test_missed_then_redo_is_discounted(client: TestClient, db_session: Session):
-    _make_child(db_session, "b@x.fr")
+    child = make_child(db_session, name="B")
     _lesson, exercises = _seed_lesson(db_session, n_exercises=2, xp_reward=0)
     e1, e2 = exercises
-    h = _auth(client, "b@x.fr")
+    h = child_headers(client, child)
 
     assert _submit(client, e1.id, True, h)["xp_awarded"] == settings.XP_PER_EXERCISE
     assert _submit(client, e2.id, False, h)["xp_awarded"] == 0  # raté
@@ -111,10 +97,10 @@ def test_missed_then_redo_is_discounted(client: TestClient, db_session: Session)
 
 
 def test_replaying_completed_lesson_awards_zero(client: TestClient, db_session: Session):
-    _make_child(db_session, "c@x.fr")
+    child = make_child(db_session, name="C")
     _lesson, exercises = _seed_lesson(db_session, n_exercises=2, xp_reward=50)
     e1, e2 = exercises
-    h = _auth(client, "c@x.fr")
+    h = child_headers(client, child)
 
     assert _submit(client, e1.id, True, h)["xp_awarded"] == settings.XP_PER_EXERCISE
     complete = _submit(client, e2.id, True, h)

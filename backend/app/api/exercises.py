@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.auth import get_current_active_user
-from app.api.subjects import child_content_level, require_admin
+from app.api.subjects import acting_child, child_content_level, require_admin
 from app.core.database import get_db
 from app.models.content import Exercise, ExerciseType, Lesson
 from app.models.progress import ExerciseResult
@@ -283,7 +283,7 @@ async def submit_exercise(
     exercise_id: UUID,
     submission: ExerciseSubmit,
     db: Annotated[Session, Depends(get_db)],
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    acting: Annotated[User, Depends(acting_child)],
 ) -> ExerciseSubmitResponse:
     """
     Soumet une réponse pour un exercice
@@ -308,8 +308,8 @@ async def submit_exercise(
 
     # Verrou côté serveur : un enfant ne peut pas valider un exercice d'une leçon
     # verrouillée (palier inférieur non terminé), même via un lien direct.
-    level = child_content_level(current_user, db)
-    if level is not None and lesson_locked(current_user.id, exercise.lesson, level, db):
+    level = child_content_level(acting, db)
+    if level is not None and lesson_locked(acting.id, exercise.lesson, level, db):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Cette leçon est verrouillée : termine d'abord le niveau précédent.",
@@ -321,7 +321,7 @@ async def submit_exercise(
     # Enregistrer le résultat AVANT le calcul de progression : la détection de
     # complétion de leçon compte les ExerciseResult déjà persistés.
     result = ExerciseResult(
-        user_id=current_user.id,
+        user_id=acting.id,
         exercise_id=exercise_id,
         answer=submission.answer,
         is_correct=is_correct,
@@ -336,7 +336,7 @@ async def submit_exercise(
     # Mettre à jour la progression (UserProgress), l'XP, la série, la complétion
     # de la leçon et débloquer les achievements éligibles.
     summary = process_exercise_result(
-        user_id=current_user.id,
+        user_id=acting.id,
         exercise=exercise,
         is_correct=is_correct,
         time_taken=submission.time_taken,

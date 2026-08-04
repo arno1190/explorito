@@ -27,6 +27,17 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 heures
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    # Authentification Google (Google Identity Services, flux id_token).
+    # Client ID OAuth « Web » public ; sert d'audience à la vérification du jeton.
+    GOOGLE_CLIENT_ID: str = ""
+    # Emails (séparés par des virgules) promus au rôle admin à la connexion.
+    ADMIN_EMAILS: str = ""
+
+    @property
+    def admin_emails_set(self) -> set[str]:
+        """Ensemble normalisé (minuscules) des emails administrateurs."""
+        return {e.strip().lower() for e in self.ADMIN_EMAILS.split(",") if e.strip()}
+
     # Database
     DATABASE_URL: PostgresDsn = "postgresql://explorito:explorito123@localhost:5432/explorito"
 

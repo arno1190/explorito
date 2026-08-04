@@ -2,12 +2,15 @@
 Tests d'intégration de la boucle cœur : soumission d'exercice -> progression,
 XP, série, complétion de leçon ; plus le contrôle d'accès (RBAC) sur le CRUD
 de contenu.
+
+Auth : parent (via dev-login) incarnant un enfant (X-Acting-Child-Id) pour le
+jeu ; parent/admin pour le CRUD de contenu.
 """
 
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.core.security import get_password_hash
+from app.core.config import settings
 from app.models.content import (
     DifficultyEnum,
     Exercise,
@@ -17,17 +20,7 @@ from app.models.content import (
     Subject,
 )
 from app.models.progress import ProgressStatus, UserProgress
-from app.models.user import Profile, User, UserRole
-
-
-def _make_user(db: Session, email: str, role: UserRole, password: str = "SecurePass123") -> User:
-    user = User(email=email, password_hash=get_password_hash(password), role=role, is_active=True)
-    db.add(user)
-    db.flush()
-    db.add(Profile(user_id=user.id, display_name=email.split("@")[0], is_child=(role == UserRole.CHILD)))
-    db.commit()
-    db.refresh(user)
-    return user
+from tests.helpers import child_headers, dev_login, make_child
 
 
 def _seed_lesson_with_two_mcq(db: Session) -> tuple[Lesson, list[Exercise]]:
@@ -65,26 +58,21 @@ def _seed_lesson_with_two_mcq(db: Session) -> tuple[Lesson, list[Exercise]]:
     return lesson, [e1, e2]
 
 
-def _login(client: TestClient, email: str, password: str = "SecurePass123") -> str:
-    resp = client.post("/api/v1/auth/login", json={"email": email, "password": password})
-    assert resp.status_code == 200, resp.text
-    return resp.json()["access_token"]
-
-
-def _auth(token: str) -> dict[str, str]:
-    return {"Authorization": f"Bearer {token}"}
+def _admin_headers(client: TestClient, monkeypatch, email: str = "admin@x.fr") -> dict[str, str]:
+    monkeypatch.setattr(settings, "ADMIN_EMAILS", email)
+    return dev_login(client, email)
 
 
 def test_submit_awards_xp_and_completes_lesson(client: TestClient, db_session: Session):
-    _make_user(db_session, "kid@x.fr", UserRole.CHILD)
+    child = make_child(db_session, name="kid")
     lesson, (e1, e2) = _seed_lesson_with_two_mcq(db_session)
-    token = _login(client, "kid@x.fr")
+    h = child_headers(client, child)
 
     # Premier exercice réussi : +10 XP, série 1, leçon pas encore terminée.
     r1 = client.post(
         f"/api/v1/exercises/{e1.id}/submit",
         json={"answer": {"option_ids": ["a"]}, "time_taken": 5},
-        headers=_auth(token),
+        headers=h,
     )
     assert r1.status_code == 201, r1.text
     body1 = r1.json()
@@ -98,7 +86,7 @@ def test_submit_awards_xp_and_completes_lesson(client: TestClient, db_session: S
     r2 = client.post(
         f"/api/v1/exercises/{e2.id}/submit",
         json={"answer": {"option_ids": ["a"]}, "time_taken": 7},
-        headers=_auth(token),
+        headers=h,
     )
     assert r2.status_code == 201, r2.text
     body2 = r2.json()
@@ -109,9 +97,10 @@ def test_submit_awards_xp_and_completes_lesson(client: TestClient, db_session: S
     assert body2["xp_awarded"] == 10
     assert body2["total_xp"] == 20
 
-    # Progression persistée en base.
+    # Progression persistée en base (attribuée à l'enfant incarné).
     progress = db_session.query(UserProgress).filter_by(lesson_id=lesson.id).first()
     assert progress is not None
+    assert progress.user_id == child.id
     assert progress.status == ProgressStatus.COMPLETED
     assert progress.stars == 3
     assert progress.attempts == 2
@@ -119,14 +108,14 @@ def test_submit_awards_xp_and_completes_lesson(client: TestClient, db_session: S
 
 
 def test_wrong_answer_no_xp(client: TestClient, db_session: Session):
-    _make_user(db_session, "kid2@x.fr", UserRole.CHILD)
+    child = make_child(db_session, name="kid2")
     _lesson, (e1, _e2) = _seed_lesson_with_two_mcq(db_session)
-    token = _login(client, "kid2@x.fr")
+    h = child_headers(client, child)
 
     r = client.post(
         f"/api/v1/exercises/{e1.id}/submit",
         json={"answer": {"option_ids": ["b"]}},
-        headers=_auth(token),
+        headers=h,
     )
     assert r.status_code == 201, r.text
     body = r.json()
@@ -135,22 +124,16 @@ def test_wrong_answer_no_xp(client: TestClient, db_session: Session):
     assert body["lesson_completed"] is False
 
 
-# --- RBAC sur le CRUD de contenu --------------------------------------------
-def test_child_cannot_create_subject(client: TestClient, db_session: Session):
-    _make_user(db_session, "kid3@x.fr", UserRole.CHILD)
-    token = _login(client, "kid3@x.fr")
-    r = client.post(
-        "/api/v1/subjects",
-        json={"name": "Hack", "slug": "hack"},
-        headers=_auth(token),
-    )
+# --- RBAC sur le CRUD de contenu (réservé à l'admin) ------------------------
+def test_parent_cannot_create_subject(client: TestClient, db_session: Session):
+    h = dev_login(client, "parent1@x.fr")
+    r = client.post("/api/v1/subjects", json={"name": "Hack", "slug": "hack"}, headers=h)
     assert r.status_code == 403, r.text
 
 
-def test_child_cannot_create_exercise(client: TestClient, db_session: Session):
-    _make_user(db_session, "kid4@x.fr", UserRole.CHILD)
+def test_parent_cannot_create_exercise(client: TestClient, db_session: Session):
     lesson, _ = _seed_lesson_with_two_mcq(db_session)
-    token = _login(client, "kid4@x.fr")
+    h = dev_login(client, "parent2@x.fr")
     r = client.post(
         "/api/v1/exercises",
         json={
@@ -160,7 +143,7 @@ def test_child_cannot_create_exercise(client: TestClient, db_session: Session):
             "content": {"options": [{"id": "a", "text": "x"}, {"id": "b", "text": "y"}]},
             "correct_answer": {"option_ids": ["a"]},
         },
-        headers=_auth(token),
+        headers=h,
     )
     assert r.status_code == 403, r.text
 
@@ -170,22 +153,16 @@ def test_unauthenticated_cannot_create_subject(client: TestClient):
     assert r.status_code in (401, 403), r.text
 
 
-def test_admin_can_create_subject(client: TestClient, db_session: Session):
-    _make_user(db_session, "admin@x.fr", UserRole.ADMIN)
-    token = _login(client, "admin@x.fr")
-    r = client.post(
-        "/api/v1/subjects",
-        json={"name": "Maths", "slug": "maths-admin"},
-        headers=_auth(token),
-    )
+def test_admin_can_create_subject(client: TestClient, db_session: Session, monkeypatch):
+    h = _admin_headers(client, monkeypatch)
+    r = client.post("/api/v1/subjects", json={"name": "Maths", "slug": "maths-admin"}, headers=h)
     assert r.status_code == 201, r.text
 
 
 # --- validation du contrat d'exercice ---------------------------------------
-def test_create_exercise_rejects_bad_contract(client: TestClient, db_session: Session):
-    _make_user(db_session, "admin2@x.fr", UserRole.ADMIN)
+def test_create_exercise_rejects_bad_contract(client: TestClient, db_session: Session, monkeypatch):
     lesson, _ = _seed_lesson_with_two_mcq(db_session)
-    token = _login(client, "admin2@x.fr")
+    h = _admin_headers(client, monkeypatch, "admin2@x.fr")
     # correct_answer référence une option inexistante -> 422
     r = client.post(
         "/api/v1/exercises",
@@ -196,6 +173,6 @@ def test_create_exercise_rejects_bad_contract(client: TestClient, db_session: Se
             "content": {"options": [{"id": "a", "text": "2"}, {"id": "b", "text": "3"}]},
             "correct_answer": {"option_ids": ["z"]},
         },
-        headers=_auth(token),
+        headers=h,
     )
     assert r.status_code == 422, r.text

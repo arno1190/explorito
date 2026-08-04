@@ -3,12 +3,13 @@ Schémas Pydantic pour la validation et sérialisation des données
 """
 
 from app.schemas.auth import (
+    DevLoginRequest,
+    GoogleAuthRequest,
+    PinRequest,
     ProfileResponse,
     RefreshTokenRequest,
     Token,
     TokenData,
-    UserLogin,
-    UserRegister,
     UserResponse,
 )
 from app.schemas.exercise import (
@@ -47,8 +48,9 @@ from app.schemas.subject import (
 __all__ = [
     "Token",
     "TokenData",
-    "UserLogin",
-    "UserRegister",
+    "GoogleAuthRequest",
+    "DevLoginRequest",
+    "PinRequest",
     "UserResponse",
     "ProfileResponse",
     "RefreshTokenRequest",

@@ -3,7 +3,10 @@ Sécurité et authentification JWT
 """
 
 from datetime import datetime, timedelta
+from typing import Any
 
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token as google_id_token
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
@@ -11,6 +14,34 @@ from app.core.config import settings
 
 # Context pour le hashing des mots de passe
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# Requête HTTP réutilisée pour récupérer (et mettre en cache) les clés Google.
+_google_request = google_requests.Request()
+
+
+def verify_google_id_token(token: str) -> dict[str, Any]:
+    """Vérifie un ID token Google et renvoie ses claims.
+
+    Contrôle la signature (clés publiques Google), l'audience
+    (``settings.GOOGLE_CLIENT_ID``), l'émetteur et l'expiration.
+
+    Args:
+        token: ID token (JWT) émis par Google Identity Services.
+
+    Returns:
+        Dictionnaire des claims (``sub``, ``email``, ``email_verified``, ``name``…).
+
+    Raises:
+        ValueError: Si le token est invalide, expiré, ou d'audience inattendue.
+    """
+    if not settings.GOOGLE_CLIENT_ID:
+        raise ValueError("GOOGLE_CLIENT_ID n'est pas configuré côté serveur.")
+    info: dict[str, Any] = google_id_token.verify_oauth2_token(  # type: ignore[no-untyped-call]
+        token, _google_request, settings.GOOGLE_CLIENT_ID
+    )
+    if info.get("iss") not in ("accounts.google.com", "https://accounts.google.com"):
+        raise ValueError("Émetteur du token Google inattendu.")
+    return info
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:

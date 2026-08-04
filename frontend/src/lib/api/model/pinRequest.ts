@@ -6,11 +6,9 @@
  */
 
 /**
- * Schéma pour la connexion
+ * Définition ou vérification d'un code PIN parent (4 chiffres).
  */
-export interface UserLogin {
-  /** Adresse email */
-  email: string;
-  /** Mot de passe */
-  password: string;
+export interface PinRequest {
+  /** Code PIN à 4 chiffres */
+  pin: string;
 }

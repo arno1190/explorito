@@ -11,7 +11,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.api.auth import get_current_active_user
+from app.api.subjects import acting_child
 from app.core.database import get_db
 from app.models.user import User
 from app.schemas.pythagore import PythagoreSessionRequest, PythagoreSessionResponse
@@ -23,7 +23,7 @@ router = APIRouter()
 @router.post("/session", response_model=PythagoreSessionResponse)
 async def play_session(
     payload: PythagoreSessionRequest,
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    acting: Annotated[User, Depends(acting_child)],
     db: Annotated[Session, Depends(get_db)],
 ) -> PythagoreSessionResponse:
     """
@@ -42,5 +42,5 @@ async def play_session(
         Correction détaillée, série la plus longue, XP attribué (après plafond) et
         nouveau solde dépensable.
     """
-    summary = run_session(current_user.id, payload.items, payload.difficulty, db)
+    summary = run_session(acting.id, payload.items, payload.difficulty, db)
     return PythagoreSessionResponse(**summary)

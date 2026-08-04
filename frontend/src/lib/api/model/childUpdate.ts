@@ -16,8 +16,6 @@ export interface ChildUpdate {
   name?: string | null;
   /** Date de naissance */
   birth_date?: string | null;
-  /** Nouveau mot de passe */
-  password?: string | null;
   /** Niveau scolaire (PS à CM2) */
   level?: LevelEnum | null;
   /** Avatar (emoji ou URL d'image) */

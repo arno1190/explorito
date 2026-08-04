@@ -10,52 +10,31 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 from app.models.user import UserRole
 
 
-class UserRegister(BaseModel):
-    """
-    Schéma pour l'inscription d'un nouvel utilisateur
-    """
+class GoogleAuthRequest(BaseModel):
+    """Connexion via Google Identity Services (flux id_token)."""
 
-    email: EmailStr = Field(..., description="Adresse email de l'utilisateur")
-    password: str = Field(..., min_length=8, description="Mot de passe (minimum 8 caractères)")
-    display_name: str = Field(..., min_length=2, max_length=100, description="Nom d'affichage")
-    role: UserRole = Field(default=UserRole.PARENT, description="Rôle de l'utilisateur")
-    date_of_birth: date | None = Field(None, description="Date de naissance")
-    parent_email: EmailStr | None = Field(None, description="Email du parent (pour les enfants)")
+    credential: str = Field(..., description="ID token (JWT) renvoyé par Google Identity Services")
 
-    @field_validator("password")
+
+class DevLoginRequest(BaseModel):
+    """Connexion de développement/tests (montée uniquement si DEBUG)."""
+
+    email: EmailStr = Field(..., description="Email du parent (créé si absent)")
+    display_name: str | None = Field(None, max_length=100, description="Nom d'affichage à la création")
+
+
+class PinRequest(BaseModel):
+    """Définition ou vérification d'un code PIN parent (4 chiffres)."""
+
+    pin: str = Field(..., description="Code PIN à 4 chiffres")
+
+    @field_validator("pin")
     @classmethod
-    def validate_password(cls, v: str) -> str:
-        """Valide la force du mot de passe"""
-        if len(v) < 8:
-            raise ValueError("Le mot de passe doit contenir au moins 8 caractères")
-        if not any(char.isdigit() for char in v):
-            raise ValueError("Le mot de passe doit contenir au moins un chiffre")
-        if not any(char.isalpha() for char in v):
-            raise ValueError("Le mot de passe doit contenir au moins une lettre")
+    def validate_pin(cls, v: str) -> str:
+        """Le PIN doit être exactement 4 chiffres."""
+        if not (len(v) == 4 and v.isdigit()):
+            raise ValueError("Le code PIN doit contenir exactement 4 chiffres.")
         return v
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "email": "alice@example.com",
-                "password": "SecurePass123",
-                "display_name": "Alice",
-                "role": "child",
-                "date_of_birth": "2015-06-15",
-            }
-        }
-
-
-class UserLogin(BaseModel):
-    """
-    Schéma pour la connexion
-    """
-
-    email: EmailStr = Field(..., description="Adresse email")
-    password: str = Field(..., description="Mot de passe")
-
-    class Config:
-        json_schema_extra = {"example": {"email": "alice@example.com", "password": "SecurePass123"}}
 
 
 class Token(BaseModel):
@@ -118,9 +97,10 @@ class UserResponse(BaseModel):
     """
 
     id: UUID
-    email: str
+    email: str | None = None
     role: UserRole
     is_active: bool
+    has_pin: bool = False
     created_at: datetime
     profile: ProfileResponse | None = None
 

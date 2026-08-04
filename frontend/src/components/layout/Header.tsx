@@ -20,10 +20,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { UserAvatar } from "@/components/profile/UserAvatar";
 import { AvatarPicker } from "@/components/profile/AvatarPicker";
+import { PinDialog } from "@/components/profile/PinDialog";
 import { useUpdateMyProfileApiV1AuthMePatch as useUpdateProfile } from "@/lib/api/generated/auth/auth";
 import { uploadFile } from "@/lib/api/axios-instance";
 import { useGetWalletApiV1CollectionMeGet as useMyCollection } from "@/lib/api/generated/collection/collection";
-import { LogOut, ArrowLeft, Smile } from "lucide-react";
+import { LogOut, ArrowLeft, Smile, KeyRound } from "lucide-react";
 
 const NAV_LINKS: Record<ActingRole, { href: string; label: string }[]> = {
   child: [
@@ -45,12 +46,24 @@ export function Header() {
     refreshUser,
     isAuthenticated,
     impersonatedChild,
-    stopImpersonation,
+    exitChildMode,
   } = useAuth();
   const actingRole = useActingRole();
   const pathname = usePathname();
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [pinOpen, setPinOpen] = useState(false);
+  const [pinMode, setPinMode] = useState<"verify" | "set">("verify");
   const updateProfile = useUpdateProfile();
+
+  // Retour à la vue parent : protégé par le code PIN (porte douce).
+  const openExitToParent = () => {
+    setPinMode("verify");
+    setPinOpen(true);
+  };
+  const openChangePin = () => {
+    setPinMode("set");
+    setPinOpen(true);
+  };
 
   // Solde XP affiché dans la barre : uniquement en contexte enfant (l'enfant
   // connecté, ou le parent qui l'incarne — l'en-tête X-Acting-Child-Id renvoie
@@ -84,25 +97,6 @@ export function Header() {
 
   return (
     <>
-      {impersonatedChild && (
-        <div className="bg-fun-sun-light text-fun-text px-4 py-2 text-center border-b-2 border-fun-sun">
-          <div className="container mx-auto flex items-center justify-center gap-4">
-            <span className="font-semibold">
-              Mode enfant&nbsp;: {impersonatedChild.name}
-            </span>
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={stopImpersonation}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Retour au mode parent
-            </Button>
-          </div>
-        </div>
-      )}
-
       <header className="bg-white/80 backdrop-blur-sm border-b-2 border-fun-border sticky top-0 z-40">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <Link
@@ -170,13 +164,23 @@ export function Header() {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     {!impersonatedChild && (
-                      <DropdownMenuItem onClick={() => setPickerOpen(true)}>
-                        <Smile className="mr-2 h-4 w-4" />
-                        <span>Choisir mon avatar</span>
-                      </DropdownMenuItem>
+                      <>
+                        <DropdownMenuItem onClick={() => setPickerOpen(true)}>
+                          <Smile className="mr-2 h-4 w-4" />
+                          <span>Choisir mon avatar</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={openChangePin}>
+                          <KeyRound className="mr-2 h-4 w-4" />
+                          <span>
+                            {user?.has_pin
+                              ? "Modifier le code parent"
+                              : "Définir un code parent"}
+                          </span>
+                        </DropdownMenuItem>
+                      </>
                     )}
                     {impersonatedChild ? (
-                      <DropdownMenuItem onClick={stopImpersonation}>
+                      <DropdownMenuItem onClick={openExitToParent}>
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         <span>Retour au mode parent</span>
                       </DropdownMenuItem>
@@ -196,16 +200,20 @@ export function Header() {
                   onSelect={handleSelectAvatar}
                   uploader={handleUploadAvatar}
                 />
+
+                <PinDialog
+                  open={pinOpen}
+                  onOpenChange={setPinOpen}
+                  mode={pinMode}
+                  onSuccess={() => {
+                    if (pinMode === "verify") exitChildMode();
+                  }}
+                />
               </>
             ) : (
-              <>
-                <Link href="/login">
-                  <Button variant="ghost">Connexion</Button>
-                </Link>
-                <Link href="/register">
-                  <Button>Inscription</Button>
-                </Link>
-              </>
+              <Link href="/login">
+                <Button>Connexion</Button>
+              </Link>
             )}
           </nav>
         </div>

@@ -32,6 +32,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserAvatar } from "@/components/profile/UserAvatar";
 import { AvatarPicker } from "@/components/profile/AvatarPicker";
+import { PinDialog } from "@/components/profile/PinDialog";
 import { uploadFile } from "@/lib/api/axios-instance";
 import { Plus, Trash2, Play, TrendingUp } from "lucide-react";
 import type { ChildResponse, ChildStatsResponse } from "@/lib/api/model";
@@ -58,9 +59,20 @@ export default function DashboardPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
   const [birthDate, setBirthDate] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [level, setLevel] = useState<LevelEnum>("cp");
+  // Lancement du mode enfant : protégé par le code PIN parent. S'il n'existe pas
+  // encore, on invite à le définir avant de basculer.
+  const [pinOpen, setPinOpen] = useState(false);
+  const [pendingChild, setPendingChild] = useState<ChildResponse | null>(null);
+
+  const launchChild = (child: ChildResponse) => {
+    if (user?.has_pin) {
+      impersonateChild(child);
+    } else {
+      setPendingChild(child);
+      setPinOpen(true);
+    }
+  };
   const [error, setError] = useState("");
   const [avatarChildId, setAvatarChildId] = useState<string | null>(null);
 
@@ -109,16 +121,12 @@ export default function DashboardPage() {
     try {
       await createChildApiV1ChildrenPost({
         name,
-        birth_date: birthDate,
-        email,
-        password,
+        birth_date: birthDate || undefined,
         level,
       });
       setDialogOpen(false);
       setName("");
       setBirthDate("");
-      setEmail("");
-      setPassword("");
       setLevel("cp");
       loadChildren();
     } catch (err: any) {
@@ -229,34 +237,14 @@ export default function DashboardPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="birthDate">Birth Date</Label>
+                  <Label htmlFor="birthDate">
+                    Date de naissance (optionnel)
+                  </Label>
                   <Input
                     id="birthDate"
                     type="date"
                     value={birthDate}
                     onChange={(e) => setBirthDate(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={8}
                   />
                 </div>
                 <div className="space-y-2">
@@ -413,7 +401,7 @@ export default function DashboardPage() {
                   <div className="space-y-2 pt-2">
                     <Button
                       className="w-full"
-                      onClick={() => impersonateChild(child)}
+                      onClick={() => launchChild(child)}
                     >
                       <Play className="mr-2 h-4 w-4" />
                       Jouer comme {child.name}
@@ -433,6 +421,16 @@ export default function DashboardPage() {
           })}
         </div>
       )}
+
+      <PinDialog
+        open={pinOpen}
+        onOpenChange={setPinOpen}
+        mode="set"
+        onSuccess={() => {
+          if (pendingChild) impersonateChild(pendingChild);
+          setPendingChild(null);
+        }}
+      />
     </div>
   );
 }

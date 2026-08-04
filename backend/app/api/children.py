@@ -10,7 +10,6 @@ from sqlalchemy.orm import Session
 
 from app.api.auth import get_current_user
 from app.core.database import get_db
-from app.core.security import get_password_hash
 from app.models.user import Profile, User, UserRole
 from app.schemas.children import ChildCreate, ChildResponse, ChildUpdate
 from app.services.uploads import save_avatar
@@ -28,7 +27,7 @@ def _require_owned_child(child_id: UUID, current_user: User, db: Session) -> Pro
     Raises:
         HTTPException: 403 si non-parent, 404 si l'enfant n'appartient pas au parent.
     """
-    if current_user.role != UserRole.PARENT:
+    if current_user.role not in (UserRole.PARENT, UserRole.ADMIN):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Seuls les parents peuvent accéder à cette ressource",
@@ -59,7 +58,7 @@ async def get_children(
         Liste des profils enfants liés au parent
     """
     # Vérifier que l'utilisateur est un parent
-    if current_user.role != UserRole.PARENT:
+    if current_user.role not in (UserRole.PARENT, UserRole.ADMIN):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Seuls les parents peuvent accéder à cette ressource",
@@ -102,7 +101,7 @@ async def get_child(
         Profil de l'enfant
     """
     # Vérifier que l'utilisateur est un parent
-    if current_user.role != UserRole.PARENT:
+    if current_user.role not in (UserRole.PARENT, UserRole.ADMIN):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Seuls les parents peuvent accéder à cette ressource",
@@ -148,25 +147,17 @@ async def create_child(
     Returns:
         Profil de l'enfant créé
     """
-    # Vérifier que l'utilisateur est un parent
-    if current_user.role != UserRole.PARENT:
+    # Parents (et admin) peuvent créer des enfants.
+    if current_user.role not in (UserRole.PARENT, UserRole.ADMIN):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Seuls les parents peuvent créer des profils enfants",
         )
 
-    # Vérifier que l'email n'existe pas déjà
-    existing_user = db.query(User).filter(User.email == child_data.email).first()
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Un utilisateur avec cet email existe déjà",
-        )
-
-    # Créer l'utilisateur enfant
+    # Enfant = compte sans connexion (ni email ni mot de passe).
     child_user = User(
-        email=child_data.email,
-        password_hash=get_password_hash(child_data.password),
+        email=None,
+        password_hash=None,
         role=UserRole.CHILD,
         is_active=True,
     )
@@ -224,10 +215,6 @@ async def update_child(
         profile.level = child_data.level
     if child_data.avatar_url is not None:
         profile.avatar_url = child_data.avatar_url or None
-    if child_data.password is not None:
-        child_user = db.query(User).filter(User.id == child_id).first()
-        if child_user is not None:
-            child_user.password_hash = get_password_hash(child_data.password)
 
     db.commit()
     db.refresh(profile)
@@ -288,7 +275,7 @@ async def delete_child(
         child_id: ID de l'utilisateur enfant à supprimer
     """
     # Vérifier que l'utilisateur est un parent
-    if current_user.role != UserRole.PARENT:
+    if current_user.role not in (UserRole.PARENT, UserRole.ADMIN):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Seuls les parents peuvent supprimer des profils enfants",
