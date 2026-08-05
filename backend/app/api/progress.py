@@ -11,6 +11,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.api.auth import get_current_active_user
+from app.api.subjects import acting_child
 from app.core.database import get_db
 from app.models.content import Exercise, Lesson, Subject
 from app.models.gamification import Streak
@@ -28,14 +29,14 @@ router = APIRouter()
 
 @router.get("/me", response_model=ProgressDashboard)
 async def get_user_progress(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    acting: Annotated[User, Depends(acting_child)],
     db: Annotated[Session, Depends(get_db)],
 ) -> ProgressDashboard:
     """
     Récupère la progression globale de l'utilisateur actuel
 
     Args:
-        current_user: Utilisateur authentifié
+        acting: Utilisateur authentifié
         db: Session de base de données
 
     Returns:
@@ -43,7 +44,7 @@ async def get_user_progress(
     """
     # Calculer l'XP total
     total_xp = (
-        db.query(func.sum(SubjectProgress.total_xp)).filter(SubjectProgress.user_id == current_user.id).scalar() or 0
+        db.query(func.sum(SubjectProgress.total_xp)).filter(SubjectProgress.user_id == acting.id).scalar() or 0
     )
 
     # Calculer le niveau global
@@ -51,7 +52,7 @@ async def get_user_progress(
     next_level_xp = calculate_next_level_xp(overall_level)
 
     # Récupérer le streak
-    streak = db.query(Streak).filter(Streak.user_id == current_user.id).first()
+    streak = db.query(Streak).filter(Streak.user_id == acting.id).first()
     current_streak = streak.current_streak if streak else 0
 
     # Compter les leçons complétées aujourd'hui
@@ -59,7 +60,7 @@ async def get_user_progress(
     lessons_today = (
         db.query(func.count(UserProgress.id))
         .filter(
-            UserProgress.user_id == current_user.id,
+            UserProgress.user_id == acting.id,
             UserProgress.status == ProgressStatus.COMPLETED,
             func.date(UserProgress.completed_at) == today,
         )
@@ -71,7 +72,7 @@ async def get_user_progress(
     total_lessons = (
         db.query(func.count(UserProgress.id))
         .filter(
-            UserProgress.user_id == current_user.id,
+            UserProgress.user_id == acting.id,
             UserProgress.status == ProgressStatus.COMPLETED,
         )
         .scalar()
@@ -79,7 +80,7 @@ async def get_user_progress(
     )
 
     # Récupérer la progression par matière
-    subject_progress_list = db.query(SubjectProgress).filter(SubjectProgress.user_id == current_user.id).all()
+    subject_progress_list = db.query(SubjectProgress).filter(SubjectProgress.user_id == acting.id).all()
 
     # Enrichir avec le nom de la matière
     subjects_progress = []
@@ -92,7 +93,7 @@ async def get_user_progress(
     # Récupérer les leçons récentes (5 dernières)
     recent_progress = (
         db.query(UserProgress)
-        .filter(UserProgress.user_id == current_user.id)
+        .filter(UserProgress.user_id == acting.id)
         .order_by(UserProgress.completed_at.desc())
         .limit(5)
         .all()
@@ -108,7 +109,7 @@ async def get_user_progress(
     # Compter les achievements
     achievements_count = (
         db.query(func.count("*"))
-        .select_from(db.query(User).filter(User.id == current_user.id).join(User.achievements))
+        .select_from(db.query(User).filter(User.id == acting.id).join(User.achievements))
         .scalar()
         or 0
     )
@@ -129,7 +130,7 @@ async def get_user_progress(
 @router.get("/subjects/{subject_id}", response_model=SubjectProgressResponse)
 async def get_subject_progress(
     subject_id: UUID,
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    acting: Annotated[User, Depends(acting_child)],
     db: Annotated[Session, Depends(get_db)],
 ) -> SubjectProgressResponse:
     """
@@ -137,7 +138,7 @@ async def get_subject_progress(
 
     Args:
         subject_id: ID de la matière
-        current_user: Utilisateur authentifié
+        acting: Utilisateur authentifié
         db: Session de base de données
 
     Returns:
@@ -155,7 +156,7 @@ async def get_subject_progress(
     subject_progress = (
         db.query(SubjectProgress)
         .filter(
-            SubjectProgress.user_id == current_user.id,
+            SubjectProgress.user_id == acting.id,
             SubjectProgress.subject_id == subject_id,
         )
         .first()
@@ -164,7 +165,7 @@ async def get_subject_progress(
     if not subject_progress:
         # Créer une progression vide si elle n'existe pas
         subject_progress = SubjectProgress(
-            user_id=current_user.id,
+            user_id=acting.id,
             subject_id=subject_id,
             total_xp=0,
             level=1,
@@ -183,7 +184,7 @@ async def get_subject_progress(
 @router.get("/lessons/{lesson_id}", response_model=LessonProgressResponse)
 async def get_lesson_progress(
     lesson_id: UUID,
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    acting: Annotated[User, Depends(acting_child)],
     db: Annotated[Session, Depends(get_db)],
 ) -> LessonProgressResponse:
     """
@@ -191,7 +192,7 @@ async def get_lesson_progress(
 
     Args:
         lesson_id: ID de la leçon
-        current_user: Utilisateur authentifié
+        acting: Utilisateur authentifié
         db: Session de base de données
 
     Returns:
@@ -208,14 +209,14 @@ async def get_lesson_progress(
     # Récupérer la progression
     lesson_progress = (
         db.query(UserProgress)
-        .filter(UserProgress.user_id == current_user.id, UserProgress.lesson_id == lesson_id)
+        .filter(UserProgress.user_id == acting.id, UserProgress.lesson_id == lesson_id)
         .first()
     )
 
     if not lesson_progress:
         # Retourner une progression vide si elle n'existe pas
         lesson_progress = UserProgress(
-            user_id=current_user.id,
+            user_id=acting.id,
             lesson_id=lesson_id,
             status=ProgressStatus.LOCKED,
             score=0,
@@ -235,26 +236,26 @@ async def get_lesson_progress(
 
 @router.get("/dashboard", response_model=ProgressDashboard)
 async def get_dashboard(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    acting: Annotated[User, Depends(acting_child)],
     db: Annotated[Session, Depends(get_db)],
 ) -> ProgressDashboard:
     """
     Récupère un résumé du tableau de bord (alias pour /me)
 
     Args:
-        current_user: Utilisateur authentifié
+        acting: Utilisateur authentifié
         db: Session de base de données
 
     Returns:
         Tableau de bord de progression
     """
-    return await get_user_progress(current_user, db)
+    return await get_user_progress(acting, db)
 
 
 @router.get("/lessons/{lesson_id}/completed-exercises", response_model=list[str])
 async def get_completed_exercises(
     lesson_id: UUID,
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    acting: Annotated[User, Depends(acting_child)],
     db: Annotated[Session, Depends(get_db)],
 ) -> list[str]:
     """
@@ -262,7 +263,7 @@ async def get_completed_exercises(
 
     Args:
         lesson_id: ID de la leçon
-        current_user: Utilisateur authentifié
+        acting: Utilisateur authentifié
         db: Session de base de données
 
     Returns:
@@ -281,7 +282,7 @@ async def get_completed_exercises(
     completed = (
         db.query(ExerciseResult.exercise_id)
         .filter(
-            ExerciseResult.user_id == current_user.id,
+            ExerciseResult.user_id == acting.id,
             ExerciseResult.exercise_id.in_([UUID(e) for e in exercise_id_list]),
             ExerciseResult.is_correct.is_(True),
         )
@@ -315,7 +316,7 @@ async def get_child_progress(
     from app.models.user import Profile, UserRole
 
     # Vérifier que l'utilisateur est un parent
-    if current_user.role != UserRole.PARENT:
+    if current_user.role not in (UserRole.PARENT, UserRole.ADMIN):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Seuls les parents peuvent accéder à la progression de leurs enfants",
@@ -369,7 +370,7 @@ async def get_child_lesson_progress(
     from app.models.user import Profile, UserRole
 
     # Vérifier que l'utilisateur est un parent
-    if current_user.role != UserRole.PARENT:
+    if current_user.role not in (UserRole.PARENT, UserRole.ADMIN):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Seuls les parents peuvent accéder à la progression de leurs enfants",
