@@ -10,8 +10,11 @@ from sqlalchemy.orm import Session
 
 from app.api.auth import get_current_user
 from app.core.database import get_db
+from app.models.collection import WALLET_POINTS, WALLETS
 from app.models.user import Profile, User, UserRole
 from app.schemas.children import ChildCreate, ChildResponse, ChildUpdate
+from app.schemas.collection import AwardCreate, AwardResponse
+from app.services.collection import award_points, list_awards
 from app.services.uploads import save_avatar
 
 router = APIRouter()
@@ -301,3 +304,40 @@ async def delete_child(
     db.commit()
 
     return None
+
+
+@router.post("/{child_id}/awards", response_model=AwardResponse, status_code=status.HTTP_201_CREATED)
+async def create_award(
+    child_id: UUID,
+    body: AwardCreate,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> AwardResponse:
+    """Attribue (ou retire) des points à un enfant.
+
+    Points : montant > 0 (hardskill, additif). Comportement : montant ≠ 0
+    (positif ou négatif). Réservé au parent (ou admin) propriétaire de l'enfant.
+    """
+    _require_owned_child(child_id, current_user, db)
+    if body.wallet not in WALLETS:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Porte-monnaie inconnu")
+    if body.amount == 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Le montant ne peut pas être nul")
+    if body.wallet == WALLET_POINTS and body.amount < 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Les points de compétence ne peuvent pas être retirés",
+        )
+    award = award_points(child_id, body.wallet, body.amount, body.reason, current_user.id, db)
+    return AwardResponse.model_validate(award)
+
+
+@router.get("/{child_id}/awards", response_model=list[AwardResponse])
+async def get_awards(
+    child_id: UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> list[AwardResponse]:
+    """Historique des points attribués à un enfant (parent/admin propriétaire)."""
+    _require_owned_child(child_id, current_user, db)
+    return [AwardResponse.model_validate(a) for a in list_awards(child_id, db)]

@@ -7,6 +7,8 @@
 
 export * from "./achievementRarity";
 export * from "./achievementResponse";
+export * from "./awardCreate";
+export * from "./awardResponse";
 export * from "./bodyLoginFormApiV1AuthLoginFormPost";
 export * from "./bodyUploadChildAvatarApiV1ChildrenChildIdAvatarPost";
 export * from "./bodyUploadMyAvatarApiV1AuthMeAvatarPost";

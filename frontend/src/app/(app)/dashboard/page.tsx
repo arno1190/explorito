@@ -33,6 +33,7 @@ import { Label } from "@/components/ui/label";
 import { UserAvatar } from "@/components/profile/UserAvatar";
 import { AvatarPicker } from "@/components/profile/AvatarPicker";
 import { PinDialog } from "@/components/profile/PinDialog";
+import { AwardPointsDialog } from "@/components/profile/AwardPointsDialog";
 import { uploadFile } from "@/lib/api/axios-instance";
 import { Plus, Trash2, Play, TrendingUp } from "lucide-react";
 import type { ChildResponse, ChildStatsResponse } from "@/lib/api/model";
@@ -64,6 +65,7 @@ export default function DashboardPage() {
   // encore, on invite à le définir avant de basculer.
   const [pinOpen, setPinOpen] = useState(false);
   const [pendingChild, setPendingChild] = useState<ChildResponse | null>(null);
+  const [awardChild, setAwardChild] = useState<ChildResponse | null>(null);
 
   const launchChild = (child: ChildResponse) => {
     if (user?.has_pin) {
@@ -414,6 +416,13 @@ export default function DashboardPage() {
                       <TrendingUp className="mr-2 h-4 w-4" />
                       Voir les progrès
                     </Button>
+                    <Button
+                      className="w-full"
+                      variant="outline"
+                      onClick={() => setAwardChild(child)}
+                    >
+                      🎁 Attribuer des points
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -430,6 +439,14 @@ export default function DashboardPage() {
           if (pendingChild) impersonateChild(pendingChild);
           setPendingChild(null);
         }}
+      />
+
+      <AwardPointsDialog
+        open={awardChild !== null}
+        onOpenChange={(o) => !o && setAwardChild(null)}
+        childId={awardChild?.id ?? ""}
+        childName={awardChild?.name ?? ""}
+        onAwarded={loadChildren}
       />
     </div>
   );

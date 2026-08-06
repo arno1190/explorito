@@ -41,4 +41,8 @@ export interface ExerciseResponse {
   media_urls?: ExerciseResponseMediaUrls;
   id: string;
   lesson_id: string;
+  /** Difficulté fine évaluée (1-5) */
+  difficulty_level?: number | null;
+  /** XP réel de l'exercice (selon difficulty_level), pour l'affichage. */
+  readonly xp_value: number;
 }

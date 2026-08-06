@@ -28,8 +28,12 @@ export default function CatalogPage() {
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<CatalogGridItem | null>(null);
   const [filter, setFilter] = useState<"all" | "owned" | "locked">("all");
+  const [currency, setCurrency] = useState<"points" | "behavior">("points");
 
-  const balance = walletQuery.data?.balance ?? 0;
+  const wallet = walletQuery.data;
+  const pointsBalance = wallet?.balance ?? 0;
+  const behaviorBalance = wallet?.behavior_balance ?? 0;
+  const balance = currency === "behavior" ? behaviorBalance : pointsBalance;
   const info = walletQuery.data?.catalogs?.find((c) => c.slug === slug);
   const items = catalogQuery.data ?? [];
   const ownedCount = items.filter((p) => p.owned).length;
@@ -48,7 +52,7 @@ export default function CatalogPage() {
     setError(null);
     try {
       const res = await purchase.mutateAsync({
-        data: { catalog: slug, item_id: entry.id },
+        data: { catalog: slug, item_id: entry.id, currency },
       });
       await Promise.all([catalogQuery.refetch(), walletQuery.refetch()]);
       setCelebrating(res.item.name_fr);
@@ -88,19 +92,53 @@ export default function CatalogPage() {
               {info?.icon} {info?.name ?? "Collection"}
             </h1>
             <p className="mt-1 text-fun-text-muted">
-              Dépense ton XP pour débloquer&nbsp;!
+              Choisis ta cagnotte et débloque&nbsp;!
             </p>
           </div>
-          <div className="flex items-center gap-2 rounded-2xl bg-fun-sun-light px-5 py-3">
-            <Star className="h-6 w-6 fill-fun-sun text-fun-sun" />
-            <div>
-              <div className="text-2xl font-extrabold text-fun-text">
-                {balance}
+          {/* Sélecteur de porte-monnaie : le solde actif pilote les achats. */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setCurrency("points")}
+              className={cn(
+                "flex items-center gap-2 rounded-2xl px-5 py-3 transition-all active:scale-95",
+                currency === "points"
+                  ? "bg-fun-sun-light ring-2 ring-fun-sun"
+                  : "bg-fun-surface candy-shadow opacity-70 hover:opacity-100"
+              )}
+              aria-pressed={currency === "points"}
+            >
+              <span className="text-2xl">⭐</span>
+              <div className="text-left">
+                <div className="text-2xl font-extrabold text-fun-text">
+                  {pointsBalance}
+                </div>
+                <div className="text-xs font-semibold text-fun-text-muted">
+                  Points
+                </div>
               </div>
-              <div className="text-xs font-semibold text-fun-text-muted">
-                XP à dépenser
+            </button>
+            <button
+              type="button"
+              onClick={() => setCurrency("behavior")}
+              className={cn(
+                "flex items-center gap-2 rounded-2xl px-5 py-3 transition-all active:scale-95",
+                currency === "behavior"
+                  ? "bg-fun-green-light ring-2 ring-fun-green"
+                  : "bg-fun-surface candy-shadow opacity-70 hover:opacity-100"
+              )}
+              aria-pressed={currency === "behavior"}
+            >
+              <span className="text-2xl">💚</span>
+              <div className="text-left">
+                <div className="text-2xl font-extrabold text-fun-text">
+                  {behaviorBalance}
+                </div>
+                <div className="text-xs font-semibold text-fun-text-muted">
+                  Comportement
+                </div>
               </div>
-            </div>
+            </button>
           </div>
         </div>
         <div className="mt-4">
@@ -216,11 +254,13 @@ export default function CatalogPage() {
                   )}
                 >
                   {affordable ? (
-                    <Star className="h-4 w-4 fill-fun-sun text-fun-sun" />
+                    <span aria-hidden>
+                      {currency === "behavior" ? "💚" : "⭐"}
+                    </span>
                   ) : (
                     <Lock className="h-4 w-4" />
                   )}
-                  {p.price} XP
+                  {p.price}
                 </button>
               )}
             </div>

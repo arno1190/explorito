@@ -16,4 +16,6 @@ export interface PurchaseRequest {
    * @minimum 1
    */
   item_id: number;
+  /** Porte-monnaie : points | behavior */
+  currency?: string;
 }

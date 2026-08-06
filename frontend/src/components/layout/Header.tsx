@@ -129,15 +129,18 @@ export function Header() {
                 })}
 
                 {isChildContext && (
-                  <div
-                    className="flex items-center gap-2 rounded-full bg-fun-sun-light px-3 py-1.5"
-                    title="XP à dépenser · XP total gagné"
-                  >
-                    <span className="text-sm font-extrabold text-fun-sun">
-                      ⚡ {wallet?.balance ?? 0}
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="flex items-center gap-1 rounded-full bg-fun-sun-light px-3 py-1.5 text-sm font-extrabold text-fun-sun"
+                      title="Points à dépenser (exercices + compétences)"
+                    >
+                      ⭐ {wallet?.balance ?? 0}
                     </span>
-                    <span className="text-xs font-bold text-fun-text-muted">
-                      ⭐ {wallet?.total_earned ?? 0}
+                    <span
+                      className="flex items-center gap-1 rounded-full bg-fun-green-light px-3 py-1.5 text-sm font-extrabold text-fun-green-dark"
+                      title="Points de comportement à dépenser"
+                    >
+                      💚 {wallet?.behavior_balance ?? 0}
                     </span>
                   </div>
                 )}

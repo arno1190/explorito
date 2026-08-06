@@ -12,6 +12,7 @@ JSON (id → nom FR, prix, image, anecdote) chargé et mis en cache.
 
 import functools
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 from uuid import UUID
@@ -20,7 +21,13 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.models.collection import CollectibleUnlock
+from app.models.collection import (
+    WALLET_BEHAVIOR,
+    WALLET_POINTS,
+    WALLETS,
+    CollectibleUnlock,
+    PointAward,
+)
 from app.models.progress import SubjectProgress
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -94,15 +101,56 @@ def get_total_earned_xp(user_id: UUID, db: Session) -> int:
     return int(total or 0)
 
 
-def get_spent_xp(user_id: UUID, db: Session) -> int:
-    """XP dépensé (somme des prix payés, tous catalogues confondus)."""
-    spent = db.query(func.sum(CollectibleUnlock.price_paid)).filter(CollectibleUnlock.user_id == user_id).scalar()
+def _awards_sum(user_id: UUID, wallet: str, db: Session) -> int:
+    """Somme (nette) des points attribués par le parent pour un porte-monnaie."""
+    total = (
+        db.query(func.sum(PointAward.amount))
+        .filter(PointAward.child_id == user_id, PointAward.wallet == wallet)
+        .scalar()
+    )
+    return int(total or 0)
+
+
+def get_points_earned(user_id: UUID, db: Session) -> int:
+    """« Gagné » du porte-monnaie Points = XP d'exercices + attributions hardskill."""
+    return get_total_earned_xp(user_id, db) + _awards_sum(user_id, WALLET_POINTS, db)
+
+
+def get_behavior_earned(user_id: UUID, db: Session) -> int:
+    """« Gagné » (net) du porte-monnaie Comportement."""
+    return _awards_sum(user_id, WALLET_BEHAVIOR, db)
+
+
+def wallet_earned(user_id: UUID, wallet: str, db: Session) -> int:
+    """Total gagné d'un porte-monnaie donné."""
+    if wallet == WALLET_BEHAVIOR:
+        return get_behavior_earned(user_id, db)
+    return get_points_earned(user_id, db)
+
+
+def get_spent(user_id: UUID, currency: str, db: Session) -> int:
+    """XP/points dépensés avec un porte-monnaie donné (tous catalogues)."""
+    spent = (
+        db.query(func.sum(CollectibleUnlock.price_paid))
+        .filter(CollectibleUnlock.user_id == user_id, CollectibleUnlock.currency == currency)
+        .scalar()
+    )
     return int(spent or 0)
 
 
+def wallet_balance(user_id: UUID, wallet: str, db: Session) -> int:
+    """Solde dépensable d'un porte-monnaie = gagné − dépensé (jamais négatif)."""
+    return max(0, wallet_earned(user_id, wallet, db) - get_spent(user_id, wallet, db))
+
+
+def get_spent_xp(user_id: UUID, db: Session) -> int:
+    """Rétro-compat : XP dépensé avec le porte-monnaie Points."""
+    return get_spent(user_id, WALLET_POINTS, db)
+
+
 def get_balance(user_id: UUID, db: Session) -> int:
-    """Solde XP dépensable = gagné − dépensé (jamais négatif)."""
-    return max(0, get_total_earned_xp(user_id, db) - get_spent_xp(user_id, db))
+    """Rétro-compat : solde dépensable du porte-monnaie Points."""
+    return wallet_balance(user_id, WALLET_POINTS, db)
 
 
 def get_unlocked_ids(user_id: UUID, catalog: str, db: Session) -> list[int]:
@@ -144,7 +192,9 @@ def catalog_infos(user_id: UUID, db: Session) -> list[dict[str, Any]]:
     return infos
 
 
-def purchase_item(user_id: UUID, catalog: str, item_id: int, db: Session) -> dict[str, Any]:
+def purchase_item(
+    user_id: UUID, catalog: str, item_id: int, db: Session, currency: str = WALLET_POINTS
+) -> dict[str, Any]:
     """
     Achète un objet d'un catalogue et l'ajoute à la collection de l'utilisateur.
 
@@ -179,14 +229,86 @@ def purchase_item(user_id: UUID, catalog: str, item_id: int, db: Session) -> dic
     if already is not None:
         raise AlreadyOwnedError(f"{entry['name_fr']} est déjà dans ta collection")
 
-    price = int(entry["price"])
-    if get_balance(user_id, db) < price:
-        raise InsufficientBalanceError(f"Il te faut {price} XP pour débloquer {entry['name_fr']}")
+    if currency not in WALLETS:
+        raise ItemNotFoundError(f"Porte-monnaie « {currency} » inconnu")
 
-    db.add(CollectibleUnlock(user_id=user_id, catalog=catalog, item_id=int(item_id), price_paid=price))
+    price = int(entry["price"])
+    if wallet_balance(user_id, currency, db) < price:
+        raise InsufficientBalanceError(f"Il te faut {price} points pour débloquer {entry['name_fr']}")
+
+    db.add(
+        CollectibleUnlock(
+            user_id=user_id,
+            catalog=catalog,
+            item_id=int(item_id),
+            price_paid=price,
+            currency=currency,
+        )
+    )
     try:
         db.commit()
     except IntegrityError as exc:
         db.rollback()
         raise AlreadyOwnedError(f"{entry['name_fr']} est déjà dans ta collection") from exc
     return _item(entry)
+
+
+# --------------------------------------------------------------------------- #
+# Points attribués par le parent (hardskill / comportement)
+# --------------------------------------------------------------------------- #
+def award_points(
+    child_id: UUID,
+    wallet: str,
+    amount: int,
+    reason: str | None,
+    awarded_by: UUID | None,
+    db: Session,
+) -> PointAward:
+    """Enregistre une attribution (ou un retrait) de points par le parent.
+
+    La validation métier (Points > 0 ; Comportement ≠ 0) est faite par l'endpoint.
+    """
+    award = PointAward(
+        child_id=child_id,
+        wallet=wallet,
+        amount=int(amount),
+        reason=(reason or None),
+        awarded_by=awarded_by,
+    )
+    db.add(award)
+    db.commit()
+    db.refresh(award)
+    return award
+
+
+def list_awards(child_id: UUID, db: Session, limit: int = 100) -> list[PointAward]:
+    """Historique des attributions d'un enfant (plus récentes d'abord)."""
+    return (
+        db.query(PointAward)
+        .filter(PointAward.child_id == child_id)
+        .order_by(PointAward.created_at.desc())
+        .limit(limit)
+        .all()
+    )
+
+
+def unseen_awards(child_id: UUID, db: Session) -> list[PointAward]:
+    """Attributions non encore vues par l'enfant (pour la notification)."""
+    return (
+        db.query(PointAward)
+        .filter(PointAward.child_id == child_id, PointAward.acknowledged_at.is_(None))
+        .order_by(PointAward.created_at.asc())
+        .all()
+    )
+
+
+def acknowledge_awards(child_id: UUID, db: Session) -> int:
+    """Marque toutes les attributions non vues comme vues. Renvoie le nombre traité."""
+    now = datetime.utcnow()
+    n = (
+        db.query(PointAward)
+        .filter(PointAward.child_id == child_id, PointAward.acknowledged_at.is_(None))
+        .update({PointAward.acknowledged_at: now}, synchronize_session=False)
+    )
+    db.commit()
+    return int(n)

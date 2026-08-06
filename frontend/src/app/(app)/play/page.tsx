@@ -7,6 +7,10 @@ import { listSubjectsApiV1SubjectsGet } from "@/lib/api/generated/subjects/subje
 import { useRecentLessonsApiV1LessonsRecentGet as useRecentLessons } from "@/lib/api/generated/lessons/lessons";
 import { getChildStatsApiV1GamificationChildIdStatsGet } from "@/lib/api/generated/gamification/gamification";
 import { getSubjectsOverviewApiV1ProgressSubjectsOverviewGet } from "@/lib/api/generated/progress/progress";
+import {
+  getUnseenAwardsApiV1CollectionAwardsUnseenGet,
+  ackAwardsApiV1CollectionAwardsAckPost,
+} from "@/lib/api/generated/collection/collection";
 import type {
   ChildStatsResponse,
   SubjectOverviewItem,
@@ -21,6 +25,7 @@ export default function PlayPage() {
   const [overview, setOverview] = useState<Record<string, SubjectOverviewItem>>(
     {}
   );
+  const [awardToast, setAwardToast] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const { data: recent } = useRecentLessons({ limit: 6 });
 
@@ -53,6 +58,28 @@ export default function PlayPage() {
           setOverview(Object.fromEntries(ov.map((o) => [o.subject_id, o])));
         } catch (ovErr) {
           console.warn("Failed to load subjects overview:", ovErr);
+        }
+
+        // Notification des points attribués par le parent (toast célébratoire).
+        try {
+          const unseen = await getUnseenAwardsApiV1CollectionAwardsUnseenGet();
+          if (unseen.length > 0) {
+            setAwardToast(
+              unseen
+                .map(
+                  (a) =>
+                    `${a.amount > 0 ? "+" : ""}${a.amount} ${
+                      a.reason ||
+                      (a.wallet === "points" ? "Points" : "Comportement")
+                    } ${a.wallet === "points" ? "⭐" : "💚"}`
+                )
+                .join("  ·  ")
+            );
+            await ackAwardsApiV1CollectionAwardsAckPost();
+            window.setTimeout(() => setAwardToast(null), 6000);
+          }
+        } catch (awErr) {
+          console.warn("Failed to load award notifications:", awErr);
         }
 
         // Load stats separately (non-critical - don't block subjects)
@@ -121,6 +148,15 @@ export default function PlayPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-fun-sky-light via-white to-fun-violet-light p-4">
+      {/* Toast : points attribués par le parent */}
+      {awardToast && (
+        <div className="fixed inset-x-0 top-4 z-50 flex justify-center px-4">
+          <div className="animate-[candy-pop_0.6s_ease-out] rounded-2xl bg-fun-green px-5 py-3 text-center font-extrabold text-white candy-shadow-lg">
+            🎉 {awardToast}
+          </div>
+        </div>
+      )}
+
       {/* Header with stats */}
       <div className="max-w-4xl mx-auto mb-8">
         <div className="bg-white rounded-3xl candy-shadow p-6 flex items-center justify-between">

@@ -7,14 +7,23 @@
 import type { CatalogInfo } from "./catalogInfo";
 
 /**
- * Porte-monnaie XP partagé + avancement par catalogue.
+ * Deux porte-monnaies dépensables + avancement par catalogue.
+
+``total_earned/spent/balance`` = porte-monnaie **Points** (XP + hardskill).
+``behavior_*`` = porte-monnaie **Comportement**.
  */
 export interface WalletSummary {
-  /** XP total gagné (inchangé, pilote les niveaux) */
+  /** Points gagnés (XP exercices + hardskill) */
   total_earned: number;
-  /** XP dépensé (tous catalogues confondus) */
+  /** Points dépensés */
   spent: number;
-  /** XP dépensable = gagné − dépensé */
+  /** Solde Points = gagné − dépensé */
   balance: number;
+  /** Points de comportement gagnés (net) */
+  behavior_earned?: number;
+  /** Points de comportement dépensés */
+  behavior_spent?: number;
+  /** Solde Comportement */
+  behavior_balance?: number;
   catalogs?: CatalogInfo[];
 }
