@@ -26,7 +26,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, computed_field, model_validator
 
 from app.models.content import DifficultyEnum, ExerciseType
 
@@ -270,8 +270,20 @@ class ExerciseResponse(ExerciseBase):
 
     id: UUID
     lesson_id: UUID
+    difficulty_level: int | None = Field(default=None, description="Difficulté fine évaluée (1-5)")
 
     model_config = {"from_attributes": True}
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def xp_value(self) -> int:
+        """XP réel de l'exercice (selon difficulty_level), pour l'affichage."""
+        from app.core.config import settings
+
+        level = self.difficulty_level
+        if level is not None and int(level) in settings.XP_BY_LEVEL:
+            return settings.XP_BY_LEVEL[int(level)]
+        return settings.XP_PER_EXERCISE
 
     # La réponse ne revalide pas la forme : les données en base font foi.
     @model_validator(mode="after")

@@ -21,6 +21,7 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  AwardResponse,
   CatalogGridItem,
   HTTPValidationError,
   PurchaseRequest,
@@ -31,7 +32,7 @@ import type {
 import { axiosInstance } from "../../axios-instance";
 
 /**
- * Porte-monnaie XP partagé + avancement par catalogue.
+ * Les deux porte-monnaies (Points, Comportement) + avancement par catalogue.
  * @summary Get Wallet
  */
 export const getWalletApiV1CollectionMeGet = (signal?: AbortSignal) => {
@@ -347,7 +348,7 @@ export function useGetCatalogApiV1CollectionCatalogsSlugGet<
 }
 
 /**
- * Débloque un objet d'un catalogue en dépensant l'XP de l'utilisateur.
+ * Débloque un objet en dépensant le porte-monnaie choisi (points | behavior).
  * @summary Purchase
  */
 export const purchaseApiV1CollectionPurchasePost = (
@@ -431,6 +432,266 @@ export const usePurchaseApiV1CollectionPurchasePost = <
 > => {
   return useMutation(
     getPurchaseApiV1CollectionPurchasePostMutationOptions(options),
+    queryClient
+  );
+};
+/**
+ * Points attribués non encore vus par l'enfant (pour la notification).
+ * @summary Get Unseen Awards
+ */
+export const getUnseenAwardsApiV1CollectionAwardsUnseenGet = (
+  signal?: AbortSignal
+) => {
+  return axiosInstance<AwardResponse[]>({
+    url: `/api/v1/collection/awards/unseen`,
+    method: "GET",
+    signal,
+  });
+};
+
+export const getGetUnseenAwardsApiV1CollectionAwardsUnseenGetQueryKey = () => {
+  return [`/api/v1/collection/awards/unseen`] as const;
+};
+
+export const getGetUnseenAwardsApiV1CollectionAwardsUnseenGetQueryOptions = <
+  TData = Awaited<
+    ReturnType<typeof getUnseenAwardsApiV1CollectionAwardsUnseenGet>
+  >,
+  TError = HTTPValidationError,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getUnseenAwardsApiV1CollectionAwardsUnseenGet>>,
+      TError,
+      TData
+    >
+  >;
+}) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetUnseenAwardsApiV1CollectionAwardsUnseenGetQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getUnseenAwardsApiV1CollectionAwardsUnseenGet>>
+  > = ({ signal }) => getUnseenAwardsApiV1CollectionAwardsUnseenGet(signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getUnseenAwardsApiV1CollectionAwardsUnseenGet>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetUnseenAwardsApiV1CollectionAwardsUnseenGetQueryResult =
+  NonNullable<
+    Awaited<ReturnType<typeof getUnseenAwardsApiV1CollectionAwardsUnseenGet>>
+  >;
+export type GetUnseenAwardsApiV1CollectionAwardsUnseenGetQueryError =
+  HTTPValidationError;
+
+export function useGetUnseenAwardsApiV1CollectionAwardsUnseenGet<
+  TData = Awaited<
+    ReturnType<typeof getUnseenAwardsApiV1CollectionAwardsUnseenGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getUnseenAwardsApiV1CollectionAwardsUnseenGet>
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<
+            ReturnType<typeof getUnseenAwardsApiV1CollectionAwardsUnseenGet>
+          >,
+          TError,
+          Awaited<
+            ReturnType<typeof getUnseenAwardsApiV1CollectionAwardsUnseenGet>
+          >
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUnseenAwardsApiV1CollectionAwardsUnseenGet<
+  TData = Awaited<
+    ReturnType<typeof getUnseenAwardsApiV1CollectionAwardsUnseenGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getUnseenAwardsApiV1CollectionAwardsUnseenGet>
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<
+            ReturnType<typeof getUnseenAwardsApiV1CollectionAwardsUnseenGet>
+          >,
+          TError,
+          Awaited<
+            ReturnType<typeof getUnseenAwardsApiV1CollectionAwardsUnseenGet>
+          >
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUnseenAwardsApiV1CollectionAwardsUnseenGet<
+  TData = Awaited<
+    ReturnType<typeof getUnseenAwardsApiV1CollectionAwardsUnseenGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getUnseenAwardsApiV1CollectionAwardsUnseenGet>
+        >,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get Unseen Awards
+ */
+
+export function useGetUnseenAwardsApiV1CollectionAwardsUnseenGet<
+  TData = Awaited<
+    ReturnType<typeof getUnseenAwardsApiV1CollectionAwardsUnseenGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getUnseenAwardsApiV1CollectionAwardsUnseenGet>
+        >,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions =
+    getGetUnseenAwardsApiV1CollectionAwardsUnseenGetQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Marque comme vues les attributions de points de l'enfant.
+ * @summary Ack Awards
+ */
+export const ackAwardsApiV1CollectionAwardsAckPost = (signal?: AbortSignal) => {
+  return axiosInstance<void>({
+    url: `/api/v1/collection/awards/ack`,
+    method: "POST",
+    signal,
+  });
+};
+
+export const getAckAwardsApiV1CollectionAwardsAckPostMutationOptions = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof ackAwardsApiV1CollectionAwardsAckPost>>,
+    TError,
+    void,
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof ackAwardsApiV1CollectionAwardsAckPost>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["ackAwardsApiV1CollectionAwardsAckPost"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof ackAwardsApiV1CollectionAwardsAckPost>>,
+    void
+  > = () => {
+    return ackAwardsApiV1CollectionAwardsAckPost();
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AckAwardsApiV1CollectionAwardsAckPostMutationResult = NonNullable<
+  Awaited<ReturnType<typeof ackAwardsApiV1CollectionAwardsAckPost>>
+>;
+
+export type AckAwardsApiV1CollectionAwardsAckPostMutationError =
+  HTTPValidationError;
+
+/**
+ * @summary Ack Awards
+ */
+export const useAckAwardsApiV1CollectionAwardsAckPost = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof ackAwardsApiV1CollectionAwardsAckPost>>,
+      TError,
+      void,
+      TContext
+    >;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof ackAwardsApiV1CollectionAwardsAckPost>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(
+    getAckAwardsApiV1CollectionAwardsAckPostMutationOptions(options),
     queryClient
   );
 };

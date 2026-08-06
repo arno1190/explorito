@@ -21,6 +21,8 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  AwardCreate,
+  AwardResponse,
   BodyUploadChildAvatarApiV1ChildrenChildIdAvatarPost,
   ChildCreate,
   ChildResponse,
@@ -753,3 +755,264 @@ export const useUploadChildAvatarApiV1ChildrenChildIdAvatarPost = <
     queryClient
   );
 };
+/**
+ * Attribue (ou retire) des points à un enfant.
+
+Points : montant > 0 (hardskill, additif). Comportement : montant ≠ 0
+(positif ou négatif). Réservé au parent (ou admin) propriétaire de l'enfant.
+ * @summary Create Award
+ */
+export const createAwardApiV1ChildrenChildIdAwardsPost = (
+  childId: string,
+  awardCreate: AwardCreate,
+  signal?: AbortSignal
+) => {
+  return axiosInstance<AwardResponse>({
+    url: `/api/v1/children/${childId}/awards`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: awardCreate,
+    signal,
+  });
+};
+
+export const getCreateAwardApiV1ChildrenChildIdAwardsPostMutationOptions = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createAwardApiV1ChildrenChildIdAwardsPost>>,
+    TError,
+    { childId: string; data: AwardCreate },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createAwardApiV1ChildrenChildIdAwardsPost>>,
+  TError,
+  { childId: string; data: AwardCreate },
+  TContext
+> => {
+  const mutationKey = ["createAwardApiV1ChildrenChildIdAwardsPost"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createAwardApiV1ChildrenChildIdAwardsPost>>,
+    { childId: string; data: AwardCreate }
+  > = (props) => {
+    const { childId, data } = props ?? {};
+
+    return createAwardApiV1ChildrenChildIdAwardsPost(childId, data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateAwardApiV1ChildrenChildIdAwardsPostMutationResult =
+  NonNullable<
+    Awaited<ReturnType<typeof createAwardApiV1ChildrenChildIdAwardsPost>>
+  >;
+export type CreateAwardApiV1ChildrenChildIdAwardsPostMutationBody = AwardCreate;
+export type CreateAwardApiV1ChildrenChildIdAwardsPostMutationError =
+  HTTPValidationError;
+
+/**
+ * @summary Create Award
+ */
+export const useCreateAwardApiV1ChildrenChildIdAwardsPost = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createAwardApiV1ChildrenChildIdAwardsPost>>,
+      TError,
+      { childId: string; data: AwardCreate },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof createAwardApiV1ChildrenChildIdAwardsPost>>,
+  TError,
+  { childId: string; data: AwardCreate },
+  TContext
+> => {
+  return useMutation(
+    getCreateAwardApiV1ChildrenChildIdAwardsPostMutationOptions(options),
+    queryClient
+  );
+};
+/**
+ * Historique des points attribués à un enfant (parent/admin propriétaire).
+ * @summary Get Awards
+ */
+export const getAwardsApiV1ChildrenChildIdAwardsGet = (
+  childId: string,
+  signal?: AbortSignal
+) => {
+  return axiosInstance<AwardResponse[]>({
+    url: `/api/v1/children/${childId}/awards`,
+    method: "GET",
+    signal,
+  });
+};
+
+export const getGetAwardsApiV1ChildrenChildIdAwardsGetQueryKey = (
+  childId: string
+) => {
+  return [`/api/v1/children/${childId}/awards`] as const;
+};
+
+export const getGetAwardsApiV1ChildrenChildIdAwardsGetQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAwardsApiV1ChildrenChildIdAwardsGet>>,
+  TError = HTTPValidationError,
+>(
+  childId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAwardsApiV1ChildrenChildIdAwardsGet>>,
+        TError,
+        TData
+      >
+    >;
+  }
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetAwardsApiV1ChildrenChildIdAwardsGetQueryKey(childId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getAwardsApiV1ChildrenChildIdAwardsGet>>
+  > = ({ signal }) => getAwardsApiV1ChildrenChildIdAwardsGet(childId, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!childId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAwardsApiV1ChildrenChildIdAwardsGet>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetAwardsApiV1ChildrenChildIdAwardsGetQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAwardsApiV1ChildrenChildIdAwardsGet>>
+>;
+export type GetAwardsApiV1ChildrenChildIdAwardsGetQueryError =
+  HTTPValidationError;
+
+export function useGetAwardsApiV1ChildrenChildIdAwardsGet<
+  TData = Awaited<ReturnType<typeof getAwardsApiV1ChildrenChildIdAwardsGet>>,
+  TError = HTTPValidationError,
+>(
+  childId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAwardsApiV1ChildrenChildIdAwardsGet>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAwardsApiV1ChildrenChildIdAwardsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getAwardsApiV1ChildrenChildIdAwardsGet>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetAwardsApiV1ChildrenChildIdAwardsGet<
+  TData = Awaited<ReturnType<typeof getAwardsApiV1ChildrenChildIdAwardsGet>>,
+  TError = HTTPValidationError,
+>(
+  childId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAwardsApiV1ChildrenChildIdAwardsGet>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAwardsApiV1ChildrenChildIdAwardsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getAwardsApiV1ChildrenChildIdAwardsGet>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetAwardsApiV1ChildrenChildIdAwardsGet<
+  TData = Awaited<ReturnType<typeof getAwardsApiV1ChildrenChildIdAwardsGet>>,
+  TError = HTTPValidationError,
+>(
+  childId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAwardsApiV1ChildrenChildIdAwardsGet>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get Awards
+ */
+
+export function useGetAwardsApiV1ChildrenChildIdAwardsGet<
+  TData = Awaited<ReturnType<typeof getAwardsApiV1ChildrenChildIdAwardsGet>>,
+  TError = HTTPValidationError,
+>(
+  childId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAwardsApiV1ChildrenChildIdAwardsGet>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetAwardsApiV1ChildrenChildIdAwardsGetQueryOptions(
+    childId,
+    options
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}

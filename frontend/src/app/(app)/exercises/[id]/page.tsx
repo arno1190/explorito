@@ -147,7 +147,9 @@ export default function ExercisePage() {
         </h1>
         <div className="flex items-center gap-2 rounded-full bg-fun-sun-light px-4 py-2">
           <Star className="h-5 w-5 fill-fun-sun text-fun-sun" />
-          <span className="font-bold text-fun-text">10 pts</span>
+          <span className="font-bold text-fun-text">
+            {exercise.xp_value ?? 10} pts
+          </span>
         </div>
       </div>
 
@@ -228,7 +230,7 @@ export default function ExercisePage() {
 
       {showXPGain && (
         <XPGain
-          xp={result?.xp_awarded ?? 10}
+          xp={result?.xp_awarded ?? exercise.xp_value ?? 10}
           onComplete={() => setShowXPGain(false)}
         />
       )}
