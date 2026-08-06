@@ -43,9 +43,7 @@ async def get_user_progress(
         Tableau de bord de progression complet
     """
     # Calculer l'XP total
-    total_xp = (
-        db.query(func.sum(SubjectProgress.total_xp)).filter(SubjectProgress.user_id == acting.id).scalar() or 0
-    )
+    total_xp = db.query(func.sum(SubjectProgress.total_xp)).filter(SubjectProgress.user_id == acting.id).scalar() or 0
 
     # Calculer le niveau global
     overall_level = calculate_level_from_xp(int(total_xp))
@@ -208,9 +206,7 @@ async def get_lesson_progress(
 
     # Récupérer la progression
     lesson_progress = (
-        db.query(UserProgress)
-        .filter(UserProgress.user_id == acting.id, UserProgress.lesson_id == lesson_id)
-        .first()
+        db.query(UserProgress).filter(UserProgress.user_id == acting.id, UserProgress.lesson_id == lesson_id).first()
     )
 
     if not lesson_progress:
