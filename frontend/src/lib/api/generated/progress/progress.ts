@@ -21,6 +21,7 @@ import type {
   HTTPValidationError,
   LessonProgressResponse,
   ProgressDashboard,
+  SubjectOverviewItem,
   SubjectProgressResponse,
 } from "../../model";
 
@@ -30,7 +31,7 @@ import { axiosInstance } from "../../axios-instance";
  * Récupère la progression globale de l'utilisateur actuel
 
 Args:
-    current_user: Utilisateur authentifié
+    acting: Utilisateur authentifié
     db: Session de base de données
 
 Returns:
@@ -51,7 +52,7 @@ export const getGetUserProgressApiV1ProgressMeGetQueryKey = () => {
 
 export const getGetUserProgressApiV1ProgressMeGetQueryOptions = <
   TData = Awaited<ReturnType<typeof getUserProgressApiV1ProgressMeGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(options?: {
   query?: Partial<
     UseQueryOptions<
@@ -80,11 +81,11 @@ export const getGetUserProgressApiV1ProgressMeGetQueryOptions = <
 export type GetUserProgressApiV1ProgressMeGetQueryResult = NonNullable<
   Awaited<ReturnType<typeof getUserProgressApiV1ProgressMeGet>>
 >;
-export type GetUserProgressApiV1ProgressMeGetQueryError = unknown;
+export type GetUserProgressApiV1ProgressMeGetQueryError = HTTPValidationError;
 
 export function useGetUserProgressApiV1ProgressMeGet<
   TData = Awaited<ReturnType<typeof getUserProgressApiV1ProgressMeGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options: {
     query: Partial<
@@ -109,7 +110,7 @@ export function useGetUserProgressApiV1ProgressMeGet<
 };
 export function useGetUserProgressApiV1ProgressMeGet<
   TData = Awaited<ReturnType<typeof getUserProgressApiV1ProgressMeGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -134,7 +135,7 @@ export function useGetUserProgressApiV1ProgressMeGet<
 };
 export function useGetUserProgressApiV1ProgressMeGet<
   TData = Awaited<ReturnType<typeof getUserProgressApiV1ProgressMeGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -155,7 +156,7 @@ export function useGetUserProgressApiV1ProgressMeGet<
 
 export function useGetUserProgressApiV1ProgressMeGet<
   TData = Awaited<ReturnType<typeof getUserProgressApiV1ProgressMeGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -182,11 +183,212 @@ export function useGetUserProgressApiV1ProgressMeGet<
 }
 
 /**
+ * Avancement par matière (leçons terminées / total) pour l'enfant incarné.
+
+Calculé au niveau scolaire de l'enfant, sur les leçons publiées uniquement.
+Alimente les barres de progression des cartes « matière » (/play, /subjects).
+ * @summary Get Subjects Overview
+ */
+export const getSubjectsOverviewApiV1ProgressSubjectsOverviewGet = (
+  signal?: AbortSignal
+) => {
+  return axiosInstance<SubjectOverviewItem[]>({
+    url: `/api/v1/progress/subjects-overview`,
+    method: "GET",
+    signal,
+  });
+};
+
+export const getGetSubjectsOverviewApiV1ProgressSubjectsOverviewGetQueryKey =
+  () => {
+    return [`/api/v1/progress/subjects-overview`] as const;
+  };
+
+export const getGetSubjectsOverviewApiV1ProgressSubjectsOverviewGetQueryOptions =
+  <
+    TData = Awaited<
+      ReturnType<typeof getSubjectsOverviewApiV1ProgressSubjectsOverviewGet>
+    >,
+    TError = HTTPValidationError,
+  >(options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getSubjectsOverviewApiV1ProgressSubjectsOverviewGet>
+        >,
+        TError,
+        TData
+      >
+    >;
+  }) => {
+    const { query: queryOptions } = options ?? {};
+
+    const queryKey =
+      queryOptions?.queryKey ??
+      getGetSubjectsOverviewApiV1ProgressSubjectsOverviewGetQueryKey();
+
+    const queryFn: QueryFunction<
+      Awaited<
+        ReturnType<typeof getSubjectsOverviewApiV1ProgressSubjectsOverviewGet>
+      >
+    > = ({ signal }) =>
+      getSubjectsOverviewApiV1ProgressSubjectsOverviewGet(signal);
+
+    return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+      Awaited<
+        ReturnType<typeof getSubjectsOverviewApiV1ProgressSubjectsOverviewGet>
+      >,
+      TError,
+      TData
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
+  };
+
+export type GetSubjectsOverviewApiV1ProgressSubjectsOverviewGetQueryResult =
+  NonNullable<
+    Awaited<
+      ReturnType<typeof getSubjectsOverviewApiV1ProgressSubjectsOverviewGet>
+    >
+  >;
+export type GetSubjectsOverviewApiV1ProgressSubjectsOverviewGetQueryError =
+  HTTPValidationError;
+
+export function useGetSubjectsOverviewApiV1ProgressSubjectsOverviewGet<
+  TData = Awaited<
+    ReturnType<typeof getSubjectsOverviewApiV1ProgressSubjectsOverviewGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getSubjectsOverviewApiV1ProgressSubjectsOverviewGet>
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<
+            ReturnType<
+              typeof getSubjectsOverviewApiV1ProgressSubjectsOverviewGet
+            >
+          >,
+          TError,
+          Awaited<
+            ReturnType<
+              typeof getSubjectsOverviewApiV1ProgressSubjectsOverviewGet
+            >
+          >
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetSubjectsOverviewApiV1ProgressSubjectsOverviewGet<
+  TData = Awaited<
+    ReturnType<typeof getSubjectsOverviewApiV1ProgressSubjectsOverviewGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getSubjectsOverviewApiV1ProgressSubjectsOverviewGet>
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<
+            ReturnType<
+              typeof getSubjectsOverviewApiV1ProgressSubjectsOverviewGet
+            >
+          >,
+          TError,
+          Awaited<
+            ReturnType<
+              typeof getSubjectsOverviewApiV1ProgressSubjectsOverviewGet
+            >
+          >
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetSubjectsOverviewApiV1ProgressSubjectsOverviewGet<
+  TData = Awaited<
+    ReturnType<typeof getSubjectsOverviewApiV1ProgressSubjectsOverviewGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getSubjectsOverviewApiV1ProgressSubjectsOverviewGet>
+        >,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get Subjects Overview
+ */
+
+export function useGetSubjectsOverviewApiV1ProgressSubjectsOverviewGet<
+  TData = Awaited<
+    ReturnType<typeof getSubjectsOverviewApiV1ProgressSubjectsOverviewGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getSubjectsOverviewApiV1ProgressSubjectsOverviewGet>
+        >,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions =
+    getGetSubjectsOverviewApiV1ProgressSubjectsOverviewGetQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
  * Récupère la progression de l'utilisateur pour une matière spécifique
 
 Args:
     subject_id: ID de la matière
-    current_user: Utilisateur authentifié
+    acting: Utilisateur authentifié
     db: Session de base de données
 
 Returns:
@@ -414,7 +616,7 @@ export function useGetSubjectProgressApiV1ProgressSubjectsSubjectIdGet<
 
 Args:
     lesson_id: ID de la leçon
-    current_user: Utilisateur authentifié
+    acting: Utilisateur authentifié
     db: Session de base de données
 
 Returns:
@@ -626,7 +828,7 @@ export function useGetLessonProgressApiV1ProgressLessonsLessonIdGet<
  * Récupère un résumé du tableau de bord (alias pour /me)
 
 Args:
-    current_user: Utilisateur authentifié
+    acting: Utilisateur authentifié
     db: Session de base de données
 
 Returns:
@@ -647,7 +849,7 @@ export const getGetDashboardApiV1ProgressDashboardGetQueryKey = () => {
 
 export const getGetDashboardApiV1ProgressDashboardGetQueryOptions = <
   TData = Awaited<ReturnType<typeof getDashboardApiV1ProgressDashboardGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(options?: {
   query?: Partial<
     UseQueryOptions<
@@ -677,11 +879,12 @@ export const getGetDashboardApiV1ProgressDashboardGetQueryOptions = <
 export type GetDashboardApiV1ProgressDashboardGetQueryResult = NonNullable<
   Awaited<ReturnType<typeof getDashboardApiV1ProgressDashboardGet>>
 >;
-export type GetDashboardApiV1ProgressDashboardGetQueryError = unknown;
+export type GetDashboardApiV1ProgressDashboardGetQueryError =
+  HTTPValidationError;
 
 export function useGetDashboardApiV1ProgressDashboardGet<
   TData = Awaited<ReturnType<typeof getDashboardApiV1ProgressDashboardGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options: {
     query: Partial<
@@ -706,7 +909,7 @@ export function useGetDashboardApiV1ProgressDashboardGet<
 };
 export function useGetDashboardApiV1ProgressDashboardGet<
   TData = Awaited<ReturnType<typeof getDashboardApiV1ProgressDashboardGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -731,7 +934,7 @@ export function useGetDashboardApiV1ProgressDashboardGet<
 };
 export function useGetDashboardApiV1ProgressDashboardGet<
   TData = Awaited<ReturnType<typeof getDashboardApiV1ProgressDashboardGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -752,7 +955,7 @@ export function useGetDashboardApiV1ProgressDashboardGet<
 
 export function useGetDashboardApiV1ProgressDashboardGet<
   TData = Awaited<ReturnType<typeof getDashboardApiV1ProgressDashboardGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -783,7 +986,7 @@ export function useGetDashboardApiV1ProgressDashboardGet<
 
 Args:
     lesson_id: ID de la leçon
-    current_user: Utilisateur authentifié
+    acting: Utilisateur authentifié
     db: Session de base de données
 
 Returns:

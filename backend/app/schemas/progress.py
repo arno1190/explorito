@@ -75,6 +75,21 @@ class SubjectProgressResponse(BaseModel):
         }
 
 
+class SubjectOverviewItem(BaseModel):
+    """Avancement d'une matière pour l'enfant : leçons terminées / total.
+
+    Calculé au niveau scolaire de l'enfant (leçons publiées uniquement). Permet
+    d'afficher une barre de progression par matière (où l'enfant est en retard).
+    """
+
+    subject_id: UUID
+    total_lessons: int = Field(..., ge=0, description="Leçons publiées à son niveau")
+    completed_lessons: int = Field(..., ge=0, description="Leçons terminées")
+
+    class Config:
+        from_attributes = True
+
+
 class ProgressDashboard(BaseModel):
     """
     Schéma pour le tableau de bord de progression

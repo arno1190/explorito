@@ -87,6 +87,7 @@ export * from "./startLessonApiV1LessonsLessonIdStartPost201";
 export * from "./streakResponse";
 export * from "./subjectAccuracy";
 export * from "./subjectCreate";
+export * from "./subjectOverviewItem";
 export * from "./subjectProgressResponse";
 export * from "./subjectResponse";
 export * from "./subjectUpdate";

@@ -11,15 +11,16 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.api.auth import get_current_active_user
-from app.api.subjects import acting_child
+from app.api.subjects import acting_child, child_content_level
 from app.core.database import get_db
-from app.models.content import Exercise, Lesson, Subject
+from app.models.content import Exercise, LearningPath, Lesson, Subject
 from app.models.gamification import Streak
 from app.models.progress import ExerciseResult, ProgressStatus, SubjectProgress, UserProgress
 from app.models.user import User
 from app.schemas.progress import (
     LessonProgressResponse,
     ProgressDashboard,
+    SubjectOverviewItem,
     SubjectProgressResponse,
 )
 from app.services.gamification import calculate_level_from_xp, calculate_next_level_xp
@@ -123,6 +124,50 @@ async def get_user_progress(
         achievements_count=int(achievements_count),
         next_level_xp=next_level_xp,
     )
+
+
+@router.get("/subjects-overview", response_model=list[SubjectOverviewItem])
+async def get_subjects_overview(
+    acting: Annotated[User, Depends(acting_child)],
+    db: Annotated[Session, Depends(get_db)],
+) -> list[SubjectOverviewItem]:
+    """Avancement par matière (leçons terminées / total) pour l'enfant incarné.
+
+    Calculé au niveau scolaire de l'enfant, sur les leçons publiées uniquement.
+    Alimente les barres de progression des cartes « matière » (/play, /subjects).
+    """
+    level = child_content_level(acting, db)
+
+    totals_q = (
+        db.query(LearningPath.subject_id, func.count(Lesson.id))
+        .join(Lesson, Lesson.path_id == LearningPath.id)
+        .filter(Lesson.is_published.is_(True))
+    )
+    completed_q = (
+        db.query(LearningPath.subject_id, func.count(func.distinct(UserProgress.lesson_id)))
+        .join(Lesson, Lesson.path_id == LearningPath.id)
+        .join(UserProgress, UserProgress.lesson_id == Lesson.id)
+        .filter(
+            Lesson.is_published.is_(True),
+            UserProgress.user_id == acting.id,
+            UserProgress.status == ProgressStatus.COMPLETED,
+        )
+    )
+    if level is not None:
+        totals_q = totals_q.filter(LearningPath.level == level)
+        completed_q = completed_q.filter(LearningPath.level == level)
+
+    totals = dict(totals_q.group_by(LearningPath.subject_id).all())
+    completed = dict(completed_q.group_by(LearningPath.subject_id).all())
+
+    return [
+        SubjectOverviewItem(
+            subject_id=subject_id,
+            total_lessons=int(total),
+            completed_lessons=int(completed.get(subject_id, 0)),
+        )
+        for subject_id, total in totals.items()
+    ]
 
 
 @router.get("/subjects/{subject_id}", response_model=SubjectProgressResponse)

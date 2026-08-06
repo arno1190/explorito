@@ -78,3 +78,39 @@ def test_progress_empty_for_parent_without_acting(client: TestClient, db_session
     done = client.get(f"/api/v1/progress/lessons/{lesson.id}/completed-exercises", headers=h_parent)
     assert done.status_code == 200
     assert done.json() == []  # la progression de l'enfant ne fuite pas vers le parent
+
+
+def test_subjects_overview_counts_completed_for_acting_child(client: TestClient, db_session: Session):
+    # Matière avec 2 leçons CP publiées ; l'enfant en termine 1.
+    subject = Subject(name="Maths", slug="maths")
+    db_session.add(subject)
+    db_session.flush()
+    path = LearningPath(subject_id=subject.id, name="Calcul", level=LevelEnum.CP)
+    db_session.add(path)
+    db_session.flush()
+    l1 = Lesson(path_id=path.id, name="P1", order_index=1, xp_reward=0, is_published=True)
+    l2 = Lesson(path_id=path.id, name="P2", order_index=2, xp_reward=0, is_published=True)
+    db_session.add_all([l1, l2])
+    db_session.flush()
+    e1 = Exercise(
+        lesson_id=l1.id,
+        type="multiple_choice",
+        question="1+1?",
+        content={"options": [{"id": "a", "text": "2"}, {"id": "b", "text": "3"}], "multiple": False},
+        correct_answer={"option_ids": ["a"]},
+        order_index=0,
+        difficulty=DifficultyEnum.EASY,
+    )
+    db_session.add(e1)
+    db_session.commit()
+    db_session.refresh(e1)
+
+    child = make_child(db_session, level=LevelEnum.CP)
+    h = child_headers(client, child)
+    client.post(f"/api/v1/exercises/{e1.id}/submit", json={"answer": {"option_ids": ["a"]}}, headers=h)
+
+    overview = client.get("/api/v1/progress/subjects-overview", headers=h)
+    assert overview.status_code == 200, overview.text
+    by_id = {o["subject_id"]: o for o in overview.json()}
+    assert by_id[str(subject.id)]["total_lessons"] == 2
+    assert by_id[str(subject.id)]["completed_lessons"] == 1

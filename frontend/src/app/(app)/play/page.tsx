@@ -6,13 +6,21 @@ import { useRouter } from "next/navigation";
 import { listSubjectsApiV1SubjectsGet } from "@/lib/api/generated/subjects/subjects";
 import { useRecentLessonsApiV1LessonsRecentGet as useRecentLessons } from "@/lib/api/generated/lessons/lessons";
 import { getChildStatsApiV1GamificationChildIdStatsGet } from "@/lib/api/generated/gamification/gamification";
-import type { ChildStatsResponse, SubjectResponse } from "@/lib/api/model";
+import { getSubjectsOverviewApiV1ProgressSubjectsOverviewGet } from "@/lib/api/generated/progress/progress";
+import type {
+  ChildStatsResponse,
+  SubjectOverviewItem,
+  SubjectResponse,
+} from "@/lib/api/model";
 
 export default function PlayPage() {
   const { user, impersonatedChild } = useAuth();
   const router = useRouter();
   const [subjects, setSubjects] = useState<SubjectResponse[]>([]);
   const [stats, setStats] = useState<ChildStatsResponse | null>(null);
+  const [overview, setOverview] = useState<Record<string, SubjectOverviewItem>>(
+    {}
+  );
   const [loading, setLoading] = useState(true);
   const { data: recent } = useRecentLessons({ limit: 6 });
 
@@ -37,6 +45,15 @@ export default function PlayPage() {
         // Load subjects first (critical for the page)
         const subjectsData = await listSubjectsApiV1SubjectsGet();
         setSubjects(subjectsData.filter((s) => s.is_active));
+
+        // Per-subject completion (non-critical) for the progress bars.
+        try {
+          const ov =
+            await getSubjectsOverviewApiV1ProgressSubjectsOverviewGet();
+          setOverview(Object.fromEntries(ov.map((o) => [o.subject_id, o])));
+        } catch (ovErr) {
+          console.warn("Failed to load subjects overview:", ovErr);
+        }
 
         // Load stats separately (non-critical - don't block subjects)
         if (childId) {
@@ -221,18 +238,34 @@ export default function PlayPage() {
               <h3 className="text-xl font-bold text-fun-text mb-2">
                 {subject.name}
               </h3>
-              <div className="flex justify-center gap-1">
-                {[1, 2, 3].map((star) => (
-                  <span key={star} className="text-2xl">
-                    {star <= ((subject.lesson_count ?? 0) > 0 ? 1 : 0)
-                      ? "⭐"
-                      : "☆"}
-                  </span>
-                ))}
-              </div>
-              <p className="text-sm text-fun-text-muted mt-2">
-                {subject.lesson_count ?? 0} leçons
-              </p>
+              {(() => {
+                const ov = overview[subject.id];
+                const total = ov?.total_lessons ?? subject.lesson_count ?? 0;
+                const done = ov?.completed_lessons ?? 0;
+                const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+                const complete = total > 0 && done >= total;
+                return (
+                  <>
+                    <div className="mt-1 h-3 w-full overflow-hidden rounded-full bg-fun-green-light">
+                      <div
+                        className="h-3 rounded-full bg-fun-green transition-all"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <p className="mt-2 text-sm font-semibold text-fun-text-muted">
+                      {complete ? (
+                        <span className="text-fun-green-dark">
+                          Terminé ! ✅
+                        </span>
+                      ) : (
+                        <>
+                          {done}/{total} leçons
+                        </>
+                      )}
+                    </p>
+                  </>
+                );
+              })()}
             </button>
           ))}
         </div>

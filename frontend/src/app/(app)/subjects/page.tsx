@@ -5,10 +5,13 @@ import { BookOpen } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
 import { useListSubjectsApiV1SubjectsGet as useSubjects } from "@/lib/api/generated/subjects/subjects";
+import { useGetSubjectsOverviewApiV1ProgressSubjectsOverviewGet as useSubjectsOverview } from "@/lib/api/generated/progress/progress";
 
 export default function SubjectsPage() {
   const router = useRouter();
   const { data: subjects, isLoading, isError, refetch } = useSubjects();
+  const { data: overview } = useSubjectsOverview();
+  const overviewById = new Map((overview ?? []).map((o) => [o.subject_id, o]));
 
   if (isLoading) {
     return (
@@ -67,10 +70,34 @@ export default function SubjectsPage() {
                   {subject.description}
                 </p>
               </div>
-              <div className="rounded-full bg-fun-green-light px-4 py-2 text-sm font-semibold text-fun-green-dark">
-                {subject.lesson_count ?? 0} leçon
-                {(subject.lesson_count ?? 0) !== 1 ? "s" : ""}
-              </div>
+              {(() => {
+                const ov = overviewById.get(subject.id);
+                const total = ov?.total_lessons ?? subject.lesson_count ?? 0;
+                const done = ov?.completed_lessons ?? 0;
+                const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+                const complete = total > 0 && done >= total;
+                return (
+                  <div className="w-full">
+                    <div className="h-3 w-full overflow-hidden rounded-full bg-fun-green-light">
+                      <div
+                        className="h-3 rounded-full bg-fun-green transition-all"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <p className="mt-2 text-sm font-semibold text-fun-text-muted">
+                      {complete ? (
+                        <span className="text-fun-green-dark">
+                          Terminé ! ✅
+                        </span>
+                      ) : (
+                        <>
+                          {done}/{total} leçons&nbsp;·&nbsp;{pct}%
+                        </>
+                      )}
+                    </p>
+                  </div>
+                );
+              })()}
             </div>
           </Card>
         ))}
