@@ -11,7 +11,7 @@ par (parcours, nom de leçon) : ré-exécuter n'insère pas de doublon.
 
 Usage:
     # dev
-    DATABASE_URL=postgresql://devuser@localhost:5432/explorito_dev \\
+    DATABASE_URL=postgresql://user@localhost:5432/explorito_dev \\
         uv run python scripts/seed_curriculum.py
     # prod (dans le conteneur backend)
     uv run python scripts/seed_curriculum.py

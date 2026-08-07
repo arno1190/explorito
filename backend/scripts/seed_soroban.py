@@ -10,7 +10,7 @@ Réutilise les constructeurs et l'insertion idempotente de ``seed_curriculum``.
 
 Usage:
     # dev
-    DATABASE_URL=postgresql://devuser@localhost:5432/explorito_dev \\
+    DATABASE_URL=postgresql://user@localhost:5432/explorito_dev \\
         uv run python scripts/seed_soroban.py [--dry-run]
     # prod (dans le conteneur backend)
     uv run python scripts/seed_soroban.py

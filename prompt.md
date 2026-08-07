@@ -29,7 +29,7 @@ Read `docs/plans/2026-02-14-deployment-ready-design.md` for the full design.
 ### Phase 2: Bug Fixing & Verification
 
 1. Start Docker: `docker compose up -d --build`
-2. Wait for services, seed database: `docker compose exec backend python scripts/seed_database.py`
+2. Wait for services, seed database: `docker compose exec backend python scripts/seed_curriculum.py`
 3. Run API tests: `./scripts/test-api.sh`
 4. Test each login flow manually via curl:
    - Admin (admin@explorito.fr / admin123) -> verify /admin works
@@ -62,7 +62,7 @@ Create these components and integrate them:
 
 ### Phase 4: Content - Math & Decouverte
 
-**Add to seed script** (`backend/scripts/seed_database.py`):
+**Add to seed script** (`backend/scripts/seed_curriculum.py`):
 
 **Math lessons (12-15):**
 1. Les nombres de 0 à 5

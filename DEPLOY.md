@@ -56,7 +56,6 @@ docker compose -f docker-compose.prod.yml exec backend uv run python scripts/see
 ```
 
 > Idempotent guard: it refuses to run if content already exists. Use `--reset` only to wipe & reseed (destructive — also removes progress).
-> Do **not** run `scripts/seed_database.py` — it predates the typed exercise contract.
 
 ## 6. Create an admin + a parent
 

@@ -791,10 +791,10 @@ def main() -> None:
         decouverte_subject = session.query(Subject).filter_by(slug="questionner-le-monde").first()
 
         if not math_subject:
-            print("❌ Matiere 'Mathematiques' introuvable. Lancez d'abord seed_database.py.")
+            print("❌ Matiere 'Mathematiques' introuvable. Lancez d'abord seed_curriculum.py.")
             return
         if not decouverte_subject:
-            print("❌ Matiere 'Questionner le Monde' introuvable. Lancez d'abord seed_database.py.")
+            print("❌ Matiere 'Questionner le Monde' introuvable. Lancez d'abord seed_curriculum.py.")
             return
 
         print(f"\n✓ Matieres trouvees: {math_subject.name}, {decouverte_subject.name}")

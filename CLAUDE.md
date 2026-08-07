@@ -169,7 +169,7 @@ docker compose exec frontend pnpm format
 ### Database
 ```bash
 # Run seed script
-docker compose exec backend uv run python scripts/seed_database.py
+docker compose exec backend uv run python scripts/seed_curriculum.py
 
 # Access database
 docker compose exec postgres psql -U explorito explorito

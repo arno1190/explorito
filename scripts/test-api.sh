@@ -140,7 +140,7 @@ echo "--- Child Stats Access (Bug Fix Validation) ---"
 # Get child token
 CHILD_TOKEN=$(curl -s -X POST "$API_URL/api/v1/auth/login" \
     -H "Content-Type: application/json" \
-    -d '{"email":"alice@example.com","password":"child123"}' | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
+    -d '{"email":"child@example.com","password":"child123"}' | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
 
 if [[ -n "$CHILD_TOKEN" ]]; then
     echo -e "${GREEN}✓${NC} Child login successful"
