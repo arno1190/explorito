@@ -52,10 +52,13 @@ export function FillBlanks({
                 value={values[i]}
                 onChange={(e) => update(i, e.target.value)}
                 disabled={disabled}
-                maxLength={4}
+                maxLength={32}
                 aria-label={`Trou ${i + 1}`}
+                // Largeur auto : grandit avec la saisie (min ~5 caractères) pour
+                // que n'importe quelle réponse tienne dans le champ.
+                style={{ width: `${Math.max(values[i].length + 2, 5)}ch` }}
                 className={cn(
-                  "h-12 w-16 rounded-xl border-2 border-fun-border bg-white text-center text-2xl font-bold text-fun-text outline-none focus:border-fun-sky",
+                  "h-12 rounded-xl border-2 border-fun-border bg-white px-2 text-center text-2xl font-bold text-fun-text outline-none focus:border-fun-sky",
                   showResult &&
                     isCorrect &&
                     "border-fun-green bg-fun-green-light",
