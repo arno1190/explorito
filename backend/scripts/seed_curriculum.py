@@ -45,6 +45,8 @@ SUBJECTS: dict[str, dict[str, str]] = {
     "histoire": {"name": "Histoire", "icon": "⏳"},
     "geo": {"name": "Géographie France", "icon": "🗼"},
     "monde": {"name": "Questionner le monde", "icon": "🚀"},
+    "arts": {"name": "Arts", "icon": "🎨"},
+    "logique": {"name": "Logique", "icon": "🧩"},
 }
 
 
