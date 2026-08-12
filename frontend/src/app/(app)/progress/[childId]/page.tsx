@@ -176,6 +176,46 @@ export default function ChildProgressPage() {
         </section>
       )}
 
+      {/* Points attribués par le parent */}
+      <section className="rounded-3xl bg-white p-6 candy-shadow">
+        <h2 className="mb-4 text-xl font-extrabold text-fun-text">
+          🎁 Points attribués
+        </h2>
+        {awards.length === 0 ? (
+          <p className="text-fun-text-muted">
+            Aucun point attribué pour l&apos;instant.
+          </p>
+        ) : (
+          <ul className="divide-y divide-fun-border">
+            {awards.map((a) => {
+              const positive = a.amount >= 0;
+              const isPoints = a.wallet === "points";
+              return (
+                <li key={a.id} className="flex items-center gap-3 py-3">
+                  <span className="text-xl">{isPoints ? "⭐" : "💚"}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold text-fun-text">
+                      {a.reason || (isPoints ? "Points" : "Comportement")}
+                    </div>
+                    <div className="text-xs text-fun-text-muted">
+                      {isPoints ? "Compétences" : "Comportement"} ·{" "}
+                      {frDate(a.created_at, true)}
+                    </div>
+                  </div>
+                  <span
+                    className={`shrink-0 text-lg font-extrabold ${
+                      positive ? "text-fun-green-dark" : "text-fun-red"
+                    }`}
+                  >
+                    {positive ? `+${a.amount}` : a.amount}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
+
       {/* Historique des leçons */}
       <section className="rounded-3xl bg-white p-6 candy-shadow">
         <h2 className="mb-4 text-xl font-extrabold text-fun-text">
@@ -250,46 +290,6 @@ export default function ChildProgressPage() {
                 </div>
               </li>
             ))}
-          </ul>
-        )}
-      </section>
-
-      {/* Points attribués par le parent */}
-      <section className="rounded-3xl bg-white p-6 candy-shadow">
-        <h2 className="mb-4 text-xl font-extrabold text-fun-text">
-          🎁 Points attribués
-        </h2>
-        {awards.length === 0 ? (
-          <p className="text-fun-text-muted">
-            Aucun point attribué pour l&apos;instant.
-          </p>
-        ) : (
-          <ul className="divide-y divide-fun-border">
-            {awards.map((a) => {
-              const positive = a.amount >= 0;
-              const isPoints = a.wallet === "points";
-              return (
-                <li key={a.id} className="flex items-center gap-3 py-3">
-                  <span className="text-xl">{isPoints ? "⭐" : "💚"}</span>
-                  <div className="min-w-0 flex-1">
-                    <div className="font-bold text-fun-text">
-                      {a.reason || (isPoints ? "Points" : "Comportement")}
-                    </div>
-                    <div className="text-xs text-fun-text-muted">
-                      {isPoints ? "Compétences" : "Comportement"} ·{" "}
-                      {frDate(a.created_at, true)}
-                    </div>
-                  </div>
-                  <span
-                    className={`shrink-0 text-lg font-extrabold ${
-                      positive ? "text-fun-green-dark" : "text-fun-red"
-                    }`}
-                  >
-                    {positive ? `+${a.amount}` : a.amount}
-                  </span>
-                </li>
-              );
-            })}
           </ul>
         )}
       </section>
