@@ -2,7 +2,7 @@
 Modèles SQLAlchemy pour l'application Explorito
 """
 
-from app.models.challenge import PythagoreSession
+from app.models.challenge import PythagoreSession, SudokuSession
 from app.models.collection import CollectibleUnlock, PointAward
 from app.models.content import Exercise, LearningPath, Lesson, Media, Subject
 from app.models.gamification import (
@@ -36,4 +36,5 @@ __all__ = [
     "CollectibleUnlock",
     "PointAward",
     "PythagoreSession",
+    "SudokuSession",
 ]

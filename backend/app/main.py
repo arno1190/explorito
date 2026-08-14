@@ -84,6 +84,7 @@ from app.api import (  # noqa: E402
     progress,
     pythagore,
     subjects,
+    sudoku,
 )
 
 # Enregistrer les routers
@@ -107,6 +108,11 @@ app.include_router(
     pythagore.router,
     prefix=f"{settings.API_PREFIX}/pythagore",
     tags=["pythagore"],
+)
+app.include_router(
+    sudoku.router,
+    prefix=f"{settings.API_PREFIX}/sudoku",
+    tags=["sudoku"],
 )
 
 if __name__ == "__main__":
