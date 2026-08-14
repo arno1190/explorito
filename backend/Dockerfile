@@ -13,12 +13,10 @@ RUN apt-get update && apt-get install -y \
 # Add uv to PATH
 ENV PATH="/root/.local/bin:$PATH"
 
-# Copy project files
-COPY pyproject.toml .
-COPY requirements.txt .
-
-# Install dependencies with uv
-RUN uv pip install --system -r requirements.txt
+# Dependencies come from pyproject.toml + uv.lock (single source of truth).
+# Dev image keeps the dev group (pytest, etc.) — unlike prod's --no-dev.
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen
 
 # Copy application code
 COPY . .
@@ -26,5 +24,5 @@ COPY . .
 # Expose port
 EXPOSE 8000
 
-# Default command
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Default command (overridden by docker-compose, which re-syncs on start).
+CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
