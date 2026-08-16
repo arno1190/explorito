@@ -18,6 +18,7 @@ const CHILD_PREFIXES = [
   "/collection",
   "/pokedex",
   "/pythagore",
+  "/sudoku",
 ];
 
 export function resolveActingRole(
