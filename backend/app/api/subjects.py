@@ -14,6 +14,7 @@ from app.models.content import LearningPath, Lesson, LevelEnum, Subject
 from app.models.user import Profile, User, UserRole
 from app.schemas.lesson import LessonResponse
 from app.schemas.subject import SubjectCreate, SubjectResponse, SubjectUpdate
+from app.services.guardianship import is_guardian
 from app.services.progression import lesson_locked
 
 router = APIRouter()
@@ -59,8 +60,7 @@ def acting_child(
         return current_user
     if current_user.role == UserRole.ADMIN:
         return child
-    profile = db.query(Profile).filter(Profile.user_id == child.id).first()
-    if profile is not None and profile.parent_id == current_user.id:
+    if is_guardian(current_user.id, child.id, db):
         return child
     return current_user
 

@@ -12,6 +12,7 @@ from app.models.gamification import (
     Streak,
     UserAchievement,
 )
+from app.models.guardianship import CoParentLink, Guardianship, Invitation
 from app.models.progress import ExerciseResult, SubjectProgress, UserProgress
 from app.models.review import ReviewQueue
 from app.models.user import Profile, User
@@ -37,4 +38,7 @@ __all__ = [
     "PointAward",
     "PythagoreSession",
     "SudokuSession",
+    "Guardianship",
+    "CoParentLink",
+    "Invitation",
 ]

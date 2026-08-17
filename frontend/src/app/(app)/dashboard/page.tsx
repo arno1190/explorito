@@ -7,8 +7,12 @@ import {
   createChildApiV1ChildrenPost,
   deleteChildApiV1ChildrenChildIdDelete,
   getChildrenApiV1ChildrenGet,
+  removeChildGuardianApiV1ChildrenChildIdGuardiansGuardianIdDelete as leaveChild,
   updateChildApiV1ChildrenChildIdPut,
 } from "@/lib/api/generated/children/children";
+import { acceptApiV1InvitationsTokenAcceptPost as acceptInvitation } from "@/lib/api/generated/invitations/invitations";
+import { ShareDialog } from "@/components/profile/ShareDialog";
+import { ManageAccessDialog } from "@/components/profile/ManageAccessDialog";
 import { getChildStatsApiV1GamificationChildIdStatsGet } from "@/lib/api/generated/gamification/gamification";
 import type { LevelEnum } from "@/lib/api/model";
 import { Button } from "@/components/ui/button";
@@ -35,7 +39,16 @@ import { AvatarPicker } from "@/components/profile/AvatarPicker";
 import { PinDialog } from "@/components/profile/PinDialog";
 import { AwardPointsDialog } from "@/components/profile/AwardPointsDialog";
 import { uploadFile } from "@/lib/api/axios-instance";
-import { Plus, Trash2, Play, TrendingUp } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Play,
+  TrendingUp,
+  Share2,
+  Users,
+  LogOut,
+  UserPlus,
+} from "lucide-react";
 import type { ChildResponse, ChildStatsResponse } from "@/lib/api/model";
 
 const LEVELS: { value: LevelEnum; label: string }[] = [
@@ -66,6 +79,12 @@ export default function DashboardPage() {
   const [pinOpen, setPinOpen] = useState(false);
   const [pendingChild, setPendingChild] = useState<ChildResponse | null>(null);
   const [awardChild, setAwardChild] = useState<ChildResponse | null>(null);
+  // Partage : {childId:null} = inviter un co-parent ; sinon partage d'un enfant.
+  const [shareTarget, setShareTarget] = useState<{
+    childId: string | null;
+    childName?: string;
+  } | null>(null);
+  const [manageChild, setManageChild] = useState<ChildResponse | null>(null);
 
   const launchChild = (child: ChildResponse) => {
     if (user?.has_pin) {
@@ -81,6 +100,29 @@ export default function DashboardPage() {
   useEffect(() => {
     loadChildren();
   }, []);
+
+  // Acceptation d'une invitation en attente (déposée par la page /invite après
+  // connexion). On accepte une fois puis on recharge la liste des enfants.
+  useEffect(() => {
+    const token = localStorage.getItem("pending_invite");
+    if (!token) return;
+    localStorage.removeItem("pending_invite");
+    acceptInvitation(token)
+      .then(() => loadChildren())
+      .catch((err) => console.error("Failed to accept invitation:", err));
+  }, []);
+
+  const handleLeave = async (child: ChildResponse) => {
+    if (!user?.id) return;
+    if (!confirm(`Ne plus suivre ${child.name} ? Vous perdrez l'accès.`))
+      return;
+    try {
+      await leaveChild(child.id, user.id);
+      loadChildren();
+    } catch (err) {
+      console.error("Failed to leave child:", err);
+    }
+  };
 
   const loadChildren = async () => {
     try {
@@ -207,70 +249,79 @@ export default function DashboardPage() {
             Manage your children and discover age-appropriate activities
           </p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Child
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <form onSubmit={handleAddChild}>
-              <DialogHeader>
-                <DialogTitle>Add a new child</DialogTitle>
-                <DialogDescription>
-                  Add your child's information to get personalized activity
-                  recommendations
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                {error && (
-                  <div className="bg-fun-red-light text-fun-red p-3 rounded-xl text-sm">
-                    {error}
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setShareTarget({ childId: null })}
+          >
+            <UserPlus className="mr-2 h-4 w-4" />
+            Inviter un parent
+          </Button>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Child
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <form onSubmit={handleAddChild}>
+                <DialogHeader>
+                  <DialogTitle>Add a new child</DialogTitle>
+                  <DialogDescription>
+                    Add your child's information to get personalized activity
+                    recommendations
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  {error && (
+                    <div className="bg-fun-red-light text-fun-red p-3 rounded-xl text-sm">
+                      {error}
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input
+                      id="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                    />
                   </div>
-                )}
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor="birthDate">
+                      Date de naissance (optionnel)
+                    </Label>
+                    <Input
+                      id="birthDate"
+                      type="date"
+                      value={birthDate}
+                      onChange={(e) => setBirthDate(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="level">Niveau scolaire</Label>
+                    <select
+                      id="level"
+                      value={level}
+                      onChange={(e) => setLevel(e.target.value as LevelEnum)}
+                      className="h-11 w-full rounded-xl border-2 border-fun-border bg-white px-3 text-fun-text outline-none focus:border-fun-sky"
+                    >
+                      {LEVELS.map((l) => (
+                        <option key={l.value} value={l.value}>
+                          {l.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="birthDate">
-                    Date de naissance (optionnel)
-                  </Label>
-                  <Input
-                    id="birthDate"
-                    type="date"
-                    value={birthDate}
-                    onChange={(e) => setBirthDate(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="level">Niveau scolaire</Label>
-                  <select
-                    id="level"
-                    value={level}
-                    onChange={(e) => setLevel(e.target.value as LevelEnum)}
-                    className="h-11 w-full rounded-xl border-2 border-fun-border bg-white px-3 text-fun-text outline-none focus:border-fun-sky"
-                  >
-                    {LEVELS.map((l) => (
-                      <option key={l.value} value={l.value}>
-                        {l.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="submit">Add Child</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+                <DialogFooter>
+                  <Button type="submit">Add Child</Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {loading ? (
@@ -311,15 +362,24 @@ export default function DashboardPage() {
                           textClassName="text-2xl"
                         />
                       </button>
-                      <CardTitle className="text-xl">{child.name}</CardTitle>
+                      <div className="flex flex-col">
+                        <CardTitle className="text-xl">{child.name}</CardTitle>
+                        {!child.is_owner && (
+                          <span className="text-xs font-semibold text-fun-sky">
+                            Partagé avec vous
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDeleteChild(child.id)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    {child.is_owner && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDeleteChild(child.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    )}
                   </div>
                   <AvatarPicker
                     open={avatarChildId === child.id}
@@ -423,6 +483,40 @@ export default function DashboardPage() {
                     >
                       🎁 Attribuer des points
                     </Button>
+                    {child.is_owner ? (
+                      <div className="flex gap-2">
+                        <Button
+                          className="flex-1"
+                          variant="outline"
+                          onClick={() =>
+                            setShareTarget({
+                              childId: child.id,
+                              childName: child.name,
+                            })
+                          }
+                        >
+                          <Share2 className="mr-1 h-4 w-4" />
+                          Partager
+                        </Button>
+                        <Button
+                          className="flex-1"
+                          variant="outline"
+                          onClick={() => setManageChild(child)}
+                        >
+                          <Users className="mr-1 h-4 w-4" />
+                          Accès
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        className="w-full"
+                        variant="ghost"
+                        onClick={() => handleLeave(child)}
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Ne plus suivre
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -447,6 +541,20 @@ export default function DashboardPage() {
         childId={awardChild?.id ?? ""}
         childName={awardChild?.name ?? ""}
         onAwarded={loadChildren}
+      />
+
+      <ShareDialog
+        open={shareTarget !== null}
+        onOpenChange={(o) => !o && setShareTarget(null)}
+        childId={shareTarget?.childId ?? null}
+        childName={shareTarget?.childName}
+      />
+
+      <ManageAccessDialog
+        open={manageChild !== null}
+        onOpenChange={(o) => !o && setManageChild(null)}
+        childId={manageChild?.id ?? ""}
+        childName={manageChild?.name ?? ""}
       />
     </div>
   );

@@ -55,6 +55,11 @@ def make_child(
             level=level,
         )
     )
+    db.flush()
+    # Garde partagée : le parent créateur devient propriétaire (comme l'API).
+    from app.services.guardianship import on_child_created
+
+    on_child_created(child.id, parent.id, db)
     db.commit()
     db.refresh(child)
     return child

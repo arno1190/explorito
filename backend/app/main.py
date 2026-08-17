@@ -80,6 +80,7 @@ from app.api import (  # noqa: E402
     collection,
     exercises,
     gamification,
+    invitations,
     lessons,
     progress,
     pythagore,
@@ -113,6 +114,11 @@ app.include_router(
     sudoku.router,
     prefix=f"{settings.API_PREFIX}/sudoku",
     tags=["sudoku"],
+)
+app.include_router(
+    invitations.router,
+    prefix=f"{settings.API_PREFIX}/invitations",
+    tags=["invitations"],
 )
 
 if __name__ == "__main__":

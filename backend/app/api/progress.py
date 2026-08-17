@@ -354,7 +354,8 @@ async def get_child_progress(
     Raises:
         HTTPException: Si l'utilisateur n'est pas parent ou si l'enfant ne lui appartient pas
     """
-    from app.models.user import Profile, UserRole
+    from app.models.user import UserRole
+    from app.services.guardianship import is_guardian
 
     # Vérifier que l'utilisateur est un parent
     if current_user.role not in (UserRole.PARENT, UserRole.ADMIN):
@@ -363,10 +364,8 @@ async def get_child_progress(
             detail="Seuls les parents peuvent accéder à la progression de leurs enfants",
         )
 
-    # Vérifier que l'enfant appartient à ce parent
-    child_profile = db.query(Profile).filter(Profile.user_id == child_id, Profile.parent_id == current_user.id).first()
-
-    if not child_profile:
+    # Vérifier que l'appelant est responsable de cet enfant (garde partagée)
+    if current_user.role != UserRole.ADMIN and not is_guardian(current_user.id, child_id, db):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Enfant non trouvé ou n'appartient pas à ce parent",
@@ -408,7 +407,8 @@ async def get_child_lesson_progress(
     Raises:
         HTTPException: Si l'utilisateur n'est pas parent, si l'enfant ne lui appartient pas, ou si la leçon n'existe pas
     """
-    from app.models.user import Profile, UserRole
+    from app.models.user import UserRole
+    from app.services.guardianship import is_guardian
 
     # Vérifier que l'utilisateur est un parent
     if current_user.role not in (UserRole.PARENT, UserRole.ADMIN):
@@ -417,10 +417,8 @@ async def get_child_lesson_progress(
             detail="Seuls les parents peuvent accéder à la progression de leurs enfants",
         )
 
-    # Vérifier que l'enfant appartient à ce parent
-    child_profile = db.query(Profile).filter(Profile.user_id == child_id, Profile.parent_id == current_user.id).first()
-
-    if not child_profile:
+    # Vérifier que l'appelant est responsable de cet enfant (garde partagée)
+    if current_user.role != UserRole.ADMIN and not is_guardian(current_user.id, child_id, db):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Enfant non trouvé ou n'appartient pas à ce parent",

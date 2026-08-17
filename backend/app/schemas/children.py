@@ -51,6 +51,9 @@ class ChildResponse(BaseModel):
     level: LevelEnum | None = None
     avatar_url: str | None = None
     created_at: datetime
+    # Garde partagée : rôle de l'appelant sur cet enfant et s'il en est propriétaire.
+    role: str = "owner"
+    is_owner: bool = True
 
     class Config:
         from_attributes = True

@@ -1,5 +1,10 @@
 """
-Endpoints pour la gestion des profils enfants
+Endpoints pour la gestion des profils enfants (garde partagée).
+
+L'accès aux enfants passe par la table ``guardianships`` : plusieurs adultes
+peuvent être responsables d'un même enfant. Le ``owner`` (créateur) est seul à
+pouvoir supprimer l'enfant et gérer les accès ; tout responsable peut consulter,
+attribuer des points, incarner l'enfant et éditer son profil.
 """
 
 from typing import Annotated
@@ -11,119 +16,72 @@ from sqlalchemy.orm import Session
 from app.api.auth import get_current_user
 from app.core.database import get_db
 from app.models.collection import WALLET_POINTS, WALLETS
+from app.models.guardianship import ROLE_GUARDIAN, ROLE_OWNER
 from app.models.user import Profile, User, UserRole
 from app.schemas.children import ChildCreate, ChildResponse, ChildUpdate
 from app.schemas.collection import AwardCreate, AwardResponse
+from app.schemas.guardianship import GuardianResponse
 from app.services.collection import award_points, list_awards
+from app.services.guardianship import (
+    guarded_child_ids,
+    guardians_of,
+    guardianship_for,
+    is_guardian,
+    is_owner,
+    on_child_created,
+    remove_guardian,
+)
 from app.services.uploads import save_avatar
 
 router = APIRouter()
 
 
-def _require_owned_child(child_id: UUID, current_user: User, db: Session) -> Profile:
-    """
-    Vérifie que l'appelant est un parent et que l'enfant lui appartient.
-
-    Returns:
-        Le profil de l'enfant.
-
-    Raises:
-        HTTPException: 403 si non-parent, 404 si l'enfant n'appartient pas au parent.
-    """
+def _require_parent(current_user: User) -> None:
+    """Rejette les comptes non parent/admin."""
     if current_user.role not in (UserRole.PARENT, UserRole.ADMIN):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Seuls les parents peuvent accéder à cette ressource",
         )
-    profile = (
-        db.query(Profile)
-        .filter(
-            Profile.user_id == child_id,
-            Profile.parent_id == current_user.id,
-            Profile.is_child.is_(True),
-        )
-        .first()
-    )
+
+
+def _get_child_profile(child_id: UUID, db: Session) -> Profile:
+    profile = db.query(Profile).filter(Profile.user_id == child_id, Profile.is_child.is_(True)).first()
     if not profile:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Enfant non trouvé")
     return profile
 
 
-@router.get("", response_model=list[ChildResponse])
-async def get_children(
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[Session, Depends(get_db)],
-):
-    """
-    Récupère la liste des enfants du parent connecté
-
-    Returns:
-        Liste des profils enfants liés au parent
-    """
-    # Vérifier que l'utilisateur est un parent
-    if current_user.role not in (UserRole.PARENT, UserRole.ADMIN):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Seuls les parents peuvent accéder à cette ressource",
-        )
-
-    # Récupérer tous les profils enfants liés à ce parent
-    children_profiles = db.query(Profile).filter(Profile.parent_id == current_user.id, Profile.is_child.is_(True)).all()
-
-    # Convertir en ChildResponse
-    children = []
-    for profile in children_profiles:
-        children.append(
-            ChildResponse(
-                id=profile.user_id,
-                name=profile.display_name,
-                birth_date=profile.date_of_birth,
-                parent_id=profile.parent_id,
-                level=profile.level,
-                avatar_url=profile.avatar_url,
-                created_at=profile.created_at,
-            )
-        )
-
-    return children
+def _require_guardian(child_id: UUID, current_user: User, db: Session) -> Profile:
+    """L'appelant doit être responsable de l'enfant (n'importe quel rôle). Admin = accès total."""
+    _require_parent(current_user)
+    profile = _get_child_profile(child_id, db)
+    if current_user.role == UserRole.ADMIN or is_guardian(current_user.id, child_id, db):
+        return profile
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Enfant non trouvé")
 
 
-@router.get("/{child_id}", response_model=ChildResponse)
-async def get_child(
-    child_id: UUID,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[Session, Depends(get_db)],
-):
-    """
-    Récupère les détails d'un enfant spécifique
-
-    Args:
-        child_id: ID de l'utilisateur enfant
-
-    Returns:
-        Profil de l'enfant
-    """
-    # Vérifier que l'utilisateur est un parent
-    if current_user.role not in (UserRole.PARENT, UserRole.ADMIN):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Seuls les parents peuvent accéder à cette ressource",
-        )
-
-    # Récupérer le profil de l'enfant
-    profile = (
-        db.query(Profile)
-        .filter(
-            Profile.user_id == child_id,
-            Profile.parent_id == current_user.id,
-            Profile.is_child.is_(True),
-        )
-        .first()
+def _require_owner(child_id: UUID, current_user: User, db: Session) -> Profile:
+    """L'appelant doit être propriétaire (créateur) de l'enfant. Admin autorisé."""
+    _require_parent(current_user)
+    profile = _get_child_profile(child_id, db)
+    if current_user.role == UserRole.ADMIN or is_owner(current_user.id, child_id, db):
+        return profile
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Seul le propriétaire de l'enfant peut effectuer cette action",
     )
 
-    if not profile:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Enfant non trouvé")
 
+def _child_response(profile: Profile, current_user: User, db: Session) -> ChildResponse:
+    """Construit la réponse enrichie du rôle de l'appelant sur cet enfant."""
+    g = guardianship_for(current_user.id, profile.user_id, db)
+    if g is not None:
+        role = g.role
+    elif current_user.role == UserRole.ADMIN:
+        role = ROLE_OWNER
+    else:
+        role = ROLE_GUARDIAN
     return ChildResponse(
         id=profile.user_id,
         name=profile.display_name,
@@ -132,7 +90,34 @@ async def get_child(
         level=profile.level,
         avatar_url=profile.avatar_url,
         created_at=profile.created_at,
+        role=role,
+        is_owner=role == ROLE_OWNER,
     )
+
+
+@router.get("", response_model=list[ChildResponse])
+async def get_children(
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    """Liste des enfants dont l'appelant est responsable (union propriétaire + partagés)."""
+    _require_parent(current_user)
+    child_ids = guarded_child_ids(current_user.id, db)
+    if not child_ids:
+        return []
+    profiles = db.query(Profile).filter(Profile.user_id.in_(child_ids), Profile.is_child.is_(True)).all()
+    return [_child_response(p, current_user, db) for p in profiles]
+
+
+@router.get("/{child_id}", response_model=ChildResponse)
+async def get_child(
+    child_id: UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    """Détails d'un enfant dont l'appelant est responsable."""
+    profile = _require_guardian(child_id, current_user, db)
+    return _child_response(profile, current_user, db)
 
 
 @router.post("", response_model=ChildResponse, status_code=status.HTTP_201_CREATED)
@@ -141,33 +126,14 @@ async def create_child(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
 ):
-    """
-    Crée un nouveau profil enfant
+    """Crée un enfant (compte sans connexion). L'appelant en devient le propriétaire ;
+    les co-parents éventuels reçoivent automatiquement une garde."""
+    _require_parent(current_user)
 
-    Args:
-        child_data: Données du profil enfant à créer
-
-    Returns:
-        Profil de l'enfant créé
-    """
-    # Parents (et admin) peuvent créer des enfants.
-    if current_user.role not in (UserRole.PARENT, UserRole.ADMIN):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Seuls les parents peuvent créer des profils enfants",
-        )
-
-    # Enfant = compte sans connexion (ni email ni mot de passe).
-    child_user = User(
-        email=None,
-        password_hash=None,
-        role=UserRole.CHILD,
-        is_active=True,
-    )
+    child_user = User(email=None, password_hash=None, role=UserRole.CHILD, is_active=True)
     db.add(child_user)
-    db.flush()  # Pour obtenir l'ID sans faire le commit
+    db.flush()
 
-    # Créer le profil enfant
     child_profile = Profile(
         user_id=child_user.id,
         display_name=child_data.name,
@@ -177,18 +143,12 @@ async def create_child(
         parent_id=current_user.id,
     )
     db.add(child_profile)
+    db.flush()
+    on_child_created(child_user.id, current_user.id, db)
     db.commit()
     db.refresh(child_profile)
 
-    return ChildResponse(
-        id=child_user.id,
-        name=child_profile.display_name,
-        birth_date=child_profile.date_of_birth,
-        parent_id=child_profile.parent_id,
-        level=child_profile.level,
-        avatar_url=child_profile.avatar_url,
-        created_at=child_profile.created_at,
-    )
+    return _child_response(child_profile, current_user, db)
 
 
 @router.put("/{child_id}", response_model=ChildResponse)
@@ -198,17 +158,8 @@ async def update_child(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
 ) -> ChildResponse:
-    """
-    Met à jour le profil d'un enfant du parent connecté.
-
-    Args:
-        child_id: ID de l'utilisateur enfant.
-        child_data: Champs à modifier (nom, date de naissance, mot de passe).
-
-    Returns:
-        Profil de l'enfant mis à jour.
-    """
-    profile = _require_owned_child(child_id, current_user, db)
+    """Met à jour le profil d'un enfant (tout responsable)."""
+    profile = _require_guardian(child_id, current_user, db)
 
     if child_data.name is not None:
         profile.display_name = child_data.name
@@ -221,16 +172,7 @@ async def update_child(
 
     db.commit()
     db.refresh(profile)
-
-    return ChildResponse(
-        id=profile.user_id,
-        name=profile.display_name,
-        birth_date=profile.date_of_birth,
-        parent_id=profile.parent_id,
-        level=profile.level,
-        avatar_url=profile.avatar_url,
-        created_at=profile.created_at,
-    )
+    return _child_response(profile, current_user, db)
 
 
 @router.post("/{child_id}/avatar", response_model=ChildResponse)
@@ -240,29 +182,12 @@ async def upload_child_avatar(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
 ) -> ChildResponse:
-    """
-    Téléverse une image comme avatar d'un enfant du parent connecté.
-
-    Args:
-        child_id: ID de l'utilisateur enfant.
-        file: Fichier image (multipart).
-
-    Returns:
-        Profil de l'enfant mis à jour.
-    """
-    profile = _require_owned_child(child_id, current_user, db)
+    """Téléverse l'avatar d'un enfant (tout responsable)."""
+    profile = _require_guardian(child_id, current_user, db)
     profile.avatar_url = save_avatar(file)
     db.commit()
     db.refresh(profile)
-    return ChildResponse(
-        id=profile.user_id,
-        name=profile.display_name,
-        birth_date=profile.date_of_birth,
-        parent_id=profile.parent_id,
-        level=profile.level,
-        avatar_url=profile.avatar_url,
-        created_at=profile.created_at,
-    )
+    return _child_response(profile, current_user, db)
 
 
 @router.delete("/{child_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -271,38 +196,11 @@ async def delete_child(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
 ):
-    """
-    Supprime un profil enfant
-
-    Args:
-        child_id: ID de l'utilisateur enfant à supprimer
-    """
-    # Vérifier que l'utilisateur est un parent
-    if current_user.role not in (UserRole.PARENT, UserRole.ADMIN):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Seuls les parents peuvent supprimer des profils enfants",
-        )
-
-    # Récupérer le profil de l'enfant
-    profile = (
-        db.query(Profile)
-        .filter(
-            Profile.user_id == child_id,
-            Profile.parent_id == current_user.id,
-            Profile.is_child.is_(True),
-        )
-        .first()
-    )
-
-    if not profile:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Enfant non trouvé")
-
-    # Supprimer l'utilisateur (cascade supprimera le profil)
+    """Supprime définitivement un enfant (propriétaire uniquement)."""
+    _require_owner(child_id, current_user, db)
     child_user = db.query(User).filter(User.id == child_id).first()
-    db.delete(child_user)
+    db.delete(child_user)  # cascade : profil, progression, gardes
     db.commit()
-
     return None
 
 
@@ -313,12 +211,8 @@ async def create_award(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
 ) -> AwardResponse:
-    """Attribue (ou retire) des points à un enfant.
-
-    Points : montant > 0 (hardskill, additif). Comportement : montant ≠ 0
-    (positif ou négatif). Réservé au parent (ou admin) propriétaire de l'enfant.
-    """
-    _require_owned_child(child_id, current_user, db)
+    """Attribue (ou retire) des points à un enfant (tout responsable)."""
+    _require_guardian(child_id, current_user, db)
     if body.wallet not in WALLETS:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Porte-monnaie inconnu")
     if body.amount == 0:
@@ -338,6 +232,62 @@ async def get_awards(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
 ) -> list[AwardResponse]:
-    """Historique des points attribués à un enfant (parent/admin propriétaire)."""
-    _require_owned_child(child_id, current_user, db)
+    """Historique des points attribués à un enfant (tout responsable)."""
+    _require_guardian(child_id, current_user, db)
     return [AwardResponse.model_validate(a) for a in list_awards(child_id, db)]
+
+
+@router.get("/{child_id}/guardians", response_model=list[GuardianResponse])
+async def get_guardians(
+    child_id: UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> list[GuardianResponse]:
+    """Liste des responsables d'un enfant (propriétaire uniquement)."""
+    _require_owner(child_id, current_user, db)
+    out: list[GuardianResponse] = []
+    for g in guardians_of(child_id, db):
+        profile = db.query(Profile).filter(Profile.user_id == g.guardian_id).first()
+        guardian_user = db.query(User).filter(User.id == g.guardian_id).first()
+        name = (profile.display_name if profile else None) or (guardian_user.email if guardian_user else "—")
+        out.append(
+            GuardianResponse(
+                guardian_id=g.guardian_id,
+                name=name,
+                avatar_url=profile.avatar_url if profile else None,
+                role=g.role,
+                is_self=g.guardian_id == current_user.id,
+            )
+        )
+    return out
+
+
+@router.delete("/{child_id}/guardians/{guardian_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def remove_child_guardian(
+    child_id: UUID,
+    guardian_id: UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    """Retire un responsable.
+
+    - Se retirer soi-même (« quitter ») : autorisé pour tout responsable **non**
+      propriétaire.
+    - Retirer quelqu'un d'autre : réservé au propriétaire ; on ne peut pas
+      retirer le propriétaire.
+    """
+    _require_parent(current_user)
+    target = guardianship_for(guardian_id, child_id, db)
+    if target is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Responsable non trouvé")
+    if target.role == ROLE_OWNER:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Le propriétaire ne peut pas être retiré")
+
+    is_self = guardian_id == current_user.id
+    if not is_self and not (current_user.role == UserRole.ADMIN or is_owner(current_user.id, child_id, db)):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Seul le propriétaire peut retirer un autre responsable",
+        )
+    remove_guardian(child_id, guardian_id, db)
+    return None

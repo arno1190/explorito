@@ -27,16 +27,14 @@ import type {
   ChildCreate,
   ChildResponse,
   ChildUpdate,
+  GuardianResponse,
   HTTPValidationError,
 } from "../../model";
 
 import { axiosInstance } from "../../axios-instance";
 
 /**
- * Récupère la liste des enfants du parent connecté
-
-Returns:
-    Liste des profils enfants liés au parent
+ * Liste des enfants dont l'appelant est responsable (union propriétaire + partagés).
  * @summary Get Children
  */
 export const getChildrenApiV1ChildrenGet = (signal?: AbortSignal) => {
@@ -183,13 +181,8 @@ export function useGetChildrenApiV1ChildrenGet<
 }
 
 /**
- * Crée un nouveau profil enfant
-
-Args:
-    child_data: Données du profil enfant à créer
-
-Returns:
-    Profil de l'enfant créé
+ * Crée un enfant (compte sans connexion). L'appelant en devient le propriétaire ;
+les co-parents éventuels reçoivent automatiquement une garde.
  * @summary Create Child
  */
 export const createChildApiV1ChildrenPost = (
@@ -276,13 +269,7 @@ export const useCreateChildApiV1ChildrenPost = <
   );
 };
 /**
- * Récupère les détails d'un enfant spécifique
-
-Args:
-    child_id: ID de l'utilisateur enfant
-
-Returns:
-    Profil de l'enfant
+ * Détails d'un enfant dont l'appelant est responsable.
  * @summary Get Child
  */
 export const getChildApiV1ChildrenChildIdGet = (
@@ -448,14 +435,7 @@ export function useGetChildApiV1ChildrenChildIdGet<
 }
 
 /**
- * Met à jour le profil d'un enfant du parent connecté.
-
-Args:
-    child_id: ID de l'utilisateur enfant.
-    child_data: Champs à modifier (nom, date de naissance, mot de passe).
-
-Returns:
-    Profil de l'enfant mis à jour.
+ * Met à jour le profil d'un enfant (tout responsable).
  * @summary Update Child
  */
 export const updateChildApiV1ChildrenChildIdPut = (
@@ -544,10 +524,7 @@ export const useUpdateChildApiV1ChildrenChildIdPut = <
   );
 };
 /**
- * Supprime un profil enfant
-
-Args:
-    child_id: ID de l'utilisateur enfant à supprimer
+ * Supprime définitivement un enfant (propriétaire uniquement).
  * @summary Delete Child
  */
 export const deleteChildApiV1ChildrenChildIdDelete = (
@@ -633,14 +610,7 @@ export const useDeleteChildApiV1ChildrenChildIdDelete = <
   );
 };
 /**
- * Téléverse une image comme avatar d'un enfant du parent connecté.
-
-Args:
-    child_id: ID de l'utilisateur enfant.
-    file: Fichier image (multipart).
-
-Returns:
-    Profil de l'enfant mis à jour.
+ * Téléverse l'avatar d'un enfant (tout responsable).
  * @summary Upload Child Avatar
  */
 export const uploadChildAvatarApiV1ChildrenChildIdAvatarPost = (
@@ -756,10 +726,7 @@ export const useUploadChildAvatarApiV1ChildrenChildIdAvatarPost = <
   );
 };
 /**
- * Attribue (ou retire) des points à un enfant.
-
-Points : montant > 0 (hardskill, additif). Comportement : montant ≠ 0
-(positif ou négatif). Réservé au parent (ou admin) propriétaire de l'enfant.
+ * Attribue (ou retire) des points à un enfant (tout responsable).
  * @summary Create Award
  */
 export const createAwardApiV1ChildrenChildIdAwardsPost = (
@@ -849,7 +816,7 @@ export const useCreateAwardApiV1ChildrenChildIdAwardsPost = <
   );
 };
 /**
- * Historique des points attribués à un enfant (parent/admin propriétaire).
+ * Historique des points attribués à un enfant (tout responsable).
  * @summary Get Awards
  */
 export const getAwardsApiV1ChildrenChildIdAwardsGet = (
@@ -1016,3 +983,321 @@ export function useGetAwardsApiV1ChildrenChildIdAwardsGet<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * Liste des responsables d'un enfant (propriétaire uniquement).
+ * @summary Get Guardians
+ */
+export const getGuardiansApiV1ChildrenChildIdGuardiansGet = (
+  childId: string,
+  signal?: AbortSignal
+) => {
+  return axiosInstance<GuardianResponse[]>({
+    url: `/api/v1/children/${childId}/guardians`,
+    method: "GET",
+    signal,
+  });
+};
+
+export const getGetGuardiansApiV1ChildrenChildIdGuardiansGetQueryKey = (
+  childId: string
+) => {
+  return [`/api/v1/children/${childId}/guardians`] as const;
+};
+
+export const getGetGuardiansApiV1ChildrenChildIdGuardiansGetQueryOptions = <
+  TData = Awaited<
+    ReturnType<typeof getGuardiansApiV1ChildrenChildIdGuardiansGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  childId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getGuardiansApiV1ChildrenChildIdGuardiansGet>
+        >,
+        TError,
+        TData
+      >
+    >;
+  }
+) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetGuardiansApiV1ChildrenChildIdGuardiansGetQueryKey(childId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getGuardiansApiV1ChildrenChildIdGuardiansGet>>
+  > = ({ signal }) =>
+    getGuardiansApiV1ChildrenChildIdGuardiansGet(childId, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!childId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getGuardiansApiV1ChildrenChildIdGuardiansGet>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetGuardiansApiV1ChildrenChildIdGuardiansGetQueryResult =
+  NonNullable<
+    Awaited<ReturnType<typeof getGuardiansApiV1ChildrenChildIdGuardiansGet>>
+  >;
+export type GetGuardiansApiV1ChildrenChildIdGuardiansGetQueryError =
+  HTTPValidationError;
+
+export function useGetGuardiansApiV1ChildrenChildIdGuardiansGet<
+  TData = Awaited<
+    ReturnType<typeof getGuardiansApiV1ChildrenChildIdGuardiansGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  childId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getGuardiansApiV1ChildrenChildIdGuardiansGet>
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<
+            ReturnType<typeof getGuardiansApiV1ChildrenChildIdGuardiansGet>
+          >,
+          TError,
+          Awaited<
+            ReturnType<typeof getGuardiansApiV1ChildrenChildIdGuardiansGet>
+          >
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetGuardiansApiV1ChildrenChildIdGuardiansGet<
+  TData = Awaited<
+    ReturnType<typeof getGuardiansApiV1ChildrenChildIdGuardiansGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  childId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getGuardiansApiV1ChildrenChildIdGuardiansGet>
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<
+            ReturnType<typeof getGuardiansApiV1ChildrenChildIdGuardiansGet>
+          >,
+          TError,
+          Awaited<
+            ReturnType<typeof getGuardiansApiV1ChildrenChildIdGuardiansGet>
+          >
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetGuardiansApiV1ChildrenChildIdGuardiansGet<
+  TData = Awaited<
+    ReturnType<typeof getGuardiansApiV1ChildrenChildIdGuardiansGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  childId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getGuardiansApiV1ChildrenChildIdGuardiansGet>
+        >,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get Guardians
+ */
+
+export function useGetGuardiansApiV1ChildrenChildIdGuardiansGet<
+  TData = Awaited<
+    ReturnType<typeof getGuardiansApiV1ChildrenChildIdGuardiansGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  childId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getGuardiansApiV1ChildrenChildIdGuardiansGet>
+        >,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions =
+    getGetGuardiansApiV1ChildrenChildIdGuardiansGetQueryOptions(
+      childId,
+      options
+    );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Retire un responsable.
+
+- Se retirer soi-même (« quitter ») : autorisé pour tout responsable **non**
+  propriétaire.
+- Retirer quelqu'un d'autre : réservé au propriétaire ; on ne peut pas
+  retirer le propriétaire.
+ * @summary Remove Child Guardian
+ */
+export const removeChildGuardianApiV1ChildrenChildIdGuardiansGuardianIdDelete =
+  (childId: string, guardianId: string, signal?: AbortSignal) => {
+    return axiosInstance<void>({
+      url: `/api/v1/children/${childId}/guardians/${guardianId}`,
+      method: "DELETE",
+      signal,
+    });
+  };
+
+export const getRemoveChildGuardianApiV1ChildrenChildIdGuardiansGuardianIdDeleteMutationOptions =
+  <TError = HTTPValidationError, TContext = unknown>(options?: {
+    mutation?: UseMutationOptions<
+      Awaited<
+        ReturnType<
+          typeof removeChildGuardianApiV1ChildrenChildIdGuardiansGuardianIdDelete
+        >
+      >,
+      TError,
+      { childId: string; guardianId: string },
+      TContext
+    >;
+  }): UseMutationOptions<
+    Awaited<
+      ReturnType<
+        typeof removeChildGuardianApiV1ChildrenChildIdGuardiansGuardianIdDelete
+      >
+    >,
+    TError,
+    { childId: string; guardianId: string },
+    TContext
+  > => {
+    const mutationKey = [
+      "removeChildGuardianApiV1ChildrenChildIdGuardiansGuardianIdDelete",
+    ];
+    const { mutation: mutationOptions } = options
+      ? options.mutation &&
+        "mutationKey" in options.mutation &&
+        options.mutation.mutationKey
+        ? options
+        : { ...options, mutation: { ...options.mutation, mutationKey } }
+      : { mutation: { mutationKey } };
+
+    const mutationFn: MutationFunction<
+      Awaited<
+        ReturnType<
+          typeof removeChildGuardianApiV1ChildrenChildIdGuardiansGuardianIdDelete
+        >
+      >,
+      { childId: string; guardianId: string }
+    > = (props) => {
+      const { childId, guardianId } = props ?? {};
+
+      return removeChildGuardianApiV1ChildrenChildIdGuardiansGuardianIdDelete(
+        childId,
+        guardianId
+      );
+    };
+
+    return { mutationFn, ...mutationOptions };
+  };
+
+export type RemoveChildGuardianApiV1ChildrenChildIdGuardiansGuardianIdDeleteMutationResult =
+  NonNullable<
+    Awaited<
+      ReturnType<
+        typeof removeChildGuardianApiV1ChildrenChildIdGuardiansGuardianIdDelete
+      >
+    >
+  >;
+
+export type RemoveChildGuardianApiV1ChildrenChildIdGuardiansGuardianIdDeleteMutationError =
+  HTTPValidationError;
+
+/**
+ * @summary Remove Child Guardian
+ */
+export const useRemoveChildGuardianApiV1ChildrenChildIdGuardiansGuardianIdDelete =
+  <TError = HTTPValidationError, TContext = unknown>(
+    options?: {
+      mutation?: UseMutationOptions<
+        Awaited<
+          ReturnType<
+            typeof removeChildGuardianApiV1ChildrenChildIdGuardiansGuardianIdDelete
+          >
+        >,
+        TError,
+        { childId: string; guardianId: string },
+        TContext
+      >;
+    },
+    queryClient?: QueryClient
+  ): UseMutationResult<
+    Awaited<
+      ReturnType<
+        typeof removeChildGuardianApiV1ChildrenChildIdGuardiansGuardianIdDelete
+      >
+    >,
+    TError,
+    { childId: string; guardianId: string },
+    TContext
+  > => {
+    return useMutation(
+      getRemoveChildGuardianApiV1ChildrenChildIdGuardiansGuardianIdDeleteMutationOptions(
+        options
+      ),
+      queryClient
+    );
+  };

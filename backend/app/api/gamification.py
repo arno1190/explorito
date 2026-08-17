@@ -11,7 +11,7 @@ from sqlalchemy import case, desc, func
 from sqlalchemy.orm import Session
 
 from app.api.auth import get_current_active_user
-from app.api.children import _require_owned_child
+from app.api.children import _require_guardian
 from app.core.database import get_db
 from app.models.content import Exercise, LearningPath, Lesson, Subject
 from app.models.gamification import (
@@ -21,6 +21,7 @@ from app.models.gamification import (
     Streak,
     UserAchievement,
 )
+from app.models.guardianship import Guardianship
 from app.models.progress import ExerciseResult, ProgressStatus, SubjectProgress, UserProgress
 from app.models.user import Profile, User, UserRole
 from app.schemas.gamification import (
@@ -43,6 +44,7 @@ from app.services.gamification import (
     calculate_next_level_xp,
     get_or_create_daily_goal,
 )
+from app.services.guardianship import guarded_child_ids, is_guardian
 
 router = APIRouter()
 
@@ -256,7 +258,7 @@ async def set_child_daily_goal(
     Raises:
         HTTPException: 403 si non-parent, 404 si l'enfant n'appartient pas au parent.
     """
-    _require_owned_child(child_id, current_user, db)
+    _require_guardian(child_id, current_user, db)
 
     today = date.today()
     daily_goal = db.query(DailyGoal).filter(DailyGoal.user_id == child_id, DailyGoal.date == today).first()
@@ -338,19 +340,20 @@ async def get_family_leaderboard(
     Raises:
         HTTPException: Si l'utilisateur n'appartient à aucune famille
     """
-    # Déterminer l'unité familiale via Profile.parent_id.
-    # L'ancre est le parent : si l'utilisateur courant est un enfant rattaché,
-    # on remonte à son parent ; sinon l'utilisateur est lui-même l'ancre.
-    current_profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
-
-    if current_profile and current_profile.parent_id:
-        anchor_id = current_profile.parent_id
+    # Unité familiale = ensemble des enfants dont l'appelant est responsable
+    # (garde partagée). Un grand-parent voit ses petits-enfants regroupés, un
+    # parent voit ses enfants. Cas hérité (enfant connecté) : les enfants
+    # partageant au moins un responsable avec lui.
+    if current_user.role == UserRole.CHILD:
+        guardian_ids = [
+            g.guardian_id for g in db.query(Guardianship).filter(Guardianship.child_id == current_user.id).all()
+        ]
+        seen: set[UUID] = set()
+        for gid in guardian_ids:
+            seen.update(guarded_child_ids(gid, db))
+        member_ids = list(seen) if seen else [current_user.id]
     else:
-        anchor_id = current_user.id
-
-    # Membres = l'ancre (parent) + tous les enfants rattachés à l'ancre
-    child_profiles = db.query(Profile).filter(Profile.parent_id == anchor_id).all()
-    member_ids = [anchor_id] + [profile.user_id for profile in child_profiles]
+        member_ids = guarded_child_ids(current_user.id, db)
 
     if len(member_ids) <= 1:
         raise HTTPException(
@@ -450,10 +453,7 @@ async def get_child_stats(
             )
     elif current_user.role == UserRole.PARENT:
         # Parent can only access their children's stats
-        child_profile = (
-            db.query(Profile).filter(Profile.user_id == child_id, Profile.parent_id == current_user.id).first()
-        )
-        if not child_profile:
+        if not is_guardian(current_user.id, child_id, db):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Enfant non trouvé ou n'appartient pas à ce parent",
@@ -536,10 +536,7 @@ async def get_child_achievements(
             )
     elif current_user.role == UserRole.PARENT:
         # Parent can only access their children's achievements
-        child_profile = (
-            db.query(Profile).filter(Profile.user_id == child_id, Profile.parent_id == current_user.id).first()
-        )
-        if not child_profile:
+        if not is_guardian(current_user.id, child_id, db):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Enfant non trouvé ou n'appartient pas à ce parent",
@@ -567,8 +564,7 @@ def _assert_child_access(child_id: "UUID", current_user: "User", db: "Session") 
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès refusé")
         return
     if current_user.role == UserRole.PARENT:
-        owned = db.query(Profile).filter(Profile.user_id == child_id, Profile.parent_id == current_user.id).first()
-        if not owned:
+        if not is_guardian(current_user.id, child_id, db):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Enfant non trouvé")
         return
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès refusé")
