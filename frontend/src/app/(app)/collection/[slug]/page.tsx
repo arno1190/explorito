@@ -32,6 +32,10 @@ export default function CatalogPage() {
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<CatalogGridItem | null>(null);
   const [filter, setFilter] = useState<"all" | "owned" | "locked">("all");
+  const [rarityFilter, setRarityFilter] = useState<"all" | Rarity>("all");
+  const [sort, setSort] = useState<
+    "number" | "name" | "rarity" | "price-asc" | "price-desc"
+  >("number");
   const [currency, setCurrency] = useState<"points" | "behavior">("points");
   const [justUnlockedId, setJustUnlockedId] = useState<number | null>(null);
 
@@ -59,9 +63,44 @@ export default function CatalogPage() {
           : "common";
   const ownedCount = items.filter((p) => p.owned).length;
   const total = items.length;
-  const filtered = items.filter((p) =>
+  // Filtre par statut → puis par rareté → puis tri.
+  const statusFiltered = items.filter((p) =>
     filter === "owned" ? p.owned : filter === "locked" ? !p.owned : true
   );
+  const RARITY_ORDER: Record<Rarity, number> = {
+    legendary: 3,
+    epic: 2,
+    rare: 1,
+    common: 0,
+  };
+  const rarityCounts: Record<Rarity, number> = {
+    common: 0,
+    rare: 0,
+    epic: 0,
+    legendary: 0,
+  };
+  statusFiltered.forEach((p) => (rarityCounts[rarityFor(p.price)] += 1));
+  const rarityFiltered =
+    rarityFilter === "all"
+      ? statusFiltered
+      : statusFiltered.filter((p) => rarityFor(p.price) === rarityFilter);
+  const sorted = [...rarityFiltered].sort((a, b) => {
+    switch (sort) {
+      case "name":
+        return a.name_fr.localeCompare(b.name_fr, "fr");
+      case "rarity":
+        return (
+          RARITY_ORDER[rarityFor(b.price)] - RARITY_ORDER[rarityFor(a.price)] ||
+          a.id - b.id
+        );
+      case "price-asc":
+        return a.price - b.price || a.id - b.id;
+      case "price-desc":
+        return b.price - a.price || a.id - b.id;
+      default:
+        return a.id - b.id;
+    }
+  });
 
   const FILTERS: { key: typeof filter; label: string }[] = [
     { key: "all", label: `Tous (${total})` },
@@ -211,9 +250,73 @@ export default function CatalogPage() {
         ))}
       </div>
 
+      {/* Rareté + tri */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        {(
+          [
+            { key: "all", label: "Toutes", dot: "" },
+            {
+              key: "common",
+              label: `Communes (${rarityCounts.common})`,
+              dot: "#94a3b8",
+            },
+            {
+              key: "rare",
+              label: `Rares (${rarityCounts.rare})`,
+              dot: "var(--fun-sky)",
+            },
+            {
+              key: "epic",
+              label: `Épiques (${rarityCounts.epic})`,
+              dot: "var(--fun-violet)",
+            },
+            {
+              key: "legendary",
+              label: `Légendaires (${rarityCounts.legendary})`,
+              dot: "var(--fun-sun)",
+            },
+          ] as const
+        ).map((r) => (
+          <button
+            key={r.key}
+            type="button"
+            onClick={() => setRarityFilter(r.key)}
+            className={cn(
+              "flex min-h-[36px] items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-bold transition-all active:scale-95",
+              rarityFilter === r.key
+                ? "bg-fun-text text-white"
+                : "bg-white text-fun-text candy-shadow hover:bg-fun-green-light"
+            )}
+          >
+            {r.dot && (
+              <span
+                className="h-2.5 w-2.5 rounded-full"
+                style={{ background: r.dot }}
+              />
+            )}
+            {r.label}
+          </button>
+        ))}
+
+        <label className="ml-auto flex items-center gap-2 text-sm font-semibold text-fun-text-muted">
+          Trier&nbsp;:
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as typeof sort)}
+            className="h-9 rounded-xl border-2 border-fun-border bg-white px-2 text-sm font-semibold text-fun-text outline-none focus:border-fun-green"
+          >
+            <option value="number">Numéro</option>
+            <option value="name">Nom (A–Z)</option>
+            <option value="rarity">Rareté</option>
+            <option value="price-asc">Prix ↑</option>
+            <option value="price-desc">Prix ↓</option>
+          </select>
+        </label>
+      </div>
+
       {/* Grid */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-        {filtered.map((p) => (
+        {sorted.map((p) => (
           <CollectibleCard
             key={p.id}
             item={p}
@@ -228,7 +331,7 @@ export default function CatalogPage() {
         ))}
       </div>
 
-      {filtered.length === 0 && (
+      {sorted.length === 0 && (
         <div className="mt-8 text-center text-fun-text-muted">
           {filter === "owned"
             ? "Rien ici pour l'instant. Gagne de l'XP pour débloquer !"
