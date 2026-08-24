@@ -83,11 +83,21 @@ export function CollectibleCard({
           </div>
         </button>
       ) : (
-        <div className={cn("tc", rarity)} aria-hidden="true">
+        <div className="tc locked" aria-hidden="true">
           <div className="tc-inner">
-            <div className="face back">
-              <span className="q">?</span>
-              <small>Explorito</small>
+            <div className="face front candy-shadow">
+              <div className="art">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={item.image_url}
+                  alt="Mystère"
+                  loading="lazy"
+                  className="silhouette"
+                />
+              </div>
+              <div className="cap">
+                <b>???</b>
+              </div>
             </div>
           </div>
         </div>
