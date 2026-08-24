@@ -2,11 +2,15 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ChevronLeft, Sparkles, Star, Lock } from "lucide-react";
+import { ChevronLeft, Sparkles } from "lucide-react";
 
 import { Confetti } from "@/components/gamification/Confetti";
 import { PokemonCardModal } from "@/components/pokedex/PokemonCardModal";
 import { CollectibleModal } from "@/components/pokedex/CollectibleModal";
+import {
+  CollectibleCard,
+  type Rarity,
+} from "@/components/pokedex/CollectibleCard";
 import { cn } from "@/lib/utils";
 import {
   useGetCatalogApiV1CollectionCatalogsSlugGet as useCatalog,
@@ -29,6 +33,7 @@ export default function CatalogPage() {
   const [selected, setSelected] = useState<CatalogGridItem | null>(null);
   const [filter, setFilter] = useState<"all" | "owned" | "locked">("all");
   const [currency, setCurrency] = useState<"points" | "behavior">("points");
+  const [justUnlockedId, setJustUnlockedId] = useState<number | null>(null);
 
   const wallet = walletQuery.data;
   const pointsBalance = wallet?.balance ?? 0;
@@ -36,6 +41,22 @@ export default function CatalogPage() {
   const balance = currency === "behavior" ? behaviorBalance : pointsBalance;
   const info = walletQuery.data?.catalogs?.find((c) => c.slug === slug);
   const items = catalogQuery.data ?? [];
+  // Rareté dérivée du prix (percentiles au sein du catalogue) : les objets les
+  // plus chers sont les plus rares.
+  const prices = items.map((i) => i.price).sort((a, b) => a - b);
+  const q = (f: number) =>
+    prices.length
+      ? prices[Math.min(prices.length - 1, Math.floor(prices.length * f))]
+      : 0;
+  const cut = { rare: q(0.55), epic: q(0.8), legend: q(0.95) };
+  const rarityFor = (price: number): Rarity =>
+    price >= cut.legend
+      ? "legendary"
+      : price >= cut.epic
+        ? "epic"
+        : price >= cut.rare
+          ? "rare"
+          : "common";
   const ownedCount = items.filter((p) => p.owned).length;
   const total = items.length;
   const filtered = items.filter((p) =>
@@ -56,7 +77,9 @@ export default function CatalogPage() {
       });
       await Promise.all([catalogQuery.refetch(), walletQuery.refetch()]);
       setCelebrating(res.item.name_fr);
+      setJustUnlockedId(res.item.id);
       window.setTimeout(() => setCelebrating(null), 1800);
+      window.setTimeout(() => setJustUnlockedId(null), 1200);
     } catch (err: unknown) {
       const detail =
         (err as { response?: { data?: { detail?: string } } })?.response?.data
@@ -189,83 +212,20 @@ export default function CatalogPage() {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-        {filtered.map((p) => {
-          const affordable = balance >= p.price;
-          return (
-            <div
-              key={p.id}
-              className={cn(
-                "flex flex-col items-center rounded-2xl border-2 bg-white p-3 candy-shadow transition-all",
-                p.owned ? "border-fun-green" : "border-fun-border"
-              )}
-            >
-              <span className="self-start text-xs font-bold text-fun-text-muted">
-                #{String(p.id).padStart(3, "0")}
-              </span>
-              {p.owned ? (
-                <button
-                  type="button"
-                  onClick={() => setSelected(p)}
-                  className="flex flex-col items-center transition-transform active:scale-95"
-                  aria-label={`Voir ${p.name_fr}`}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={p.image_url}
-                    alt={p.name_fr}
-                    loading="lazy"
-                    className="h-24 w-24 object-contain transition-all hover:scale-105"
-                  />
-                  <div className="mt-1 min-h-6 text-center text-sm font-bold text-fun-text">
-                    {p.name_fr}
-                  </div>
-                </button>
-              ) : (
-                <>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={p.image_url}
-                    alt="Mystère"
-                    loading="lazy"
-                    className="h-24 w-24 object-contain opacity-40 [filter:grayscale(1)_brightness(0.6)]"
-                  />
-                  <div className="mt-1 min-h-6 text-center text-sm font-bold text-fun-text">
-                    ???
-                  </div>
-                </>
-              )}
-
-              {p.owned ? (
-                <div className="mt-2 flex items-center gap-1 rounded-full bg-fun-green-light px-3 py-1 text-xs font-bold text-fun-green-dark">
-                  <Star className="h-3 w-3 fill-fun-green text-fun-green" />
-                  Voir la carte
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => buy(p)}
-                  disabled={!affordable || purchase.isPending}
-                  className={cn(
-                    "mt-2 flex min-h-[40px] items-center gap-1 rounded-xl px-3 py-2 text-sm font-bold transition-all active:scale-95",
-                    affordable
-                      ? "bg-fun-green text-white hover:bg-fun-green-dark"
-                      : "cursor-not-allowed bg-fun-border text-fun-text-muted"
-                  )}
-                >
-                  {affordable ? (
-                    <span aria-hidden>
-                      {currency === "behavior" ? "💚" : "⭐"}
-                    </span>
-                  ) : (
-                    <Lock className="h-4 w-4" />
-                  )}
-                  {p.price}
-                </button>
-              )}
-            </div>
-          );
-        })}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        {filtered.map((p) => (
+          <CollectibleCard
+            key={p.id}
+            item={p}
+            rarity={rarityFor(p.price)}
+            currency={currency}
+            affordable={balance >= p.price}
+            pending={purchase.isPending}
+            justUnlocked={justUnlockedId === p.id}
+            onBuy={buy}
+            onOpen={setSelected}
+          />
+        ))}
       </div>
 
       {filtered.length === 0 && (
