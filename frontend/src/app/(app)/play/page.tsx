@@ -109,7 +109,7 @@ export default function PlayPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-fun-sky-light via-white to-fun-violet-light p-4">
+      <div className="min-h-screen p-4">
         {/* Header skeleton */}
         <div className="max-w-4xl mx-auto mb-8">
           <div className="bg-white rounded-3xl candy-shadow p-6 flex items-center justify-between">
@@ -147,7 +147,7 @@ export default function PlayPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-fun-sky-light via-white to-fun-violet-light p-4">
+    <div className="min-h-screen p-4">
       {/* Toast : points attribués par le parent */}
       {awardToast && (
         <div className="fixed inset-x-0 top-4 z-50 flex justify-center px-4">

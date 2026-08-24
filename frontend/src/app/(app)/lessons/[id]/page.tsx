@@ -146,7 +146,10 @@ export default function LessonDetailPage() {
     totalExercises > 0
       ? Math.round((completedCount / totalExercises) * 100)
       : 0;
-  const totalPoints = exercises.reduce((sum, ex) => sum + 10, 0);
+  const totalPoints = exercises.reduce(
+    (sum, ex) => sum + (ex.xp_value ?? 10),
+    0
+  );
 
   if (loading) {
     return (
@@ -251,7 +254,7 @@ export default function LessonDetailPage() {
 
         {exercises.map((exercise, index) => {
           const isCompleted = completedExerciseIds.has(exercise.id);
-          const points = 10;
+          const points = exercise.xp_value ?? 10;
 
           return (
             <Card
