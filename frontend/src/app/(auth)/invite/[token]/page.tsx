@@ -178,7 +178,7 @@ export default function InvitePage() {
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-fun-sky-light via-white to-fun-violet-light px-4">
       <Card className="w-full max-w-md rounded-3xl candy-shadow-lg">
         <CardHeader className="space-y-1 text-center">
-          <div className="mb-2 text-5xl">🦉</div>
+          <div className="mb-2 text-5xl">🦊</div>
           <CardTitle className="text-2xl font-extrabold text-fun-text">
             Invitation Explorito
           </CardTitle>

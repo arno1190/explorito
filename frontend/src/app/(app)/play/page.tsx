@@ -188,7 +188,7 @@ export default function PlayPage() {
       {/* Mascot/Encouragement */}
       <div className="max-w-4xl mx-auto mb-8">
         <div className="bg-gradient-to-r from-fun-green to-fun-sky rounded-3xl candy-shadow p-6 text-center">
-          <div className="text-6xl mb-2">🦉</div>
+          <div className="text-6xl mb-2">🦊</div>
           <p className="text-white text-xl font-semibold">
             Choisis une matière pour commencer!
           </p>

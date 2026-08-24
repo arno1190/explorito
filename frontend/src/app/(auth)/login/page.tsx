@@ -94,7 +94,12 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-fun-sky-light via-white to-fun-violet-light px-4">
       <Card className="w-full max-w-md rounded-3xl candy-shadow-lg">
         <CardHeader className="space-y-1 text-center">
-          <div className="text-5xl mb-2">🦉</div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/explorito-badge.png"
+            alt="Explorito"
+            className="mx-auto mb-3 h-20 w-20"
+          />
           <CardTitle className="text-2xl font-extrabold text-fun-text">
             Bienvenue sur Explorito
           </CardTitle>

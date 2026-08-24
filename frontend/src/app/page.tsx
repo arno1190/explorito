@@ -47,7 +47,7 @@ export default function Home() {
             role="img"
             aria-label="Mascotte hibou"
           >
-            🦉
+            🦊
           </div>
           <h1 className="text-4xl md:text-6xl font-extrabold text-fun-text mb-4">
             Apprends en t&apos;amusant !
