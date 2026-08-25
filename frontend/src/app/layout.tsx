@@ -20,7 +20,7 @@ const fredoka = Fredoka({
 export const metadata: Metadata = {
   title: "Explorito - Apprends en t'amusant !",
   description:
-    "Application éducative ludique pour les enfants du CP. Apprends le français, les maths et bien plus !",
+    "Application éducative ludique pour les enfants du CP au CM1. Apprends le français, les maths et bien plus !",
 };
 
 export default function RootLayout({

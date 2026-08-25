@@ -45,7 +45,7 @@ export default function Home() {
           <div
             className="text-7xl mb-6 animate-[candy-bounce_2s_ease-in-out_infinite]"
             role="img"
-            aria-label="Mascotte hibou"
+            aria-label="Mascotte renard"
           >
             🦊
           </div>
@@ -53,8 +53,9 @@ export default function Home() {
             Apprends en t&apos;amusant !
           </h1>
           <p className="text-lg md:text-xl text-fun-text-muted mb-8 max-w-2xl mx-auto">
-            Explorito aide les enfants du CP à découvrir le français, les maths
-            et bien plus, de manière ludique et interactive.
+            Explorito accompagne les enfants du CP au CM1 à la découverte du
+            français, des maths et de bien plus encore, de manière ludique et
+            interactive.
           </p>
           <div className="flex gap-4 justify-center flex-col sm:flex-row">
             <Link href="/register">

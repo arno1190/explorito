@@ -179,6 +179,32 @@ def pythagore(question: str, tables: list[int], blanks: int = 6, *, level: int |
     return ex
 
 
+def shuffle_options(themes: list[dict[str, Any]], *, salt: str = "") -> list[dict[str, Any]]:
+    """Mélange (déterministe) l'ordre d'affichage des options des QCM.
+
+    Le frontend affiche ``content.options`` dans l'ordre du tableau et corrige
+    par ``id`` : réordonner le tableau (sans toucher aux ``id`` ni aux
+    ``correct_answer``) varie donc la position de la bonne réponse sans rien
+    casser. Évite le biais « la bonne réponse est toujours la première ».
+
+    Déterministe (graine issue de la question + ``salt``) pour rester stable
+    d'une exécution à l'autre et garder la parité dev/prod.
+    """
+    import hashlib
+    import random as _random
+
+    for theme_data in themes:
+        for ex in theme_data.get("exercises", []):
+            if ex.get("type") != "multiple_choice":
+                continue
+            opts = ex.get("content", {}).get("options")
+            if not opts or len(opts) < 2:
+                continue
+            seed = int(hashlib.sha256((salt + ex.get("question", "")).encode()).hexdigest(), 16)
+            _random.Random(seed).shuffle(opts)
+    return themes
+
+
 def theme(
     slug: str,
     level: str,
