@@ -40,6 +40,7 @@ CATALOGS: dict[str, dict[str, str]] = {
     "dragon_ball": {"name": "Dragon Ball", "icon": "🐉", "file": "dragon_ball.json"},
     "harry_potter": {"name": "Harry Potter", "icon": "⚡", "file": "harry_potter.json"},
     "mario": {"name": "Super Mario", "icon": "🍄", "file": "mario.json"},
+    "paw_patrol": {"name": "Pat' Patrouille", "icon": "🐾", "file": "paw_patrol.json"},
 }
 
 

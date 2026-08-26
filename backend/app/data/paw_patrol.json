@@ -1,0 +1,296 @@
+[
+  {
+    "id": 1,
+    "name_fr": "Chase",
+    "image_url": "/uploads/img/collectibles/paw_patrol/1.png",
+    "fact": "Chase, le berger allemand : chef adjoint, expert de la police et de l'espionnage.",
+    "price": 185
+  },
+  {
+    "id": 2,
+    "name_fr": "Marcus",
+    "image_url": "/uploads/img/collectibles/paw_patrol/2.png",
+    "fact": "Marcus, le dalmatien pompier et secouriste, maladroit mais très courageux.",
+    "price": 120
+  },
+  {
+    "id": 3,
+    "name_fr": "Stella",
+    "image_url": "/uploads/img/collectibles/paw_patrol/3.png",
+    "fact": "Stella, la pilote intrépide : « Prête pour un petit tour dans les airs ! »",
+    "price": 150
+  },
+  {
+    "id": 4,
+    "name_fr": "Ruben",
+    "image_url": "/uploads/img/collectibles/paw_patrol/4.png",
+    "fact": "Ruben, le bouledogue costaud, expert du chantier et des engins de BTP.",
+    "price": 95
+  },
+  {
+    "id": 5,
+    "name_fr": "Rocky",
+    "image_url": "/uploads/img/collectibles/paw_patrol/5.png",
+    "fact": "Rocky, le champion du recyclage, débrouillard… mais il déteste l'eau !",
+    "price": 90
+  },
+  {
+    "id": 6,
+    "name_fr": "Zuma",
+    "image_url": "/uploads/img/collectibles/paw_patrol/6.png",
+    "fact": "Zuma, le labrador chocolat, spécialiste du sauvetage sur l'eau.",
+    "price": 85
+  },
+  {
+    "id": 7,
+    "name_fr": "Everest",
+    "image_url": "/uploads/img/collectibles/paw_patrol/7.png",
+    "fact": "Everest, la husky des neiges, spécialiste du sauvetage en montagne.",
+    "price": 75
+  },
+  {
+    "id": 8,
+    "name_fr": "Tracker",
+    "image_url": "/uploads/img/collectibles/paw_patrol/8.png",
+    "fact": "Tracker, le chihuahua explorateur de la jungle, à l'ouïe très fine.",
+    "price": 70
+  },
+  {
+    "id": 9,
+    "name_fr": "Rex",
+    "image_url": "/uploads/img/collectibles/paw_patrol/9.png",
+    "fact": "Rex, le bouvier bernois, spécialiste des dinosaures.",
+    "price": 65
+  },
+  {
+    "id": 10,
+    "name_fr": "Liberty",
+    "image_url": "/uploads/img/collectibles/paw_patrol/10.png",
+    "fact": "Liberty, la teckel pleine d'énergie, guide de la grande ville.",
+    "price": 60
+  },
+  {
+    "id": 11,
+    "name_fr": "Coral",
+    "image_url": "/uploads/img/collectibles/paw_patrol/11.png",
+    "fact": "Coral, la chienne-sirène, exploratrice des océans.",
+    "price": 60
+  },
+  {
+    "id": 12,
+    "name_fr": "Ryder",
+    "image_url": "/uploads/img/collectibles/paw_patrol/12.png",
+    "fact": "Ryder, le jeune chef qui dirige la Pat'Patrouille depuis son quad.",
+    "price": 200
+  },
+  {
+    "id": 13,
+    "name_fr": "Super Chase",
+    "image_url": "/uploads/img/collectibles/paw_patrol/13.png",
+    "fact": "Super Chase : Chase en Super Chiot, doté de super-pouvoirs !",
+    "price": 175
+  },
+  {
+    "id": 14,
+    "name_fr": "Super Marcus",
+    "image_url": "/uploads/img/collectibles/paw_patrol/14.png",
+    "fact": "Super Marcus : Marcus en Super Chiot, maître du feu et de la glace !",
+    "price": 110
+  },
+  {
+    "id": 15,
+    "name_fr": "Super Stella",
+    "image_url": "/uploads/img/collectibles/paw_patrol/15.png",
+    "fact": "Super Stella : Stella en Super Chiot, elle vole à toute vitesse !",
+    "price": 140
+  },
+  {
+    "id": 16,
+    "name_fr": "Super Ruben",
+    "image_url": "/uploads/img/collectibles/paw_patrol/16.png",
+    "fact": "Super Ruben : Ruben en Super Chiot, il soulève des rochers énormes !",
+    "price": 55
+  },
+  {
+    "id": 17,
+    "name_fr": "Super Rocky",
+    "image_url": "/uploads/img/collectibles/paw_patrol/17.png",
+    "fact": "Super Rocky : Rocky en Super Chiot, il fabrique tout en un clin d'œil !",
+    "price": 50
+  },
+  {
+    "id": 18,
+    "name_fr": "Super Zuma",
+    "image_url": "/uploads/img/collectibles/paw_patrol/18.png",
+    "fact": "Super Zuma : Zuma en Super Chiot, maître des vagues !",
+    "price": 45
+  },
+  {
+    "id": 19,
+    "name_fr": "Chevalier Chase",
+    "image_url": "/uploads/img/collectibles/paw_patrol/19.png",
+    "fact": "Chevalier Chase : Chase en armure, prêt à défendre le royaume de Château-Fort !",
+    "price": 160
+  },
+  {
+    "id": 20,
+    "name_fr": "Chevalier Marcus",
+    "image_url": "/uploads/img/collectibles/paw_patrol/20.png",
+    "fact": "Chevalier Marcus : Marcus en chevalier, courageux face aux dragons !",
+    "price": 105
+  },
+  {
+    "id": 21,
+    "name_fr": "Chevalier Stella",
+    "image_url": "/uploads/img/collectibles/paw_patrol/21.png",
+    "fact": "Chevalier Stella : Stella en chevalière ailée, elle survole le royaume !",
+    "price": 130
+  },
+  {
+    "id": 22,
+    "name_fr": "Chevalier Ruben",
+    "image_url": "/uploads/img/collectibles/paw_patrol/22.png",
+    "fact": "Chevalier Ruben : Ruben en chevalier costaud, solide comme un roc !",
+    "price": 45
+  },
+  {
+    "id": 23,
+    "name_fr": "Chevalier Rocky",
+    "image_url": "/uploads/img/collectibles/paw_patrol/23.png",
+    "fact": "Chevalier Rocky : Rocky en chevalier astucieux, il bricole même les catapultes !",
+    "price": 40
+  },
+  {
+    "id": 24,
+    "name_fr": "Chevalier Zuma",
+    "image_url": "/uploads/img/collectibles/paw_patrol/24.png",
+    "fact": "Chevalier Zuma : Zuma en chevalier, gardien des douves du château !",
+    "price": 35
+  },
+  {
+    "id": 25,
+    "name_fr": "Monsieur Hellinger",
+    "image_url": "/uploads/img/collectibles/paw_patrol/25.png",
+    "fact": "Monsieur Hellinger, le maire malveillant, toujours prêt à faire des bêtises.",
+    "price": 35
+  },
+  {
+    "id": 26,
+    "name_fr": "Harold Hellinger",
+    "image_url": "/uploads/img/collectibles/paw_patrol/26.png",
+    "fact": "Harold Hellinger, le neveu génial et farceur de Monsieur Hellinger.",
+    "price": 30
+  },
+  {
+    "id": 27,
+    "name_fr": "Vicky",
+    "image_url": "/uploads/img/collectibles/paw_patrol/27.png",
+    "fact": "Vicky, la chienne du palais : mignonne en apparence, mais espiègle et rusée.",
+    "price": 30
+  },
+  {
+    "id": 28,
+    "name_fr": "Croc",
+    "image_url": "/uploads/img/collectibles/paw_patrol/28.png",
+    "fact": "Croc, le crocodile espiègle qui surgit là où on ne l'attend pas.",
+    "price": 30
+  },
+  {
+    "id": 29,
+    "name_fr": "Robochien",
+    "image_url": "/uploads/img/collectibles/paw_patrol/29.png",
+    "fact": "Robochien, le pilote robot des véhicules de la Pat'Patrouille.",
+    "price": 25
+  },
+  {
+    "id": 30,
+    "name_fr": "Capitaine Turbot",
+    "image_url": "/uploads/img/collectibles/paw_patrol/30.png",
+    "fact": "Le Capitaine Turbot, le marin d'Aventureville, ami des chiots.",
+    "price": 25
+  },
+  {
+    "id": 31,
+    "name_fr": "François Turbot",
+    "image_url": "/uploads/img/collectibles/paw_patrol/31.png",
+    "fact": "François Turbot, le cousin maladroit du Capitaine Turbot.",
+    "price": 20
+  },
+  {
+    "id": 32,
+    "name_fr": "Katie",
+    "image_url": "/uploads/img/collectibles/paw_patrol/32.png",
+    "fact": "Katie, la vétérinaire d'Aventureville qui adore les animaux.",
+    "price": 20
+  },
+  {
+    "id": 33,
+    "name_fr": "Cali",
+    "image_url": "/uploads/img/collectibles/paw_patrol/33.png",
+    "fact": "Cali, le chat de Katie.",
+    "price": 20
+  },
+  {
+    "id": 34,
+    "name_fr": "Madame la Maire",
+    "image_url": "/uploads/img/collectibles/paw_patrol/34.png",
+    "fact": "Madame la Maire d'Aventureville et sa fidèle poule Galineta.",
+    "price": 20
+  },
+  {
+    "id": 35,
+    "name_fr": "Galineta",
+    "image_url": "/uploads/img/collectibles/paw_patrol/35.png",
+    "fact": "Galineta, la poule farceuse de Madame la Maire.",
+    "price": 15
+  },
+  {
+    "id": 36,
+    "name_fr": "Alex",
+    "image_url": "/uploads/img/collectibles/paw_patrol/36.png",
+    "fact": "Alex, le petit-fils de Monsieur Porter, toujours prêt pour l'aventure.",
+    "price": 15
+  },
+  {
+    "id": 37,
+    "name_fr": "Monsieur Porter",
+    "image_url": "/uploads/img/collectibles/paw_patrol/37.png",
+    "fact": "Monsieur Porter, le restaurateur d'Aventureville et grand-père d'Alex.",
+    "price": 15
+  },
+  {
+    "id": 38,
+    "name_fr": "Jake",
+    "image_url": "/uploads/img/collectibles/paw_patrol/38.png",
+    "fact": "Jake, le moniteur de la montagne, ami d'Everest.",
+    "price": 15
+  },
+  {
+    "id": 39,
+    "name_fr": "Carlos",
+    "image_url": "/uploads/img/collectibles/paw_patrol/39.png",
+    "fact": "Carlos, le jeune explorateur de la jungle, ami de Tracker.",
+    "price": 10
+  },
+  {
+    "id": 40,
+    "name_fr": "Fermière Yumi",
+    "image_url": "/uploads/img/collectibles/paw_patrol/40.png",
+    "fact": "Fermière Yumi, qui s'occupe de sa ferme et de ses animaux.",
+    "price": 10
+  },
+  {
+    "id": 41,
+    "name_fr": "Fermier Al",
+    "image_url": "/uploads/img/collectibles/paw_patrol/41.png",
+    "fact": "Fermier Al, toujours à la ferme avec Yumi.",
+    "price": 10
+  },
+  {
+    "id": 42,
+    "name_fr": "Wally",
+    "image_url": "/uploads/img/collectibles/paw_patrol/42.png",
+    "fact": "Wally, le morse farceur d'Aventureville, ami du Capitaine Turbot.",
+    "price": 10
+  }
+]

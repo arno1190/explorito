@@ -335,10 +335,186 @@ def build_mario() -> list[dict[str, Any]]:
     return items
 
 
+# --------------------------------------------------------------------------- #
+# Pat' Patrouille (PAW Patrol) — pas d'API : roster curé, images du wiki Fandom
+# --------------------------------------------------------------------------- #
+def _fandom_query(params: dict[str, str]) -> dict[str, Any]:
+    url = "https://pawpatrol.fandom.com/api.php?" + urllib.parse.urlencode(
+        {**params, "action": "query", "format": "json"}
+    )
+    with _open(url, timeout=25) as r:
+        return json.loads(r.read())
+
+
+def _fandom_image(pages: list[str]) -> str | None:
+    """Image principale (pageimages) de la 1re page qui en a une."""
+    for t in pages:
+        try:
+            d = _fandom_query({"prop": "pageimages", "pithumbsize": "600", "titles": t})
+            src = next(iter(d["query"]["pages"].values())).get("thumbnail", {}).get("source")
+            if src:
+                return src
+        except Exception:  # noqa: BLE001
+            continue
+    return None
+
+
+def _fandom_file(files: list[str]) -> str | None:
+    """URL d'un fichier ``File:...`` précis (imageinfo). Pour les formes Mighty."""
+    for f in files:
+        try:
+            d = _fandom_query({"prop": "imageinfo", "iiprop": "url", "iiurlwidth": "600", "titles": f})
+            ii = next(iter(d["query"]["pages"].values())).get("imageinfo")
+            if ii:
+                return ii[0].get("thumburl") or ii[0].get("url")
+        except Exception:  # noqa: BLE001
+            continue
+    return None
+
+
+# (nom_fr, image_spec, fact_fr). image_spec = ("page", [titres]) ou ("file", [File:...]).
+def _pg(*titles: str) -> tuple[str, list[str]]:
+    return ("page", list(titles))
+
+
+def _fl(*files: str) -> tuple[str, list[str]]:
+    return ("file", list(files))
+
+
+PAW_PATROL: list[tuple[str, tuple[str, list[str]], str]] = [
+    # Chiots principaux
+    ("Chase", _pg("Chase"), "Chase, le berger allemand : chef adjoint, expert de la police et de l'espionnage."),
+    ("Marcus", _pg("Marshall"), "Marcus, le dalmatien pompier et secouriste, maladroit mais très courageux."),
+    ("Stella", _pg("Skye"), "Stella, la pilote intrépide : « Prête pour un petit tour dans les airs ! »"),
+    ("Ruben", _pg("Rubble"), "Ruben, le bouledogue costaud, expert du chantier et des engins de BTP."),
+    ("Rocky", _pg("Rocky"), "Rocky, le champion du recyclage, débrouillard… mais il déteste l'eau !"),
+    ("Zuma", _pg("Zuma"), "Zuma, le labrador chocolat, spécialiste du sauvetage sur l'eau."),
+    # Chiots additionnels
+    ("Everest", _pg("Everest"), "Everest, la husky des neiges, spécialiste du sauvetage en montagne."),
+    ("Tracker", _pg("Tracker"), "Tracker, le chihuahua explorateur de la jungle, à l'ouïe très fine."),
+    ("Rex", _pg("Rex"), "Rex, le bouvier bernois, spécialiste des dinosaures."),
+    ("Liberty", _pg("Liberty"), "Liberty, la teckel pleine d'énergie, guide de la grande ville."),
+    ("Coral", _pg("Coral"), "Coral, la chienne-sirène, exploratrice des océans."),
+    ("Ryder", _pg("Ryder"), "Ryder, le jeune chef qui dirige la Pat'Patrouille depuis son quad."),
+    # Super Chiots (images Mighty dédiées)
+    (
+        "Super Chase",
+        _fl("File:Mighty Chase (Movie).webp", "File:Mighty Chase.png"),
+        "Super Chase : Chase en Super Chiot, doté de super-pouvoirs !",
+    ),
+    (
+        "Super Marcus",
+        _fl("File:Marshall - Mighty Pups (PPTMM) Uniform Official Vector.png", "File:Mighty Marshall.png"),
+        "Super Marcus : Marcus en Super Chiot, maître du feu et de la glace !",
+    ),
+    (
+        "Super Stella",
+        _fl("File:Mighty Skye (Movie).webp", "File:Mighty Movie Skye 2D Vector.png", "File:Mighty Skye.png"),
+        "Super Stella : Stella en Super Chiot, elle vole à toute vitesse !",
+    ),
+    (
+        "Super Ruben",
+        _fl("File:Mighty Rubble (Movie).webp", "File:Mighty Movie Rubble 2D Vector.png", "File:Mighty Rubble.png"),
+        "Super Ruben : Ruben en Super Chiot, il soulève des rochers énormes !",
+    ),
+    (
+        "Super Rocky",
+        _fl("File:Mighty Movie Rocky PNG.png"),
+        "Super Rocky : Rocky en Super Chiot, il fabrique tout en un clin d'œil !",
+    ),
+    (
+        "Super Zuma",
+        _fl("File:Mighty Movie Zuma PNG.png", "File:Mighty Zuma.JPG"),
+        "Super Zuma : Zuma en Super Chiot, maître des vagues !",
+    ),
+    # Chevaliers (PAW Patrol Rescue Knights)
+    (
+        "Chevalier Chase",
+        _fl("File:Chase - Royal Knight outfit.png"),
+        "Chevalier Chase : Chase en armure, prêt à défendre le royaume de Château-Fort !",
+    ),
+    (
+        "Chevalier Marcus",
+        _fl("File:Rescue Knights Marshall PNG.png", "File:Rescue Knights Marshall 2 PNG.png"),
+        "Chevalier Marcus : Marcus en chevalier, courageux face aux dragons !",
+    ),
+    (
+        "Chevalier Stella",
+        _fl("File:Skye - Rescue Knights outfit (Dragon Wings & Goggles).png"),
+        "Chevalier Stella : Stella en chevalière ailée, elle survole le royaume !",
+    ),
+    (
+        "Chevalier Ruben",
+        _fl("File:Rubble Rescue Knight Uniform.png", "File:Rubble Rescue Knight 2.png"),
+        "Chevalier Ruben : Ruben en chevalier costaud, solide comme un roc !",
+    ),
+    (
+        "Chevalier Rocky",
+        _fl("File:Rocky - Rescue Knights Official Vector.png", "File:Rescue Knights Rocky Vector.png"),
+        "Chevalier Rocky : Rocky en chevalier astucieux, il bricole même les catapultes !",
+    ),
+    (
+        "Chevalier Zuma",
+        _fl("File:Zuma Rescue Knights Vector.png"),
+        "Chevalier Zuma : Zuma en chevalier, gardien des douves du château !",
+    ),
+    # Méchants & personnages secondaires
+    (
+        "Monsieur Hellinger",
+        _pg("Mayor Humdinger"),
+        "Monsieur Hellinger, le maire malveillant, toujours prêt à faire des bêtises.",
+    ),
+    (
+        "Harold Hellinger",
+        _pg("Harold Humdinger"),
+        "Harold Hellinger, le neveu génial et farceur de Monsieur Hellinger.",
+    ),
+    ("Vicky", _pg("Sweetie"), "Vicky, la chienne du palais : mignonne en apparence, mais espiègle et rusée."),
+    ("Croc", _pg("Crocodile"), "Croc, le crocodile espiègle qui surgit là où on ne l'attend pas."),
+    ("Robochien", _pg("Robo-Dog", "Robodog"), "Robochien, le pilote robot des véhicules de la Pat'Patrouille."),
+    (
+        "Capitaine Turbot",
+        _pg("Cap'n Turbot", "Captain Turbot"),
+        "Le Capitaine Turbot, le marin d'Aventureville, ami des chiots.",
+    ),
+    ("François Turbot", _pg("Francois Turbot"), "François Turbot, le cousin maladroit du Capitaine Turbot."),
+    ("Katie", _pg("Katie"), "Katie, la vétérinaire d'Aventureville qui adore les animaux."),
+    ("Cali", _pg("Cali"), "Cali, le chat de Katie."),
+    ("Madame la Maire", _pg("Mayor Goodway"), "Madame la Maire d'Aventureville et sa fidèle poule Galineta."),
+    ("Galineta", _pg("Chickaletta"), "Galineta, la poule farceuse de Madame la Maire."),
+    ("Alex", _pg("Alex Porter"), "Alex, le petit-fils de Monsieur Porter, toujours prêt pour l'aventure."),
+    ("Monsieur Porter", _pg("Mr. Porter"), "Monsieur Porter, le restaurateur d'Aventureville et grand-père d'Alex."),
+    ("Jake", _pg("Jake"), "Jake, le moniteur de la montagne, ami d'Everest."),
+    ("Carlos", _pg("Carlos"), "Carlos, le jeune explorateur de la jungle, ami de Tracker."),
+    ("Fermière Yumi", _pg("Farmer Yumi"), "Fermière Yumi, qui s'occupe de sa ferme et de ses animaux."),
+    ("Fermier Al", _pg("Farmer Al"), "Fermier Al, toujours à la ferme avec Yumi."),
+    ("Wally", _pg("Wally"), "Wally, le morse farceur d'Aventureville, ami du Capitaine Turbot."),
+]
+PAW_LEGENDARY = ["Ryder", "Chase", "Super Chase", "Stella", "Super Stella", "Marcus"]
+
+
+def build_paw_patrol() -> list[dict[str, Any]]:
+    items: list[dict[str, Any]] = []
+    idx = 1
+    for name_fr, (kind, refs), fact in PAW_PATROL:
+        src = _fandom_file(refs) if kind == "file" else _fandom_image(refs)
+        if not src:
+            print(f"  ! pas d'image pour {name_fr} ({refs}) — ignoré")
+            continue
+        img = _download(src, "paw_patrol", idx)
+        if not img:
+            continue
+        items.append({"id": idx, "name_fr": name_fr, "image_url": img, "fact": fact})
+        idx += 1
+    _assign_prices(items, PAW_LEGENDARY)
+    return items
+
+
 BUILDERS = {
     "dragon_ball": build_dragon_ball,
     "harry_potter": build_harry_potter,
     "mario": build_mario,
+    "paw_patrol": build_paw_patrol,
 }
 
 
