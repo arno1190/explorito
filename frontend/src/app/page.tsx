@@ -75,6 +75,22 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      <footer className="border-t border-fun-border bg-white/60 py-4">
+        <p className="container mx-auto px-4 text-center text-xs text-fun-text-muted">
+          Pictogrammes :{" "}
+          <a
+            href="https://arasaac.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-fun-text"
+          >
+            ARASAAC
+          </a>{" "}
+          — Sergio Palao / Gouvernement d&apos;Aragon (CC BY-NC-SA). Voix de
+          synthèse : Microsoft Edge TTS.
+        </p>
+      </footer>
     </div>
   );
 }

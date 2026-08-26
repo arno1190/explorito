@@ -2,6 +2,7 @@
 
 import type { ExerciseResponse } from "@/lib/api/model";
 import { FillBlanks } from "./FillBlanks";
+import { InstructionAudio } from "./InstructionAudio";
 import { MathProblem } from "./MathProblem";
 import { MultipleChoice } from "./MultipleChoice";
 import { Pythagore } from "./Pythagore";
@@ -38,7 +39,11 @@ export function ExerciseRenderer({
   showResult = false,
   isCorrect,
 }: ExerciseRendererProps) {
-  const emoji = (exercise.media_urls as { emoji?: string } | undefined)?.emoji;
+  const media = exercise.media_urls as
+    | { emoji?: string; audio?: string }
+    | undefined;
+  const emoji = media?.emoji;
+  const audio = media?.audio;
   const shared = {
     question: exercise.question,
     emoji,
@@ -51,33 +56,44 @@ export function ExerciseRenderer({
   // `content` est un objet générique côté API (JSON) ; on le restreint par type.
   const content = exercise.content as unknown;
 
-  switch (exercise.type) {
-    case "multiple_choice":
-      return (
-        <MultipleChoice
-          {...shared}
-          content={content as MultipleChoiceContent}
-        />
-      );
-    case "fill_blanks":
-      return <FillBlanks {...shared} content={content as FillBlanksContent} />;
-    case "reveal":
-      return <Reveal {...shared} content={content as RevealContent} />;
-    case "pythagore":
-      return <Pythagore {...shared} content={content as PythagoreContent} />;
-    case "math_problem":
-      return (
-        <MathProblem {...shared} content={content as MathProblemContent} />
-      );
-    case "reading":
-      return <Reading {...shared} content={content as ReadingContent} />;
-    case "soroban":
-      return <Soroban {...shared} content={content as SorobanContent} />;
-    default:
-      return (
-        <div className="rounded-xl bg-fun-sun-light p-4 text-fun-text">
-          Type d&apos;exercice non reconnu&nbsp;: &quot;{exercise.type}&quot;
-        </div>
-      );
-  }
+  const body = (() => {
+    switch (exercise.type) {
+      case "multiple_choice":
+        return (
+          <MultipleChoice
+            {...shared}
+            content={content as MultipleChoiceContent}
+          />
+        );
+      case "fill_blanks":
+        return (
+          <FillBlanks {...shared} content={content as FillBlanksContent} />
+        );
+      case "reveal":
+        return <Reveal {...shared} content={content as RevealContent} />;
+      case "pythagore":
+        return <Pythagore {...shared} content={content as PythagoreContent} />;
+      case "math_problem":
+        return (
+          <MathProblem {...shared} content={content as MathProblemContent} />
+        );
+      case "reading":
+        return <Reading {...shared} content={content as ReadingContent} />;
+      case "soroban":
+        return <Soroban {...shared} content={content as SorobanContent} />;
+      default:
+        return (
+          <div className="rounded-xl bg-fun-sun-light p-4 text-fun-text">
+            Type d&apos;exercice non reconnu&nbsp;: &quot;{exercise.type}&quot;
+          </div>
+        );
+    }
+  })();
+
+  return (
+    <div className="space-y-2">
+      {audio && <InstructionAudio src={audio} exerciseId={exercise.id} />}
+      {body}
+    </div>
+  );
 }
