@@ -7,7 +7,7 @@ from datetime import timedelta
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, Header, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Header, HTTPException, Request, UploadFile, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
@@ -116,6 +116,7 @@ def _upsert_parent(
 
 
 async def get_current_user(
+    request: Request,
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Annotated[Session, Depends(get_db)],
     x_impersonate_user_id: Annotated[str | None, Header()] = None,
@@ -151,16 +152,27 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
 
-    # Impersonation admin : un administrateur peut « voir en tant que » un autre
-    # compte via l'en-tête X-Impersonate-User-Id (audité). Réservé aux admins.
-    if x_impersonate_user_id and user.role == UserRole.ADMIN:
+    # Impersonation admin — « voir en tant que » un autre compte via l'en-tête
+    # X-Impersonate-User-Id. Volontairement restreint pour limiter la surface :
+    #   - réservé aux administrateurs ;
+    #   - LECTURE SEULE : ignoré sur les requêtes qui modifient l'état
+    #     (seules GET/HEAD/OPTIONS sont honorées) — pas d'écriture « en tant que » ;
+    #   - cible non-admin uniquement (pas d'impersonation admin → admin) ;
+    #   - chaque usage est journalisé (audit).
+    if x_impersonate_user_id and user.role == UserRole.ADMIN and request.method in ("GET", "HEAD", "OPTIONS"):
         try:
             target_id = UUID(x_impersonate_user_id)
         except ValueError:
             return user
         target = db.query(User).filter(User.id == target_id).first()
-        if target is not None:
-            logger.info("admin_impersonation admin=%s target=%s", user.email, target_id)
+        if target is not None and target.role != UserRole.ADMIN:
+            logger.info(
+                "admin_impersonation admin=%s target=%s method=%s path=%s",
+                user.email,
+                target_id,
+                request.method,
+                request.url.path,
+            )
             return target
 
     return user
