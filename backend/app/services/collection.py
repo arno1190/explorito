@@ -37,6 +37,9 @@ CATALOGS: dict[str, dict[str, str]] = {
     "pokemon": {"name": "Pokémon", "icon": "📕", "file": "pokedex.json"},
     "dinosaurs": {"name": "Dinosaures", "icon": "🦕", "file": "dinosaurs.json"},
     "solar_system": {"name": "Système solaire", "icon": "🪐", "file": "solar_system.json"},
+    "dragon_ball": {"name": "Dragon Ball", "icon": "🐉", "file": "dragon_ball.json"},
+    "harry_potter": {"name": "Harry Potter", "icon": "⚡", "file": "harry_potter.json"},
+    "mario": {"name": "Super Mario", "icon": "🍄", "file": "mario.json"},
 }
 
 

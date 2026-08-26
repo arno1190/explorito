@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { Lock, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { resolveMediaSrc } from "@/lib/media";
 import type { CatalogGridItem } from "@/lib/api/model";
 
 export type Rarity = "common" | "rare" | "epic" | "legendary";
@@ -73,7 +74,11 @@ export function CollectibleCard({
             <div className="face front candy-shadow">
               <div className="art">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={item.image_url} alt={item.name_fr} loading="lazy" />
+                <img
+                  src={resolveMediaSrc(item.image_url)}
+                  alt={item.name_fr}
+                  loading="lazy"
+                />
               </div>
               <div className="cap">
                 <b>{item.name_fr}</b>
@@ -89,7 +94,7 @@ export function CollectibleCard({
               <div className="art">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={item.image_url}
+                  src={resolveMediaSrc(item.image_url)}
                   alt="Mystère"
                   loading="lazy"
                   className="silhouette"

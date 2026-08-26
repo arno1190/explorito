@@ -6,6 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { resolveMediaSrc } from "@/lib/media";
 
 /** Carte détaillée d'un objet de collection (dinosaure, astre…) : image + anecdote. */
 export function CollectibleModal({
@@ -33,7 +34,7 @@ export function CollectibleModal({
           <div className="flex h-48 w-full items-center justify-center rounded-2xl bg-fun-sky-light p-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={imageUrl}
+              src={resolveMediaSrc(imageUrl)}
               alt={name}
               className="max-h-44 max-w-full rounded-xl object-contain"
             />

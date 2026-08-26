@@ -1,0 +1,177 @@
+[
+  {
+    "id": 1,
+    "name_fr": "Harry Potter",
+    "image_url": "/uploads/img/collectibles/harry_potter/1.jpg",
+    "fact": "Maison : Gryffondor. Espèce : humain. Patronus : cerf.",
+    "price": 200
+  },
+  {
+    "id": 2,
+    "name_fr": "Hermione Granger",
+    "image_url": "/uploads/img/collectibles/harry_potter/2.jpeg",
+    "fact": "Maison : Gryffondor. Espèce : humain. Patronus : loutre.",
+    "price": 175
+  },
+  {
+    "id": 3,
+    "name_fr": "Ron Weasley",
+    "image_url": "/uploads/img/collectibles/harry_potter/3.jpg",
+    "fact": "Maison : Gryffondor. Espèce : humain. Patronus : Jack Russell.",
+    "price": 155
+  },
+  {
+    "id": 4,
+    "name_fr": "Draco Malfoy",
+    "image_url": "/uploads/img/collectibles/harry_potter/4.jpg",
+    "fact": "Maison : Serpentard. Espèce : humain.",
+    "price": 95
+  },
+  {
+    "id": 5,
+    "name_fr": "Minerva McGonagall",
+    "image_url": "/uploads/img/collectibles/harry_potter/5.jpg",
+    "fact": "Maison : Gryffondor. Espèce : humain. Patronus : chat tigré.",
+    "price": 75
+  },
+  {
+    "id": 6,
+    "name_fr": "Cedric Diggory",
+    "image_url": "/uploads/img/collectibles/harry_potter/6.png",
+    "fact": "Maison : Poufsouffle. Espèce : humain.",
+    "price": 65
+  },
+  {
+    "id": 7,
+    "name_fr": "Cho Chang",
+    "image_url": "/uploads/img/collectibles/harry_potter/7.jpg",
+    "fact": "Maison : Serdaigle. Espèce : humain. Patronus : cygne.",
+    "price": 55
+  },
+  {
+    "id": 8,
+    "name_fr": "Severus Snape",
+    "image_url": "/uploads/img/collectibles/harry_potter/8.jpg",
+    "fact": "Maison : Serpentard. Espèce : humain. Patronus : biche.",
+    "price": 140
+  },
+  {
+    "id": 9,
+    "name_fr": "Rubeus Hagrid",
+    "image_url": "/uploads/img/collectibles/harry_potter/9.png",
+    "fact": "Maison : Gryffondor. Espèce : demi-géant.",
+    "price": 105
+  },
+  {
+    "id": 10,
+    "name_fr": "Neville Longbottom",
+    "image_url": "/uploads/img/collectibles/harry_potter/10.jpg",
+    "fact": "Maison : Gryffondor. Espèce : humain.",
+    "price": 50
+  },
+  {
+    "id": 11,
+    "name_fr": "Luna Lovegood",
+    "image_url": "/uploads/img/collectibles/harry_potter/11.jpg",
+    "fact": "Maison : Serdaigle. Espèce : humain. Patronus : lièvre.",
+    "price": 45
+  },
+  {
+    "id": 12,
+    "name_fr": "Ginny Weasley",
+    "image_url": "/uploads/img/collectibles/harry_potter/12.jpg",
+    "fact": "Maison : Gryffondor. Espèce : humain. Patronus : cheval.",
+    "price": 40
+  },
+  {
+    "id": 13,
+    "name_fr": "Sirius Black",
+    "image_url": "/uploads/img/collectibles/harry_potter/13.jpg",
+    "fact": "Maison : Gryffondor. Espèce : humain. Patronus : lièvre.",
+    "price": 85
+  },
+  {
+    "id": 14,
+    "name_fr": "Remus Lupin",
+    "image_url": "/uploads/img/collectibles/harry_potter/14.jpg",
+    "fact": "Maison : Gryffondor. Espèce : loup-garou. Patronus : loup.",
+    "price": 35
+  },
+  {
+    "id": 15,
+    "name_fr": "Arthur Weasley",
+    "image_url": "/uploads/img/collectibles/harry_potter/15.jpg",
+    "fact": "Maison : Gryffondor. Espèce : humain. Patronus : belette.",
+    "price": 30
+  },
+  {
+    "id": 16,
+    "name_fr": "Bellatrix Lestrange",
+    "image_url": "/uploads/img/collectibles/harry_potter/16.jpg",
+    "fact": "Maison : Serpentard. Espèce : humain.",
+    "price": 25
+  },
+  {
+    "id": 17,
+    "name_fr": "Lord Voldemort",
+    "image_url": "/uploads/img/collectibles/harry_potter/17.jpg",
+    "fact": "Maison : Serpentard. Espèce : humain.",
+    "price": 120
+  },
+  {
+    "id": 18,
+    "name_fr": "Horace Slughorn",
+    "image_url": "/uploads/img/collectibles/harry_potter/18.jpg",
+    "fact": "Maison : Serpentard. Espèce : humain.",
+    "price": 25
+  },
+  {
+    "id": 19,
+    "name_fr": "Kingsley Shacklebolt",
+    "image_url": "/uploads/img/collectibles/harry_potter/19.jpg",
+    "fact": "Espèce : humain. Patronus : lynx.",
+    "price": 20
+  },
+  {
+    "id": 20,
+    "name_fr": "Dolores Umbridge",
+    "image_url": "/uploads/img/collectibles/harry_potter/20.jpg",
+    "fact": "Maison : Serpentard. Espèce : humain. Patronus : chat persan.",
+    "price": 20
+  },
+  {
+    "id": 21,
+    "name_fr": "Lucius Malfoy",
+    "image_url": "/uploads/img/collectibles/harry_potter/21.jpg",
+    "fact": "Maison : Serpentard. Espèce : humain.",
+    "price": 15
+  },
+  {
+    "id": 22,
+    "name_fr": "Vincent Crabbe",
+    "image_url": "/uploads/img/collectibles/harry_potter/22.jpg",
+    "fact": "Maison : Serpentard. Espèce : humain.",
+    "price": 15
+  },
+  {
+    "id": 23,
+    "name_fr": "Gregory Goyle",
+    "image_url": "/uploads/img/collectibles/harry_potter/23.jpg",
+    "fact": "Maison : Serpentard. Espèce : humain.",
+    "price": 15
+  },
+  {
+    "id": 24,
+    "name_fr": "Mrs Norris",
+    "image_url": "/uploads/img/collectibles/harry_potter/24.jpg",
+    "fact": "Espèce : chat.",
+    "price": 10
+  },
+  {
+    "id": 25,
+    "name_fr": "Argus Filch",
+    "image_url": "/uploads/img/collectibles/harry_potter/25.jpg",
+    "fact": "Espèce : humain.",
+    "price": 10
+  }
+]

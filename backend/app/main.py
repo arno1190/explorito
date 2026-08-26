@@ -2,6 +2,7 @@
 Application FastAPI principale pour Explorito
 """
 
+import mimetypes
 import os
 
 from fastapi import FastAPI
@@ -53,6 +54,10 @@ app.add_middleware(
 # Monter les fichiers statiques
 if not os.path.exists("uploads"):
     os.makedirs("uploads")
+
+# Certains environnements Python n'associent pas .webp (images Dragon Ball) au bon
+# type MIME : StaticFiles le servirait alors en text/plain.
+mimetypes.add_type("image/webp", ".webp")
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 

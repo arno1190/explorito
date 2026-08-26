@@ -1,0 +1,408 @@
+[
+  {
+    "id": 1,
+    "name_fr": "Goku",
+    "image_url": "/uploads/img/collectibles/dragon_ball/1.webp",
+    "fact": "Race : Saïyan. Camp : Guerrier Z. Puissance maximale : 90 Septillion.",
+    "price": 200
+  },
+  {
+    "id": 2,
+    "name_fr": "Vegeta",
+    "image_url": "/uploads/img/collectibles/dragon_ball/2.webp",
+    "fact": "Race : Saïyan. Camp : Guerrier Z. Puissance maximale : 19.84 Septillion.",
+    "price": 190
+  },
+  {
+    "id": 3,
+    "name_fr": "Piccolo",
+    "image_url": "/uploads/img/collectibles/dragon_ball/3.webp",
+    "fact": "Race : Namek. Camp : Guerrier Z. Puissance maximale : 500.000.000.",
+    "price": 170
+  },
+  {
+    "id": 4,
+    "name_fr": "Bulma",
+    "image_url": "/uploads/img/collectibles/dragon_ball/4.webp",
+    "fact": "Race : Humain. Camp : Guerrier Z. Puissance maximale : 0.",
+    "price": 110
+  },
+  {
+    "id": 5,
+    "name_fr": "Freezer",
+    "image_url": "/uploads/img/collectibles/dragon_ball/5.webp",
+    "fact": "Race : Race de Freezer. Camp : Armée de Freezer. Puissance maximale : 52.71 Septillion.",
+    "price": 160
+  },
+  {
+    "id": 6,
+    "name_fr": "Zarbon",
+    "image_url": "/uploads/img/collectibles/dragon_ball/6.webp",
+    "fact": "Race : Race de Freezer. Camp : Armée de Freezer. Puissance maximale : 30.000.",
+    "price": 105
+  },
+  {
+    "id": 7,
+    "name_fr": "Dodoria",
+    "image_url": "/uploads/img/collectibles/dragon_ball/7.webp",
+    "fact": "Race : Race de Freezer. Camp : Armée de Freezer. Puissance maximale : 20.000.",
+    "price": 100
+  },
+  {
+    "id": 8,
+    "name_fr": "Ginyu",
+    "image_url": "/uploads/img/collectibles/dragon_ball/8.webp",
+    "fact": "Race : Race de Freezer. Camp : Armée de Freezer. Puissance maximale : 25.000.",
+    "price": 95
+  },
+  {
+    "id": 9,
+    "name_fr": "Celula",
+    "image_url": "/uploads/img/collectibles/dragon_ball/9.webp",
+    "fact": "Race : Cyborg. Camp : Indépendant. Puissance maximale : 5 Billion.",
+    "price": 90
+  },
+  {
+    "id": 10,
+    "name_fr": "Gohan",
+    "image_url": "/uploads/img/collectibles/dragon_ball/10.webp",
+    "fact": "Race : Saïyan. Camp : Guerrier Z. Puissance maximale : 40 septillion.",
+    "price": 180
+  },
+  {
+    "id": 11,
+    "name_fr": "Krillin",
+    "image_url": "/uploads/img/collectibles/dragon_ball/11.webp",
+    "fact": "Race : Humain. Camp : Guerrier Z. Puissance maximale : 1 Billion.",
+    "price": 85
+  },
+  {
+    "id": 12,
+    "name_fr": "Tenshinhan",
+    "image_url": "/uploads/img/collectibles/dragon_ball/12.webp",
+    "fact": "Race : Humain. Camp : Guerrier Z. Puissance maximale : 80.000.000.",
+    "price": 80
+  },
+  {
+    "id": 13,
+    "name_fr": "Yamcha",
+    "image_url": "/uploads/img/collectibles/dragon_ball/13.webp",
+    "fact": "Race : Humain. Camp : Guerrier Z. Puissance maximale : 4.000.000.",
+    "price": 80
+  },
+  {
+    "id": 14,
+    "name_fr": "Chi-Chi",
+    "image_url": "/uploads/img/collectibles/dragon_ball/14.webp",
+    "fact": "Race : Humain. Camp : Guerrier Z. Puissance maximale : 0.",
+    "price": 75
+  },
+  {
+    "id": 15,
+    "name_fr": "Gotenks",
+    "image_url": "/uploads/img/collectibles/dragon_ball/15.webp",
+    "fact": "Race : Saïyan. Camp : Guerrier Z. Puissance maximale : 34.8 Billion.",
+    "price": 70
+  },
+  {
+    "id": 16,
+    "name_fr": "Trunks",
+    "image_url": "/uploads/img/collectibles/dragon_ball/16.webp",
+    "fact": "Race : Saïyan. Camp : Guerrier Z. Puissance maximale : 37.4 septllion.",
+    "price": 130
+  },
+  {
+    "id": 17,
+    "name_fr": "Master Roshi",
+    "image_url": "/uploads/img/collectibles/dragon_ball/17.webp",
+    "fact": "Race : Humain. Camp : Guerrier Z. Puissance maximale : 350.000.000.",
+    "price": 65
+  },
+  {
+    "id": 18,
+    "name_fr": "Bardock",
+    "image_url": "/uploads/img/collectibles/dragon_ball/18.webp",
+    "fact": "Race : Saïyan. Camp : Guerrier Z. Puissance maximale : 180.000.000.",
+    "price": 65
+  },
+  {
+    "id": 19,
+    "name_fr": "Launch",
+    "image_url": "/uploads/img/collectibles/dragon_ball/19.webp",
+    "fact": "Race : Humain. Camp : Guerrier Z. Puissance maximale : 0.",
+    "price": 60
+  },
+  {
+    "id": 20,
+    "name_fr": "Mr. Satan",
+    "image_url": "/uploads/img/collectibles/dragon_ball/20.webp",
+    "fact": "Race : Humain. Camp : Autre. Puissance maximale : 5.000.",
+    "price": 55
+  },
+  {
+    "id": 21,
+    "name_fr": "Dende",
+    "image_url": "/uploads/img/collectibles/dragon_ball/21.webp",
+    "fact": "Race : Namek. Camp : Guerrier Z. Puissance maximale : 3.200.",
+    "price": 55
+  },
+  {
+    "id": 22,
+    "name_fr": "Android 17",
+    "image_url": "/uploads/img/collectibles/dragon_ball/22.webp",
+    "fact": "Race : Cyborg. Camp : Méchant. Puissance maximale : 40 Quintillion.",
+    "price": 50
+  },
+  {
+    "id": 23,
+    "name_fr": "Android 16",
+    "image_url": "/uploads/img/collectibles/dragon_ball/23.webp",
+    "fact": "Race : Cyborg. Camp : Méchant. Puissance maximale : 440.000.000.",
+    "price": 50
+  },
+  {
+    "id": 24,
+    "name_fr": "Android 19",
+    "image_url": "/uploads/img/collectibles/dragon_ball/24.webp",
+    "fact": "Race : Cyborg. Camp : Méchant. Puissance maximale : 160,000,000.",
+    "price": 45
+  },
+  {
+    "id": 25,
+    "name_fr": "Android 20 (Dr. Gero)",
+    "image_url": "/uploads/img/collectibles/dragon_ball/25.webp",
+    "fact": "Race : Cyborg. Camp : Méchant. Puissance maximale : 158.100.000.",
+    "price": 45
+  },
+  {
+    "id": 26,
+    "name_fr": "Android 13",
+    "image_url": "/uploads/img/collectibles/dragon_ball/26.webp",
+    "fact": "Race : Cyborg. Camp : Méchant. Puissance maximale : 562.500.000.",
+    "price": 40
+  },
+  {
+    "id": 27,
+    "name_fr": "Android 14",
+    "image_url": "/uploads/img/collectibles/dragon_ball/27.webp",
+    "fact": "Race : Cyborg. Camp : Méchant. Puissance maximale : 192.500.000.",
+    "price": 40
+  },
+  {
+    "id": 28,
+    "name_fr": "Android 15",
+    "image_url": "/uploads/img/collectibles/dragon_ball/28.webp",
+    "fact": "Race : Cyborg. Camp : Méchant. Puissance maximale : 175.000.000.",
+    "price": 35
+  },
+  {
+    "id": 29,
+    "name_fr": "Nail",
+    "image_url": "/uploads/img/collectibles/dragon_ball/29.webp",
+    "fact": "Race : Namek. Camp : Guerrier Z. Puissance maximale : 42.000.",
+    "price": 35
+  },
+  {
+    "id": 30,
+    "name_fr": "Raditz",
+    "image_url": "/uploads/img/collectibles/dragon_ball/30.webp",
+    "fact": "Race : Saïyan. Camp : Armée de Freezer. Puissance maximale : 1.500.",
+    "price": 35
+  },
+  {
+    "id": 31,
+    "name_fr": "Babidi",
+    "image_url": "/uploads/img/collectibles/dragon_ball/31.webp",
+    "fact": "Race : Majin. Camp : Méchant. Puissance maximale : 0.",
+    "price": 30
+  },
+  {
+    "id": 32,
+    "name_fr": "Majin Buu",
+    "image_url": "/uploads/img/collectibles/dragon_ball/32.webp",
+    "fact": "Race : Majin. Camp : Méchant. Puissance maximale : 100 Trillion.",
+    "price": 155
+  },
+  {
+    "id": 33,
+    "name_fr": "Bills",
+    "image_url": "/uploads/img/collectibles/dragon_ball/33.webp",
+    "fact": "Race : Dieu. Camp : Autre. Puissance maximale : 100 septillion.",
+    "price": 30
+  },
+  {
+    "id": 34,
+    "name_fr": "Whis",
+    "image_url": "/uploads/img/collectibles/dragon_ball/34.webp",
+    "fact": "Race : Ange. Camp : Assistant de Beerus. Puissance maximale : 110 septillion.",
+    "price": 140
+  },
+  {
+    "id": 35,
+    "name_fr": "Zeno",
+    "image_url": "/uploads/img/collectibles/dragon_ball/35.webp",
+    "fact": "Race : Inconnue. Camp : Autre. Puissance maximale : 500 Septillion.",
+    "price": 30
+  },
+  {
+    "id": 36,
+    "name_fr": "Kibito-Shin",
+    "image_url": "/uploads/img/collectibles/dragon_ball/36.webp",
+    "fact": "Race : Dieu. Camp : Autre. Puissance maximale : 3.2 Billion.",
+    "price": 25
+  },
+  {
+    "id": 37,
+    "name_fr": "Jiren",
+    "image_url": "/uploads/img/collectibles/dragon_ball/37.webp",
+    "fact": "Race : Race de Jiren. Camp : Pride Troopers. Puissance maximale : 12.1 Septillion.",
+    "price": 25
+  },
+  {
+    "id": 38,
+    "name_fr": "Toppo",
+    "image_url": "/uploads/img/collectibles/dragon_ball/38.webp",
+    "fact": "Race : Dieu. Camp : Pride Troopers. Puissance maximale : 7.5 Sextillion.",
+    "price": 25
+  },
+  {
+    "id": 39,
+    "name_fr": "Dyspo",
+    "image_url": "/uploads/img/collectibles/dragon_ball/39.webp",
+    "fact": "Race : Dieu. Camp : Pride Troopers. Puissance maximale : 150 Quintillion.",
+    "price": 25
+  },
+  {
+    "id": 40,
+    "name_fr": "Marcarita ",
+    "image_url": "/uploads/img/collectibles/dragon_ball/40.webp",
+    "fact": "Race : Ange. Camp : Assistant de Vermoud. Puissance maximale : 99.5 septillion.",
+    "price": 20
+  },
+  {
+    "id": 41,
+    "name_fr": "Vermoudh",
+    "image_url": "/uploads/img/collectibles/dragon_ball/41.webp",
+    "fact": "Race : Dieu. Camp : Pride Troopers. Puissance maximale : 100 septillion.",
+    "price": 20
+  },
+  {
+    "id": 42,
+    "name_fr": "Grand Priest ",
+    "image_url": "/uploads/img/collectibles/dragon_ball/42.webp",
+    "fact": "Race : Ange. Camp : Autre. Puissance maximale : 969 Googolplex.",
+    "price": 20
+  },
+  {
+    "id": 43,
+    "name_fr": "Kaio del norte (Kaito)",
+    "image_url": "/uploads/img/collectibles/dragon_ball/43.webp",
+    "fact": "Race : Nucléico bénin. Camp : Autre. Puissance maximale : 6.000.",
+    "price": 20
+  },
+  {
+    "id": 44,
+    "name_fr": "Android 18",
+    "image_url": "/uploads/img/collectibles/dragon_ball/44.webp",
+    "fact": "Race : Cyborg. Camp : Guerrier Z. Puissance maximale : 300,000,000.",
+    "price": 20
+  },
+  {
+    "id": 45,
+    "name_fr": "Gogeta",
+    "image_url": "/uploads/img/collectibles/dragon_ball/45.webp",
+    "fact": "Race : Saïyan. Camp : Guerrier Z. Puissance maximale : 15 septillion.",
+    "price": 125
+  },
+  {
+    "id": 46,
+    "name_fr": "Vegetto",
+    "image_url": "/uploads/img/collectibles/dragon_ball/46.webp",
+    "fact": "Race : Saïyan. Camp : Guerrier Z. Puissance maximale : 10.8 Septillion.",
+    "price": 120
+  },
+  {
+    "id": 47,
+    "name_fr": "Janemba",
+    "image_url": "/uploads/img/collectibles/dragon_ball/47.webp",
+    "fact": "Race : Maléfique. Camp : Autre. Puissance maximale : 75 Billion.",
+    "price": 15
+  },
+  {
+    "id": 48,
+    "name_fr": "Broly",
+    "image_url": "/uploads/img/collectibles/dragon_ball/48.webp",
+    "fact": "Race : Saïyan. Camp : Autre. Puissance maximale : 11.2 Septillion.",
+    "price": 145
+  },
+  {
+    "id": 49,
+    "name_fr": "Kaio del Sur",
+    "image_url": "/uploads/img/collectibles/dragon_ball/49.webp",
+    "fact": "Race : Nucléico bénin. Camp : Autre.",
+    "price": 15
+  },
+  {
+    "id": 50,
+    "name_fr": "Kaio del este",
+    "image_url": "/uploads/img/collectibles/dragon_ball/50.webp",
+    "fact": "Race : Nucléico bénin. Camp : Autre.",
+    "price": 15
+  },
+  {
+    "id": 51,
+    "name_fr": "Kaio del Oeste",
+    "image_url": "/uploads/img/collectibles/dragon_ball/51.webp",
+    "fact": "Race : Nucléico bénin. Camp : Autre.",
+    "price": 15
+  },
+  {
+    "id": 52,
+    "name_fr": "Gran Kaio",
+    "image_url": "/uploads/img/collectibles/dragon_ball/52.webp",
+    "fact": "Race : Nucléico bénin. Camp : Autre.",
+    "price": 15
+  },
+  {
+    "id": 53,
+    "name_fr": "Kaio-shin del Este",
+    "image_url": "/uploads/img/collectibles/dragon_ball/53.webp",
+    "fact": "Race : Nucléico. Camp : Autre.",
+    "price": 15
+  },
+  {
+    "id": 54,
+    "name_fr": "Kaio-shin del Norte",
+    "image_url": "/uploads/img/collectibles/dragon_ball/54.webp",
+    "fact": "Race : Nucléico. Camp : Autre.",
+    "price": 10
+  },
+  {
+    "id": 55,
+    "name_fr": "Kaio-shin del Sur",
+    "image_url": "/uploads/img/collectibles/dragon_ball/55.webp",
+    "fact": "Race : Nucléico. Camp : Autre.",
+    "price": 10
+  },
+  {
+    "id": 56,
+    "name_fr": "Kaio-shin del Oeste",
+    "image_url": "/uploads/img/collectibles/dragon_ball/56.webp",
+    "fact": "Race : Nucléico bénin. Camp : Autre.",
+    "price": 10
+  },
+  {
+    "id": 57,
+    "name_fr": "Gran Kaio-shin",
+    "image_url": "/uploads/img/collectibles/dragon_ball/57.webp",
+    "fact": "Race : Nucléico bénin. Camp : Autre.",
+    "price": 10
+  },
+  {
+    "id": 58,
+    "name_fr": "Kibito",
+    "image_url": "/uploads/img/collectibles/dragon_ball/58.webp",
+    "fact": "Race : Nucléico. Camp : Autre.",
+    "price": 10
+  }
+]
