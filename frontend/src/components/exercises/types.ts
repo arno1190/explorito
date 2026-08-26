@@ -8,6 +8,8 @@ export interface McqOption {
   id: string;
   text: string;
   image?: string | null;
+  /** Aplat de couleur (CSS) pour les non-lecteurs : option affichée en pastille. */
+  color?: string | null;
 }
 
 export interface MultipleChoiceContent {

@@ -40,6 +40,9 @@ class MCQOption(BaseModel):
     id: str = Field(..., min_length=1)
     text: str = Field(..., min_length=1)
     image: str | None = None
+    # Pastille de couleur (CSS) pour les tout-petits non-lecteurs : l'option est
+    # affichée comme un aplat de couleur plutôt que du texte.
+    color: str | None = None
 
 
 class MultipleChoiceContent(BaseModel):

@@ -42,8 +42,12 @@ export function MultipleChoice({
     }
   };
 
-  // Layout « image d'abord » pour les non-lecteurs dès qu'une option est illustrée.
-  const hasImages = content.options.some((o) => o.image);
+  // Une option est « visuelle » (pas de lecture requise) si elle porte une image,
+  // une pastille de couleur, ou un texte fait uniquement d'emojis/de symboles.
+  const isGlyph = (t: string) => t.length > 0 && !/\p{L}\p{L}/u.test(t);
+  const useTiles = content.options.some(
+    (o) => o.image || o.color || isGlyph(o.text)
+  );
 
   return (
     <div className="space-y-6">
@@ -58,6 +62,7 @@ export function MultipleChoice({
         {content.options.map((option) => {
           const isSelected = selected.includes(option.id);
           const img = resolveMediaSrc(option.image);
+          const glyph = !option.image && !option.color && isGlyph(option.text);
           const stateClasses = cn(
             "border-fun-border bg-white text-fun-text hover:border-fun-sky",
             isSelected && !showResult && "border-fun-sky bg-fun-sky-light",
@@ -72,31 +77,41 @@ export function MultipleChoice({
             disabled && "cursor-not-allowed"
           );
 
-          if (hasImages) {
+          if (useTiles) {
             return (
               <button
                 key={option.id}
                 type="button"
                 onClick={() => toggle(option.id)}
                 disabled={disabled}
+                aria-label={option.text}
                 className={cn(
-                  "flex flex-col items-center gap-2 rounded-2xl border-2 p-3 text-center text-base font-bold transition-all active:scale-95",
+                  "flex min-h-[8rem] flex-col items-center justify-center gap-2 rounded-2xl border-2 p-3 text-center text-base font-bold transition-all active:scale-95",
                   stateClasses
                 )}
               >
                 {img ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={img}
-                    alt={option.text}
-                    className="h-28 w-28 object-contain sm:h-32 sm:w-32"
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={img}
+                      alt={option.text}
+                      className="h-28 w-28 object-contain sm:h-32 sm:w-32"
+                    />
+                    <span>{option.text}</span>
+                  </>
+                ) : option.color ? (
+                  <span
+                    className="h-24 w-24 rounded-2xl border-2 border-black/10 sm:h-28 sm:w-28"
+                    style={{ backgroundColor: option.color }}
                   />
                 ) : (
-                  <span className="flex h-28 w-28 items-center justify-center text-4xl sm:h-32 sm:w-32">
+                  // Options emoji (ex. quantités « 🐱🐱 ») : grand rendu, pas de texte.
+                  <span className="flex max-w-full flex-wrap items-center justify-center gap-0.5 text-4xl leading-tight sm:text-5xl">
                     {option.text}
                   </span>
                 )}
-                <span>{option.text}</span>
+                {!img && !glyph && !option.color && <span>{option.text}</span>}
               </button>
             );
           }
