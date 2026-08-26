@@ -48,7 +48,9 @@ import {
   Users,
   LogOut,
   UserPlus,
+  Pencil,
 } from "lucide-react";
+import { EditChildDialog } from "@/components/profile/EditChildDialog";
 import type { ChildResponse, ChildStatsResponse } from "@/lib/api/model";
 
 const LEVELS: { value: LevelEnum; label: string }[] = [
@@ -96,6 +98,7 @@ export default function DashboardPage() {
   };
   const [error, setError] = useState("");
   const [avatarChildId, setAvatarChildId] = useState<string | null>(null);
+  const [editChild, setEditChild] = useState<ChildResponse | null>(null);
 
   useEffect(() => {
     loadChildren();
@@ -371,15 +374,25 @@ export default function DashboardPage() {
                         )}
                       </div>
                     </div>
-                    {child.is_owner && (
+                    <div className="flex items-center">
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleDeleteChild(child.id)}
+                        onClick={() => setEditChild(child)}
+                        title="Modifier"
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <Pencil className="h-4 w-4 text-fun-text-muted" />
                       </Button>
-                    )}
+                      {child.is_owner && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteChild(child.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                   <AvatarPicker
                     open={avatarChildId === child.id}
@@ -556,6 +569,19 @@ export default function DashboardPage() {
         childId={manageChild?.id ?? ""}
         childName={manageChild?.name ?? ""}
       />
+
+      {editChild && (
+        <EditChildDialog
+          child={editChild}
+          open={editChild !== null}
+          onOpenChange={(o) => !o && setEditChild(null)}
+          onSaved={(updated) =>
+            setChildren((prev) =>
+              prev.map((c) => (c.id === updated.id ? { ...c, ...updated } : c))
+            )
+          }
+        />
+      )}
     </div>
   );
 }

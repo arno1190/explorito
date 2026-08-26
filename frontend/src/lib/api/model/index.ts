@@ -16,6 +16,7 @@ export * from "./bodyUploadMyAvatarApiV1AuthMeAvatarPost";
 export * from "./catalogGridItem";
 export * from "./catalogInfo";
 export * from "./catalogItem";
+export * from "./catalogMeta";
 export * from "./childCreate";
 export * from "./childHistoryResponse";
 export * from "./childResponse";

@@ -29,6 +29,7 @@ from app.models.collection import (
     PointAward,
 )
 from app.models.progress import SubjectProgress
+from app.models.user import Profile
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
@@ -178,11 +179,39 @@ def unlocked_counts(user_id: UUID, db: Session) -> dict[str, int]:
     return {str(cat): int(n) for cat, n in rows}
 
 
+def all_catalog_metas() -> list[dict[str, Any]]:
+    """Liste complète des catalogues (non filtrée) — pour la gestion parentale."""
+    return [
+        {"slug": slug, "name": CATALOGS[slug]["name"], "icon": CATALOGS[slug]["icon"], "total": len(load_catalog(slug))}
+        for slug in catalog_slugs()
+    ]
+
+
+def disabled_collections_for(user_id: UUID, db: Session) -> set[str]:
+    """Slugs de catalogues masqués pour cet enfant (choix du parent).
+
+    Stocké dans ``Profile.settings["disabled_collections"]`` (défaut : aucun).
+    """
+    profile = db.query(Profile).filter(Profile.user_id == user_id).first()
+    if not profile or not profile.settings:
+        return set()
+    raw = profile.settings.get("disabled_collections") or []
+    return {str(s) for s in raw} if isinstance(raw, list) else set()
+
+
+def catalog_allowed(user_id: UUID, slug: str, db: Session) -> bool:
+    """Un catalogue est-il accessible à cet enfant ?"""
+    return slug not in disabled_collections_for(user_id, db)
+
+
 def catalog_infos(user_id: UUID, db: Session) -> list[dict[str, Any]]:
     """Résumé de chaque catalogue disponible (total + débloqués)."""
     counts = unlocked_counts(user_id, db)
+    disabled = disabled_collections_for(user_id, db)
     infos: list[dict[str, Any]] = []
     for slug in catalog_slugs():
+        if slug in disabled:
+            continue
         meta = CATALOGS[slug]
         infos.append(
             {

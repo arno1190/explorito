@@ -23,6 +23,7 @@ import type {
 import type {
   AwardResponse,
   CatalogGridItem,
+  CatalogMeta,
   HTTPValidationError,
   PurchaseRequest,
   PurchaseResponse,
@@ -169,6 +170,157 @@ export function useGetWalletApiV1CollectionMeGet<
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getGetWalletApiV1CollectionMeGetQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Liste complète des catalogues (non filtrée) — pour la gestion parentale.
+ * @summary List Catalogs
+ */
+export const listCatalogsApiV1CollectionCatalogsGet = (
+  signal?: AbortSignal
+) => {
+  return axiosInstance<CatalogMeta[]>({
+    url: `/api/v1/collection/catalogs`,
+    method: "GET",
+    signal,
+  });
+};
+
+export const getListCatalogsApiV1CollectionCatalogsGetQueryKey = () => {
+  return [`/api/v1/collection/catalogs`] as const;
+};
+
+export const getListCatalogsApiV1CollectionCatalogsGetQueryOptions = <
+  TData = Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>,
+      TError,
+      TData
+    >
+  >;
+}) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getListCatalogsApiV1CollectionCatalogsGetQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>
+  > = ({ signal }) => listCatalogsApiV1CollectionCatalogsGet(signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListCatalogsApiV1CollectionCatalogsGetQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>
+>;
+export type ListCatalogsApiV1CollectionCatalogsGetQueryError = unknown;
+
+export function useListCatalogsApiV1CollectionCatalogsGet<
+  TData = Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>,
+  TError = unknown,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>,
+          TError,
+          Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListCatalogsApiV1CollectionCatalogsGet<
+  TData = Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>,
+          TError,
+          Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListCatalogsApiV1CollectionCatalogsGet<
+  TData = Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary List Catalogs
+ */
+
+export function useListCatalogsApiV1CollectionCatalogsGet<
+  TData = Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions =
+    getListCatalogsApiV1CollectionCatalogsGetQueryOptions(options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

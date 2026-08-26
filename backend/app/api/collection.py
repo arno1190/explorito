@@ -12,6 +12,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.api.auth import get_current_active_user
 from app.api.subjects import acting_child
 from app.core.database import get_db
 from app.models.collection import WALLETS
@@ -19,6 +20,7 @@ from app.models.user import User
 from app.schemas.collection import (
     AwardResponse,
     CatalogGridItem,
+    CatalogMeta,
     PurchaseRequest,
     PurchaseResponse,
     WalletSummary,
@@ -29,6 +31,8 @@ from app.services.collection import (
     InsufficientBalanceError,
     ItemNotFoundError,
     acknowledge_awards,
+    all_catalog_metas,
+    catalog_allowed,
     catalog_infos,
     get_behavior_earned,
     get_points_earned,
@@ -64,6 +68,14 @@ async def get_wallet(
     )
 
 
+@router.get("/catalogs", response_model=list[CatalogMeta])
+async def list_catalogs(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+) -> list[CatalogMeta]:
+    """Liste complète des catalogues (non filtrée) — pour la gestion parentale."""
+    return [CatalogMeta(**m) for m in all_catalog_metas()]
+
+
 @router.get("/catalogs/{slug}", response_model=list[CatalogGridItem])
 async def get_catalog(
     slug: str,
@@ -71,6 +83,8 @@ async def get_catalog(
     db: Annotated[Session, Depends(get_db)],
 ) -> list[CatalogGridItem]:
     """Catalogue complet avec l'état de possession de l'utilisateur."""
+    if not catalog_allowed(acting.id, slug, db):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Collection non accessible.")
     try:
         catalog = load_catalog(slug)
     except CatalogNotFoundError as exc:
@@ -98,6 +112,8 @@ async def purchase(
     """Débloque un objet en dépensant le porte-monnaie choisi (points | behavior)."""
     if body.currency not in WALLETS:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Porte-monnaie inconnu")
+    if not catalog_allowed(acting.id, body.catalog, db):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Collection non accessible.")
     try:
         item = purchase_item(acting.id, body.catalog, body.item_id, db, currency=body.currency)
     except (CatalogNotFoundError, ItemNotFoundError) as exc:

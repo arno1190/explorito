@@ -32,6 +32,15 @@ class CatalogInfo(BaseModel):
     unlocked: int
 
 
+class CatalogMeta(BaseModel):
+    """Métadonnées d'un catalogue (liste complète, non filtrée) — gestion parent."""
+
+    slug: str
+    name: str
+    icon: str
+    total: int
+
+
 class WalletSummary(BaseModel):
     """Deux porte-monnaies dépensables + avancement par catalogue.
 

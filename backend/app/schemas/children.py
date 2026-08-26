@@ -34,6 +34,9 @@ class ChildUpdate(BaseModel):
     birth_date: date | None = Field(None, description="Date de naissance")
     level: LevelEnum | None = Field(None, description="Niveau scolaire (PS à CM2)")
     avatar_url: str | None = Field(None, max_length=512, description="Avatar (emoji ou URL d'image)")
+    disabled_collections: list[str] | None = Field(
+        None, description="Slugs de collections masquées pour cet enfant (ex. ['harry_potter'])"
+    )
 
     class Config:
         json_schema_extra = {"example": {"name": "Alice", "birth_date": "2015-06-15"}}
@@ -51,6 +54,8 @@ class ChildResponse(BaseModel):
     level: LevelEnum | None = None
     avatar_url: str | None = None
     created_at: datetime
+    # Collections masquées pour cet enfant (choix du parent).
+    disabled_collections: list[str] = []
     # Garde partagée : rôle de l'appelant sur cet enfant et s'il en est propriétaire.
     role: str = "owner"
     is_owner: bool = True

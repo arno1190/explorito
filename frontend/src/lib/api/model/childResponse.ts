@@ -17,6 +17,7 @@ export interface ChildResponse {
   level?: LevelEnum | null;
   avatar_url?: string | null;
   created_at: string;
+  disabled_collections?: string[];
   role?: string;
   is_owner?: boolean;
 }

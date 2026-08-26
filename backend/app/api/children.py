@@ -12,6 +12,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.attributes import flag_modified
 
 from app.api.auth import get_current_user
 from app.core.database import get_db
@@ -90,6 +91,7 @@ def _child_response(profile: Profile, current_user: User, db: Session) -> ChildR
         level=profile.level,
         avatar_url=profile.avatar_url,
         created_at=profile.created_at,
+        disabled_collections=list((profile.settings or {}).get("disabled_collections") or []),
         role=role,
         is_owner=role == ROLE_OWNER,
     )
@@ -169,6 +171,12 @@ async def update_child(
         profile.level = child_data.level
     if child_data.avatar_url is not None:
         profile.avatar_url = child_data.avatar_url or None
+    if child_data.disabled_collections is not None:
+        profile.settings = {
+            **(profile.settings or {}),
+            "disabled_collections": sorted(set(child_data.disabled_collections)),
+        }
+        flag_modified(profile, "settings")
 
     db.commit()
     db.refresh(profile)

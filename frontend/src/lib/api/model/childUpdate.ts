@@ -20,4 +20,6 @@ export interface ChildUpdate {
   level?: LevelEnum | null;
   /** Avatar (emoji ou URL d'image) */
   avatar_url?: string | null;
+  /** Slugs de collections masquées pour cet enfant (ex. ['harry_potter']) */
+  disabled_collections?: string[] | null;
 }
