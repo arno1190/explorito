@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { ChildLayout } from "@/components/layout/ChildLayout";
+import { ImpersonationBanner } from "@/components/layout/ImpersonationBanner";
 import {
   actingRoleHome,
   isPathAllowedForRole,
@@ -44,5 +45,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return null;
   }
 
-  return <ChildLayout>{children}</ChildLayout>;
+  return (
+    <>
+      <ImpersonationBanner />
+      <ChildLayout>{children}</ChildLayout>
+    </>
+  );
 }

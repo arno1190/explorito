@@ -6,7 +6,7 @@ import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, Column, Date, DateTime, Enum, ForeignKey, String
+from sqlalchemy import JSON, Boolean, Column, Date, DateTime, Enum, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -46,6 +46,10 @@ class User(Base):
     pin_hash = Column(String, nullable=True)
     role = Column(Enum(UserRole), nullable=False, default=UserRole.CHILD)
     is_active = Column(Boolean, default=True)
+    # Suivi de connexion (parents) : compteur cumulé (survit à la purge des events)
+    # et dernière connexion, pour le tableau de bord admin.
+    login_count = Column(Integer, default=0, nullable=False)
+    last_login_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

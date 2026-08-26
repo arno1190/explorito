@@ -33,10 +33,7 @@ const NAV_LINKS: Record<ActingRole, { href: string; label: string }[]> = {
     { href: "/collection", label: "Collections" },
   ],
   parent: [{ href: "/dashboard", label: "Tableau de bord" }],
-  admin: [
-    { href: "/admin", label: "Contenu" },
-    { href: "/admin/users", label: "Utilisateurs" },
-  ],
+  admin: [{ href: "/admin", label: "Admin" }],
 };
 
 export function Header() {

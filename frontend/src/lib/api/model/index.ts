@@ -8,6 +8,8 @@
 export * from "./acceptResponse";
 export * from "./achievementRarity";
 export * from "./achievementResponse";
+export * from "./adminOverview";
+export * from "./adminUserRow";
 export * from "./awardCreate";
 export * from "./awardResponse";
 export * from "./bodyLoginFormApiV1AuthLoginFormPost";
@@ -91,6 +93,7 @@ export * from "./pythagoreSessionRequest";
 export * from "./pythagoreSessionResponse";
 export * from "./recentLessonResponse";
 export * from "./recentLessonsApiV1LessonsRecentGetParams";
+export * from "./recentLogin";
 export * from "./refreshTokenRequest";
 export * from "./rewardResponse";
 export * from "./solveRequest";

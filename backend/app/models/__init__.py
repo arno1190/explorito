@@ -2,6 +2,7 @@
 Modèles SQLAlchemy pour l'application Explorito
 """
 
+from app.models.admin import LoginEvent
 from app.models.challenge import PythagoreSession, SudokuSession
 from app.models.collection import CollectibleUnlock, PointAward
 from app.models.content import Exercise, LearningPath, Lesson, Media, Subject
@@ -41,4 +42,5 @@ __all__ = [
     "Guardianship",
     "CoParentLink",
     "Invitation",
+    "LoginEvent",
 ]

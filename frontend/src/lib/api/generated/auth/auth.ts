@@ -512,7 +512,7 @@ export const getGetCurrentUserInfoApiV1AuthMeGetQueryKey = () => {
 
 export const getGetCurrentUserInfoApiV1AuthMeGetQueryOptions = <
   TData = Awaited<ReturnType<typeof getCurrentUserInfoApiV1AuthMeGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(options?: {
   query?: Partial<
     UseQueryOptions<
@@ -541,11 +541,11 @@ export const getGetCurrentUserInfoApiV1AuthMeGetQueryOptions = <
 export type GetCurrentUserInfoApiV1AuthMeGetQueryResult = NonNullable<
   Awaited<ReturnType<typeof getCurrentUserInfoApiV1AuthMeGet>>
 >;
-export type GetCurrentUserInfoApiV1AuthMeGetQueryError = unknown;
+export type GetCurrentUserInfoApiV1AuthMeGetQueryError = HTTPValidationError;
 
 export function useGetCurrentUserInfoApiV1AuthMeGet<
   TData = Awaited<ReturnType<typeof getCurrentUserInfoApiV1AuthMeGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options: {
     query: Partial<
@@ -570,7 +570,7 @@ export function useGetCurrentUserInfoApiV1AuthMeGet<
 };
 export function useGetCurrentUserInfoApiV1AuthMeGet<
   TData = Awaited<ReturnType<typeof getCurrentUserInfoApiV1AuthMeGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -595,7 +595,7 @@ export function useGetCurrentUserInfoApiV1AuthMeGet<
 };
 export function useGetCurrentUserInfoApiV1AuthMeGet<
   TData = Awaited<ReturnType<typeof getCurrentUserInfoApiV1AuthMeGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -616,7 +616,7 @@ export function useGetCurrentUserInfoApiV1AuthMeGet<
 
 export function useGetCurrentUserInfoApiV1AuthMeGet<
   TData = Awaited<ReturnType<typeof getCurrentUserInfoApiV1AuthMeGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -859,7 +859,7 @@ export const logoutApiV1AuthLogoutPost = (signal?: AbortSignal) => {
 };
 
 export const getLogoutApiV1AuthLogoutPostMutationOptions = <
-  TError = unknown,
+  TError = HTTPValidationError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -897,13 +897,13 @@ export type LogoutApiV1AuthLogoutPostMutationResult = NonNullable<
   Awaited<ReturnType<typeof logoutApiV1AuthLogoutPost>>
 >;
 
-export type LogoutApiV1AuthLogoutPostMutationError = unknown;
+export type LogoutApiV1AuthLogoutPostMutationError = HTTPValidationError;
 
 /**
  * @summary Logout
  */
 export const useLogoutApiV1AuthLogoutPost = <
-  TError = unknown,
+  TError = HTTPValidationError,
   TContext = unknown,
 >(
   options?: {

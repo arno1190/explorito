@@ -51,7 +51,7 @@ export const getGetChildrenApiV1ChildrenGetQueryKey = () => {
 
 export const getGetChildrenApiV1ChildrenGetQueryOptions = <
   TData = Awaited<ReturnType<typeof getChildrenApiV1ChildrenGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(options?: {
   query?: Partial<
     UseQueryOptions<
@@ -80,11 +80,11 @@ export const getGetChildrenApiV1ChildrenGetQueryOptions = <
 export type GetChildrenApiV1ChildrenGetQueryResult = NonNullable<
   Awaited<ReturnType<typeof getChildrenApiV1ChildrenGet>>
 >;
-export type GetChildrenApiV1ChildrenGetQueryError = unknown;
+export type GetChildrenApiV1ChildrenGetQueryError = HTTPValidationError;
 
 export function useGetChildrenApiV1ChildrenGet<
   TData = Awaited<ReturnType<typeof getChildrenApiV1ChildrenGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options: {
     query: Partial<
@@ -109,7 +109,7 @@ export function useGetChildrenApiV1ChildrenGet<
 };
 export function useGetChildrenApiV1ChildrenGet<
   TData = Awaited<ReturnType<typeof getChildrenApiV1ChildrenGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -134,7 +134,7 @@ export function useGetChildrenApiV1ChildrenGet<
 };
 export function useGetChildrenApiV1ChildrenGet<
   TData = Awaited<ReturnType<typeof getChildrenApiV1ChildrenGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -155,7 +155,7 @@ export function useGetChildrenApiV1ChildrenGet<
 
 export function useGetChildrenApiV1ChildrenGet<
   TData = Awaited<ReturnType<typeof getChildrenApiV1ChildrenGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<

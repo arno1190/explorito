@@ -30,6 +30,13 @@ instance.interceptors.request.use((config) => {
         // ignore un JSON invalide
       }
     }
+    // Mode admin « voir en tant que » : l'admin observe l'app dans la peau d'un
+    // autre compte (parent ou enfant). Le backend applique alors les droits et
+    // les données de ce compte cible.
+    const impersonateUser = localStorage.getItem("impersonate_user");
+    if (impersonateUser) {
+      config.headers["X-Impersonate-User-Id"] = String(impersonateUser);
+    }
   }
   // Pour un envoi multipart (upload), laisser axios définir le Content-Type
   // avec la bonne « boundary » plutôt que le JSON par défaut de l'instance.

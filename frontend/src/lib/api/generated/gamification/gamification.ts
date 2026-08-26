@@ -275,7 +275,7 @@ export const getGetUserAchievementsApiV1GamificationAchievementsMeGetQueryOption
     TData = Awaited<
       ReturnType<typeof getUserAchievementsApiV1GamificationAchievementsMeGet>
     >,
-    TError = unknown,
+    TError = HTTPValidationError,
   >(options?: {
     query?: Partial<
       UseQueryOptions<
@@ -318,13 +318,13 @@ export type GetUserAchievementsApiV1GamificationAchievementsMeGetQueryResult =
     >
   >;
 export type GetUserAchievementsApiV1GamificationAchievementsMeGetQueryError =
-  unknown;
+  HTTPValidationError;
 
 export function useGetUserAchievementsApiV1GamificationAchievementsMeGet<
   TData = Awaited<
     ReturnType<typeof getUserAchievementsApiV1GamificationAchievementsMeGet>
   >,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options: {
     query: Partial<
@@ -363,7 +363,7 @@ export function useGetUserAchievementsApiV1GamificationAchievementsMeGet<
   TData = Awaited<
     ReturnType<typeof getUserAchievementsApiV1GamificationAchievementsMeGet>
   >,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -402,7 +402,7 @@ export function useGetUserAchievementsApiV1GamificationAchievementsMeGet<
   TData = Awaited<
     ReturnType<typeof getUserAchievementsApiV1GamificationAchievementsMeGet>
   >,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -429,7 +429,7 @@ export function useGetUserAchievementsApiV1GamificationAchievementsMeGet<
   TData = Awaited<
     ReturnType<typeof getUserAchievementsApiV1GamificationAchievementsMeGet>
   >,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -488,7 +488,7 @@ export const getGetUserStreakApiV1GamificationStreakGetQueryKey = () => {
 
 export const getGetUserStreakApiV1GamificationStreakGetQueryOptions = <
   TData = Awaited<ReturnType<typeof getUserStreakApiV1GamificationStreakGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(options?: {
   query?: Partial<
     UseQueryOptions<
@@ -518,11 +518,12 @@ export const getGetUserStreakApiV1GamificationStreakGetQueryOptions = <
 export type GetUserStreakApiV1GamificationStreakGetQueryResult = NonNullable<
   Awaited<ReturnType<typeof getUserStreakApiV1GamificationStreakGet>>
 >;
-export type GetUserStreakApiV1GamificationStreakGetQueryError = unknown;
+export type GetUserStreakApiV1GamificationStreakGetQueryError =
+  HTTPValidationError;
 
 export function useGetUserStreakApiV1GamificationStreakGet<
   TData = Awaited<ReturnType<typeof getUserStreakApiV1GamificationStreakGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options: {
     query: Partial<
@@ -547,7 +548,7 @@ export function useGetUserStreakApiV1GamificationStreakGet<
 };
 export function useGetUserStreakApiV1GamificationStreakGet<
   TData = Awaited<ReturnType<typeof getUserStreakApiV1GamificationStreakGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -572,7 +573,7 @@ export function useGetUserStreakApiV1GamificationStreakGet<
 };
 export function useGetUserStreakApiV1GamificationStreakGet<
   TData = Awaited<ReturnType<typeof getUserStreakApiV1GamificationStreakGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -593,7 +594,7 @@ export function useGetUserStreakApiV1GamificationStreakGet<
 
 export function useGetUserStreakApiV1GamificationStreakGet<
   TData = Awaited<ReturnType<typeof getUserStreakApiV1GamificationStreakGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -646,7 +647,7 @@ export const getGetDailyGoalApiV1GamificationDailyGoalGetQueryKey = () => {
 
 export const getGetDailyGoalApiV1GamificationDailyGoalGetQueryOptions = <
   TData = Awaited<ReturnType<typeof getDailyGoalApiV1GamificationDailyGoalGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(options?: {
   query?: Partial<
     UseQueryOptions<
@@ -676,11 +677,12 @@ export const getGetDailyGoalApiV1GamificationDailyGoalGetQueryOptions = <
 export type GetDailyGoalApiV1GamificationDailyGoalGetQueryResult = NonNullable<
   Awaited<ReturnType<typeof getDailyGoalApiV1GamificationDailyGoalGet>>
 >;
-export type GetDailyGoalApiV1GamificationDailyGoalGetQueryError = unknown;
+export type GetDailyGoalApiV1GamificationDailyGoalGetQueryError =
+  HTTPValidationError;
 
 export function useGetDailyGoalApiV1GamificationDailyGoalGet<
   TData = Awaited<ReturnType<typeof getDailyGoalApiV1GamificationDailyGoalGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options: {
     query: Partial<
@@ -705,7 +707,7 @@ export function useGetDailyGoalApiV1GamificationDailyGoalGet<
 };
 export function useGetDailyGoalApiV1GamificationDailyGoalGet<
   TData = Awaited<ReturnType<typeof getDailyGoalApiV1GamificationDailyGoalGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -730,7 +732,7 @@ export function useGetDailyGoalApiV1GamificationDailyGoalGet<
 };
 export function useGetDailyGoalApiV1GamificationDailyGoalGet<
   TData = Awaited<ReturnType<typeof getDailyGoalApiV1GamificationDailyGoalGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -751,7 +753,7 @@ export function useGetDailyGoalApiV1GamificationDailyGoalGet<
 
 export function useGetDailyGoalApiV1GamificationDailyGoalGet<
   TData = Awaited<ReturnType<typeof getDailyGoalApiV1GamificationDailyGoalGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -1042,7 +1044,7 @@ export const getGetUserRewardsApiV1GamificationRewardsGetQueryKey = () => {
 
 export const getGetUserRewardsApiV1GamificationRewardsGetQueryOptions = <
   TData = Awaited<ReturnType<typeof getUserRewardsApiV1GamificationRewardsGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(options?: {
   query?: Partial<
     UseQueryOptions<
@@ -1072,11 +1074,12 @@ export const getGetUserRewardsApiV1GamificationRewardsGetQueryOptions = <
 export type GetUserRewardsApiV1GamificationRewardsGetQueryResult = NonNullable<
   Awaited<ReturnType<typeof getUserRewardsApiV1GamificationRewardsGet>>
 >;
-export type GetUserRewardsApiV1GamificationRewardsGetQueryError = unknown;
+export type GetUserRewardsApiV1GamificationRewardsGetQueryError =
+  HTTPValidationError;
 
 export function useGetUserRewardsApiV1GamificationRewardsGet<
   TData = Awaited<ReturnType<typeof getUserRewardsApiV1GamificationRewardsGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options: {
     query: Partial<
@@ -1101,7 +1104,7 @@ export function useGetUserRewardsApiV1GamificationRewardsGet<
 };
 export function useGetUserRewardsApiV1GamificationRewardsGet<
   TData = Awaited<ReturnType<typeof getUserRewardsApiV1GamificationRewardsGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -1126,7 +1129,7 @@ export function useGetUserRewardsApiV1GamificationRewardsGet<
 };
 export function useGetUserRewardsApiV1GamificationRewardsGet<
   TData = Awaited<ReturnType<typeof getUserRewardsApiV1GamificationRewardsGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -1147,7 +1150,7 @@ export function useGetUserRewardsApiV1GamificationRewardsGet<
 
 export function useGetUserRewardsApiV1GamificationRewardsGet<
   TData = Awaited<ReturnType<typeof getUserRewardsApiV1GamificationRewardsGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -1207,7 +1210,7 @@ export const getGetFamilyLeaderboardApiV1GamificationLeaderboardGetQueryOptions 
     TData = Awaited<
       ReturnType<typeof getFamilyLeaderboardApiV1GamificationLeaderboardGet>
     >,
-    TError = unknown,
+    TError = HTTPValidationError,
   >(options?: {
     query?: Partial<
       UseQueryOptions<
@@ -1248,13 +1251,13 @@ export type GetFamilyLeaderboardApiV1GamificationLeaderboardGetQueryResult =
     >
   >;
 export type GetFamilyLeaderboardApiV1GamificationLeaderboardGetQueryError =
-  unknown;
+  HTTPValidationError;
 
 export function useGetFamilyLeaderboardApiV1GamificationLeaderboardGet<
   TData = Awaited<
     ReturnType<typeof getFamilyLeaderboardApiV1GamificationLeaderboardGet>
   >,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options: {
     query: Partial<
@@ -1291,7 +1294,7 @@ export function useGetFamilyLeaderboardApiV1GamificationLeaderboardGet<
   TData = Awaited<
     ReturnType<typeof getFamilyLeaderboardApiV1GamificationLeaderboardGet>
   >,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -1328,7 +1331,7 @@ export function useGetFamilyLeaderboardApiV1GamificationLeaderboardGet<
   TData = Awaited<
     ReturnType<typeof getFamilyLeaderboardApiV1GamificationLeaderboardGet>
   >,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -1353,7 +1356,7 @@ export function useGetFamilyLeaderboardApiV1GamificationLeaderboardGet<
   TData = Awaited<
     ReturnType<typeof getFamilyLeaderboardApiV1GamificationLeaderboardGet>
   >,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<

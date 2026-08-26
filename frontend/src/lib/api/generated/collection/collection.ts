@@ -199,7 +199,7 @@ export const getListCatalogsApiV1CollectionCatalogsGetQueryKey = () => {
 
 export const getListCatalogsApiV1CollectionCatalogsGetQueryOptions = <
   TData = Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(options?: {
   query?: Partial<
     UseQueryOptions<
@@ -229,11 +229,12 @@ export const getListCatalogsApiV1CollectionCatalogsGetQueryOptions = <
 export type ListCatalogsApiV1CollectionCatalogsGetQueryResult = NonNullable<
   Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>
 >;
-export type ListCatalogsApiV1CollectionCatalogsGetQueryError = unknown;
+export type ListCatalogsApiV1CollectionCatalogsGetQueryError =
+  HTTPValidationError;
 
 export function useListCatalogsApiV1CollectionCatalogsGet<
   TData = Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options: {
     query: Partial<
@@ -258,7 +259,7 @@ export function useListCatalogsApiV1CollectionCatalogsGet<
 };
 export function useListCatalogsApiV1CollectionCatalogsGet<
   TData = Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -283,7 +284,7 @@ export function useListCatalogsApiV1CollectionCatalogsGet<
 };
 export function useListCatalogsApiV1CollectionCatalogsGet<
   TData = Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<
@@ -304,7 +305,7 @@ export function useListCatalogsApiV1CollectionCatalogsGet<
 
 export function useListCatalogsApiV1CollectionCatalogsGet<
   TData = Awaited<ReturnType<typeof listCatalogsApiV1CollectionCatalogsGet>>,
-  TError = unknown,
+  TError = HTTPValidationError,
 >(
   options?: {
     query?: Partial<

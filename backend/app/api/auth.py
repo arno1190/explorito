@@ -2,10 +2,12 @@
 Endpoints d'authentification JWT
 """
 
+import logging
 from datetime import timedelta
 from typing import Annotated
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Header, HTTPException, UploadFile, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
@@ -28,8 +30,10 @@ from app.schemas.auth import (
     Token,
     UserResponse,
 )
+from app.services.admin import record_login
 from app.services.uploads import save_avatar
 
+logger = logging.getLogger("explorito.admin")
 router = APIRouter()
 
 # OAuth2 scheme pour l'extraction du token depuis les headers
@@ -55,8 +59,9 @@ def _role_for_email(email: str) -> UserRole:
     return UserRole.ADMIN if email.lower() in settings.admin_emails_set else UserRole.PARENT
 
 
-def _issue_token(user: User) -> Token:
-    """Émet les jetons applicatifs (accès + rafraîchissement) pour un parent."""
+def _issue_token(user: User, db: Session) -> Token:
+    """Émet les jetons applicatifs (accès + rafraîchissement) et journalise la connexion."""
+    record_login(db, user)
     access_token = create_access_token(
         data={"sub": user.email, "role": user.role.value, "user_id": str(user.id)},
         expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
@@ -113,6 +118,7 @@ def _upsert_parent(
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Annotated[Session, Depends(get_db)],
+    x_impersonate_user_id: Annotated[str | None, Header()] = None,
 ) -> User:
     """
     Récupère l'utilisateur actuel à partir du token JWT
@@ -144,6 +150,18 @@ async def get_current_user(
     user = get_user_by_email(db, email=email)
     if user is None:
         raise credentials_exception
+
+    # Impersonation admin : un administrateur peut « voir en tant que » un autre
+    # compte via l'en-tête X-Impersonate-User-Id (audité). Réservé aux admins.
+    if x_impersonate_user_id and user.role == UserRole.ADMIN:
+        try:
+            target_id = UUID(x_impersonate_user_id)
+        except ValueError:
+            return user
+        target = db.query(User).filter(User.id == target_id).first()
+        if target is not None:
+            logger.info("admin_impersonation admin=%s target=%s", user.email, target_id)
+            return target
 
     return user
 
@@ -200,7 +218,7 @@ async def google_login(payload: GoogleAuthRequest, db: Annotated[Session, Depend
     )
     if not user.is_active:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Compte désactivé.")
-    return _issue_token(user)
+    return _issue_token(user, db)
 
 
 if settings.DEBUG:
@@ -209,7 +227,7 @@ if settings.DEBUG:
     async def dev_login(payload: DevLoginRequest, db: Annotated[Session, Depends(get_db)]) -> Token:
         """Connexion sans Google pour le dev et les tests (email → jeton parent)."""
         user = _upsert_parent(db, payload.email.lower(), display_name=payload.display_name)
-        return _issue_token(user)
+        return _issue_token(user, db)
 
 
 @router.post("/pin", response_model=UserResponse)
