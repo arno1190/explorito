@@ -877,7 +877,9 @@ def knowledge_cm2() -> list[dict[str, Any]]:
 def build_curriculum() -> list[dict[str, Any]]:
     """Assemble l'ensemble du curriculum à insérer."""
     themes: list[dict[str, Any]] = []
-    themes += maternelle()
+    # La maternelle (PS/MS/GS) est désormais gérée par scripts/seed_maternelle.py
+    # (exercices 100 % visuels + audio pour non-lecteurs). L'ancienne maternelle()
+    # à options textuelles n'est plus insérée.
     themes += maths_ce2() + knowledge_ce2()
     themes += maths_cm1() + knowledge_cm1()
     themes += maths_cm2() + knowledge_cm2()
