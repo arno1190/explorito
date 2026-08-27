@@ -1,12 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { resolveMediaSrc } from "@/lib/media";
 import type {
   ExerciseTypeComponentProps,
+  McqOption,
   MultipleChoiceContent,
 } from "./types";
+
+/** Mélange (Fisher-Yates) une copie du tableau. */
+function shuffled<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 /**
  * QCM. Émet `{ option_ids: string[] }`.
@@ -23,6 +34,14 @@ export function MultipleChoice({
 }: ExerciseTypeComponentProps<MultipleChoiceContent>) {
   const multiple = content.multiple ?? false;
   const [selected, setSelected] = useState<string[]>([]);
+
+  // Ordre d'affichage mélangé une fois par question : la bonne réponse n'est plus
+  // à une position prévisible (sinon un enfant « clique toujours la 1re/2e »).
+  // La correction se fait par `id`, donc réordonner l'affichage est sans risque.
+  const options: McqOption[] = useMemo(
+    () => shuffled(content.options),
+    [content]
+  );
 
   const emit = (ids: string[]) => {
     setSelected(ids);
@@ -45,9 +64,7 @@ export function MultipleChoice({
   // Une option est « visuelle » (pas de lecture requise) si elle porte une image,
   // une pastille de couleur, ou un texte fait uniquement d'emojis/de symboles.
   const isGlyph = (t: string) => t.length > 0 && !/\p{L}\p{L}/u.test(t);
-  const useTiles = content.options.some(
-    (o) => o.image || o.color || isGlyph(o.text)
-  );
+  const useTiles = options.some((o) => o.image || o.color || isGlyph(o.text));
 
   return (
     <div className="space-y-6">
@@ -59,7 +76,7 @@ export function MultipleChoice({
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-2">
-        {content.options.map((option) => {
+        {options.map((option) => {
           const isSelected = selected.includes(option.id);
           const img = resolveMediaSrc(option.image);
           const glyph = !option.image && !option.color && isGlyph(option.text);
