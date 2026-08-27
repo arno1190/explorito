@@ -4,7 +4,7 @@
  * Explorito - Application Éducative
  * OpenAPI spec version: 1.0.0
  */
-import type { RecentLogin } from "./recentLogin";
+import type { RecentActivity } from "./recentActivity";
 
 /**
  * Métriques opérationnelles du tableau de bord admin.
@@ -20,5 +20,5 @@ export interface AdminOverview {
   exercises_total: number;
   exercises_7d: number;
   exercises_30d: number;
-  recent_logins: RecentLogin[];
+  recent_activity: RecentActivity[];
 }

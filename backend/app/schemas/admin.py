@@ -6,8 +6,12 @@ from uuid import UUID
 from pydantic import BaseModel
 
 
-class RecentLogin(BaseModel):
-    email: str | None = None
+class RecentActivity(BaseModel):
+    """Un événement d'activité : connexion parent ou session d'exercices enfant."""
+
+    kind: str  # "login" | "exercise"
+    label: str  # email du parent ou prénom de l'enfant
+    detail: str  # "Connexion" ou "N exercices"
     at: datetime
 
 
@@ -24,7 +28,7 @@ class AdminOverview(BaseModel):
     exercises_total: int
     exercises_7d: int
     exercises_30d: int
-    recent_logins: list[RecentLogin]
+    recent_activity: list[RecentActivity]
 
 
 class AdminUserRow(BaseModel):

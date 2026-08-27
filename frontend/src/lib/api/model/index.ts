@@ -91,6 +91,7 @@ export * from "./pythagoreItem";
 export * from "./pythagoreItemResult";
 export * from "./pythagoreSessionRequest";
 export * from "./pythagoreSessionResponse";
+export * from "./recentActivity";
 export * from "./recentLessonResponse";
 export * from "./recentLessonsApiV1LessonsRecentGetParams";
 export * from "./recentLogin";

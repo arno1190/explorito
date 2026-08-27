@@ -51,14 +51,35 @@ def overview(db: Session) -> dict:
     exercises_7d = db.query(func.count(ExerciseResult.id)).filter(ExerciseResult.timestamp >= d7).scalar() or 0
     exercises_30d = db.query(func.count(ExerciseResult.id)).filter(ExerciseResult.timestamp >= d30).scalar() or 0
 
-    recent = (
+    # Activité récente : fusionne les connexions parents et les sessions
+    # d'exercices des enfants (les enfants n'ont pas de connexion — sans cela
+    # l'activité d'un enfant « disparaîtrait » derrière la connexion du parent).
+    logins = (
         db.query(LoginEvent.created_at, User.email)
         .join(User, User.id == LoginEvent.user_id)
         .order_by(LoginEvent.created_at.desc())
-        .limit(10)
+        .limit(12)
         .all()
     )
-    recent_logins = [{"email": email, "at": at} for at, email in recent]
+    activity: list[dict] = [
+        {"kind": "login", "label": email or "—", "detail": "Connexion", "at": at} for at, email in logins
+    ]
+    # Sessions d'exercices agrégées par (enfant, jour).
+    day = func.date(ExerciseResult.timestamp)
+    sessions = (
+        db.query(Profile.display_name, func.max(ExerciseResult.timestamp), func.count(ExerciseResult.id))
+        .join(Profile, Profile.user_id == ExerciseResult.user_id)
+        .group_by(Profile.display_name, day)
+        .order_by(func.max(ExerciseResult.timestamp).desc())
+        .limit(12)
+        .all()
+    )
+    for name, last, cnt in sessions:
+        activity.append(
+            {"kind": "exercise", "label": name or "—", "detail": f"{cnt} exercice{'s' if cnt > 1 else ''}", "at": last}
+        )
+    activity.sort(key=lambda a: a["at"], reverse=True)
+    recent_activity = activity[:12]
 
     return {
         "parents_total": parents_total,
@@ -71,7 +92,7 @@ def overview(db: Session) -> dict:
         "exercises_total": exercises_total,
         "exercises_7d": exercises_7d,
         "exercises_30d": exercises_30d,
-        "recent_logins": recent_logins,
+        "recent_activity": recent_activity,
     }
 
 

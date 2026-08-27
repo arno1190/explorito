@@ -27,7 +27,11 @@ import { Eye, Pause, Play, Trash2, Users } from "lucide-react";
 
 function frDate(iso?: string | null, withTime = false): string {
   if (!iso) return "—";
-  const d = new Date(iso);
+  // Le backend renvoie des dates UTC naïves (sans fuseau) : sans marqueur, le
+  // navigateur les interprète comme locales. On force UTC, puis on affiche dans
+  // le fuseau du navigateur.
+  const hasTz = /[zZ]|[+-]\d{2}:\d{2}$/.test(iso);
+  const d = new Date(hasTz ? iso : `${iso}Z`);
   return d.toLocaleDateString("fr-FR", {
     day: "2-digit",
     month: "2-digit",
@@ -247,25 +251,33 @@ export default function AdminPage() {
 
             <Card className="candy-shadow">
               <CardHeader>
-                <CardTitle className="text-base">Connexions récentes</CardTitle>
+                <CardTitle className="text-base">Activité récente</CardTitle>
               </CardHeader>
               <CardContent>
-                {overview.recent_logins.length === 0 ? (
+                {overview.recent_activity.length === 0 ? (
                   <p className="text-sm text-fun-text-muted">
-                    Aucune connexion récente.
+                    Aucune activité récente.
                   </p>
                 ) : (
                   <ul className="divide-y divide-fun-border">
-                    {overview.recent_logins.map((login, i) => (
+                    {overview.recent_activity.map((act, i) => (
                       <li
-                        key={`${login.email ?? "?"}-${login.at}-${i}`}
-                        className="flex items-center justify-between py-2 text-sm"
+                        key={`${act.label}-${act.at}-${i}`}
+                        className="flex items-center justify-between gap-2 py-2 text-sm"
                       >
-                        <span className="font-semibold text-fun-text">
-                          {login.email ?? "—"}
+                        <span className="flex items-center gap-2">
+                          <span aria-hidden>
+                            {act.kind === "exercise" ? "✏️" : "🔑"}
+                          </span>
+                          <span className="font-semibold text-fun-text">
+                            {act.label}
+                          </span>
+                          <span className="text-fun-text-muted">
+                            · {act.detail}
+                          </span>
                         </span>
-                        <span className="text-fun-text-muted">
-                          {frDate(login.at, true)}
+                        <span className="shrink-0 text-fun-text-muted">
+                          {frDate(act.at, true)}
                         </span>
                       </li>
                     ))}
