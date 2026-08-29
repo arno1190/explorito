@@ -23,7 +23,7 @@ from app.schemas.progress import (
     SubjectOverviewItem,
     SubjectProgressResponse,
 )
-from app.services.gamification import calculate_level_from_xp, calculate_next_level_xp
+from app.services.gamification import calculate_level_from_xp, calculate_next_level_xp, total_xp_for
 
 router = APIRouter()
 
@@ -43,8 +43,8 @@ async def get_user_progress(
     Returns:
         Tableau de bord de progression complet
     """
-    # Calculer l'XP total
-    total_xp = db.query(func.sum(SubjectProgress.total_xp)).filter(SubjectProgress.user_id == acting.id).scalar() or 0
+    # XP total = XP d'exercices + points ⭐ attribués par le parent.
+    total_xp = total_xp_for(acting.id, db)
 
     # Calculer le niveau global
     overall_level = calculate_level_from_xp(int(total_xp))

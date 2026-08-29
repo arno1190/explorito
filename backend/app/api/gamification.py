@@ -22,7 +22,7 @@ from app.models.gamification import (
     UserAchievement,
 )
 from app.models.guardianship import Guardianship
-from app.models.progress import ExerciseResult, ProgressStatus, SubjectProgress, UserProgress
+from app.models.progress import ExerciseResult, ProgressStatus, UserProgress
 from app.models.user import Profile, User, UserRole
 from app.schemas.gamification import (
     AchievementResponse,
@@ -43,6 +43,7 @@ from app.services.gamification import (
     calculate_level_from_xp,
     calculate_next_level_xp,
     get_or_create_daily_goal,
+    total_xp_for,
 )
 from app.services.guardianship import guarded_child_ids, is_guardian
 
@@ -374,8 +375,8 @@ async def get_family_leaderboard(
         if not profile:
             continue
 
-        # Calculer l'XP total
-        total_xp = db.query(func.sum(SubjectProgress.total_xp)).filter(SubjectProgress.user_id == user_id).scalar() or 0
+        # XP total = XP d'exercices + points ⭐ attribués par le parent.
+        total_xp = total_xp_for(user_id, db)
 
         # Récupérer le streak
         streak = db.query(Streak).filter(Streak.user_id == user_id).first()
@@ -461,8 +462,8 @@ async def get_child_stats(
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès refusé")
 
-    # Calculer l'XP total
-    total_xp = db.query(func.sum(SubjectProgress.total_xp)).filter(SubjectProgress.user_id == child_id).scalar() or 0
+    # XP total = XP d'exercices + points ⭐ attribués par le parent.
+    total_xp = total_xp_for(child_id, db)
 
     # Calculer le niveau
     level = calculate_level_from_xp(int(total_xp))

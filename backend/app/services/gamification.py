@@ -20,6 +20,7 @@ from app.models.progress import (
     SubjectProgress,
     UserProgress,
 )
+from app.services.collection import get_points_earned
 
 
 def calculate_level_from_xp(xp: int) -> int:
@@ -58,6 +59,25 @@ def calculate_next_level_xp(current_level: int) -> int:
     """
     next_level = current_level + 1
     return (next_level - 1) ** 2 * 100
+
+
+def total_xp_for(user_id: UUID, db: Session) -> int:
+    """XP total « affiché » d'un enfant : exercices + points ⭐ attribués.
+
+    Égal à :func:`app.services.collection.get_points_earned` (XP d'exercices +
+    attributions du porte-monnaie **Points**). Pilote le niveau global, le
+    classement, le tableau de progression et l'écran de fin d'exercice. Les
+    points de **comportement** (💚) et l'XP dépensé en collectibles n'entrent
+    pas dans ce total.
+
+    Args:
+        user_id: ID de l'enfant.
+        db: Session de base de données.
+
+    Returns:
+        XP total affichable (exercices + attributions Points).
+    """
+    return get_points_earned(user_id, db)
 
 
 def award_xp(user_id: UUID, amount: int, subject_id: UUID | None, db: Session) -> int:
@@ -105,8 +125,8 @@ def award_xp(user_id: UUID, amount: int, subject_id: UUID | None, db: Session) -
         # que l'agrégat SUM ci-dessous voie la modification qu'on vient de faire.
         db.flush()
 
-    # Calculer l'XP total de l'utilisateur à travers toutes les matières
-    total_xp = db.query(func.sum(SubjectProgress.total_xp)).filter(SubjectProgress.user_id == user_id).scalar() or 0
+    # XP total affiché = XP d'exercices + points ⭐ attribués par le parent.
+    total_xp = total_xp_for(user_id, db)
 
     # Mettre à jour l'objectif quotidien
     today = date.today()
@@ -452,10 +472,8 @@ def process_exercise_result(
             xp_awarded += exercise_xp
             total_xp = award_xp(user_id, exercise_xp, subject_id, db)
         else:
-            # Pas d'XP à attribuer, mais renvoyer le total courant.
-            total_xp = (
-                db.query(func.sum(SubjectProgress.total_xp)).filter(SubjectProgress.user_id == user_id).scalar() or 0
-            )
+            # Pas d'XP à attribuer, mais renvoyer le total courant (incl. ⭐).
+            total_xp = total_xp_for(user_id, db)
         streak = update_streak(user_id, db)
         current_streak = int(streak.current_streak)
 
