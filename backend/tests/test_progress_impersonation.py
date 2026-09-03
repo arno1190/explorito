@@ -9,37 +9,23 @@ Sinon, un parent qui « joue comme » son enfant voit une progression vide
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.models.content import (
-    DifficultyEnum,
-    Exercise,
-    LearningPath,
-    Lesson,
-    LevelEnum,
-    Subject,
+from app.models.content import Exercise, Lesson, LevelEnum
+from tests.helpers import (
+    child_headers,
+    dev_login,
+    make_child,
+    make_exercise,
+    make_lesson,
+    make_pack,
+    make_subject,
 )
-from tests.helpers import child_headers, dev_login, make_child
 
 
 def _seed_lesson(db: Session) -> tuple[Lesson, Exercise]:
-    subject = Subject(name="Maths", slug="maths")
-    db.add(subject)
-    db.flush()
-    path = LearningPath(subject_id=subject.id, name="Calcul", level=LevelEnum.CP)
-    db.add(path)
-    db.flush()
-    lesson = Lesson(path_id=path.id, name="Additions", order_index=1, xp_reward=0, is_published=True)
-    db.add(lesson)
-    db.flush()
-    ex = Exercise(
-        lesson_id=lesson.id,
-        type="multiple_choice",
-        question="1+1?",
-        content={"options": [{"id": "a", "text": "2"}, {"id": "b", "text": "3"}], "multiple": False},
-        correct_answer={"option_ids": ["a"]},
-        order_index=0,
-        difficulty=DifficultyEnum.EASY,
-    )
-    db.add(ex)
+    subject = make_subject(db, name="Maths", slug="maths")
+    pack = make_pack(db, title="Calcul CP", level=LevelEnum.CP)
+    lesson = make_lesson(db, pack=pack, subject=subject, level=LevelEnum.CP, tier=1, name="Additions")
+    ex = make_exercise(db, lesson=lesson, question="1+1?")
     db.commit()
     db.refresh(lesson)
     db.refresh(ex)
@@ -82,28 +68,12 @@ def test_progress_empty_for_parent_without_acting(client: TestClient, db_session
 
 def test_subjects_overview_counts_completed_for_acting_child(client: TestClient, db_session: Session):
     # Matière avec 2 leçons CP publiées ; l'enfant en termine 1.
-    subject = Subject(name="Maths", slug="maths")
-    db_session.add(subject)
-    db_session.flush()
-    path = LearningPath(subject_id=subject.id, name="Calcul", level=LevelEnum.CP)
-    db_session.add(path)
-    db_session.flush()
-    l1 = Lesson(path_id=path.id, name="P1", order_index=1, xp_reward=0, is_published=True)
-    l2 = Lesson(path_id=path.id, name="P2", order_index=2, xp_reward=0, is_published=True)
-    db_session.add_all([l1, l2])
-    db_session.flush()
-    e1 = Exercise(
-        lesson_id=l1.id,
-        type="multiple_choice",
-        question="1+1?",
-        content={"options": [{"id": "a", "text": "2"}, {"id": "b", "text": "3"}], "multiple": False},
-        correct_answer={"option_ids": ["a"]},
-        order_index=0,
-        difficulty=DifficultyEnum.EASY,
-    )
-    db_session.add(e1)
+    subject = make_subject(db_session, name="Maths", slug="maths")
+    pack = make_pack(db_session, title="Calcul CP", level=LevelEnum.CP)
+    l1 = make_lesson(db_session, pack=pack, subject=subject, level=LevelEnum.CP, tier=1, name="P1")
+    make_lesson(db_session, pack=pack, subject=subject, level=LevelEnum.CP, tier=2, name="P2")
+    e1 = make_exercise(db_session, lesson=l1, question="1+1?")
     db_session.commit()
-    db_session.refresh(e1)
 
     child = make_child(db_session, level=LevelEnum.CP)
     h = child_headers(client, child)

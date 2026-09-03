@@ -142,6 +142,14 @@ def delete_user(db: Session, user_id: UUID) -> bool:
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
         return False
+    # RGPD : les packs de l'auteur survivent **anonymisés**. Les supprimer
+    # effacerait la progression d'enfants d'autres familles ; s'appuyer sur le
+    # seul ``ON DELETE SET NULL`` perdrait l'attribution (pseudonyme) des packs
+    # qui n'en portent pas encore. Import local : évite un cycle avec la
+    # modération, qui dépend déjà de ce module par ailleurs.
+    from app.services.moderation import anonymise_author
+
+    anonymise_author(db, user_id=user_id)
     db.delete(user)
     db.commit()
     return True

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import {
   getOverviewApiV1AdminOverviewGet,
@@ -23,7 +24,15 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, Pause, Play, Trash2, Users } from "lucide-react";
+import {
+  Eye,
+  Mail,
+  Pause,
+  Play,
+  ShieldCheck,
+  Trash2,
+  Users,
+} from "lucide-react";
 
 function frDate(iso?: string | null, withTime = false): string {
   if (!iso) return "—";
@@ -211,6 +220,36 @@ export default function AdminPage() {
         <p className="mt-1 text-fun-text-muted">
           Métriques opérationnelles et gestion des utilisateurs
         </p>
+      </div>
+
+      {/* ---- Surfaces dédiées (packs communautaires, emails) ---- */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Link
+          href="/admin/moderation"
+          className="rounded-2xl border-2 border-fun-green bg-white p-4 text-left candy-shadow transition-all hover:candy-shadow-lg"
+        >
+          <p className="flex items-center gap-2 font-bold text-fun-text">
+            <ShieldCheck className="h-5 w-5 text-fun-green" />
+            Modération
+          </p>
+          <p className="mt-1 text-sm text-fun-text-muted">
+            Relire les packs communautaires, prononcer les verdicts, traiter les
+            signalements et accorder les paliers de confiance.
+          </p>
+        </Link>
+        <Link
+          href="/admin/annonces"
+          className="rounded-2xl border-2 border-fun-sky bg-white p-4 text-left candy-shadow transition-all hover:candy-shadow-lg"
+        >
+          <p className="flex items-center gap-2 font-bold text-fun-text">
+            <Mail className="h-5 w-5 text-fun-sky" />
+            Annonces
+          </p>
+          <p className="mt-1 text-sm text-fun-text-muted">
+            Rédiger, prévisualiser et envoyer un email aux parents inscrits
+            (avec un test à blanc avant l&apos;envoi réel).
+          </p>
+        </Link>
       </div>
 
       {/* ---- Vue d'ensemble ---- */}

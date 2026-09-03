@@ -30,10 +30,19 @@ const NAV_LINKS: Record<ActingRole, { href: string; label: string }[]> = {
   child: [
     { href: "/play", label: "Jouer" },
     { href: "/subjects", label: "Matières" },
+    { href: "/decouvrir", label: "Découvrir" },
     { href: "/collection", label: "Collections" },
   ],
-  parent: [{ href: "/dashboard", label: "Tableau de bord" }],
-  admin: [{ href: "/admin", label: "Admin" }],
+  parent: [
+    { href: "/dashboard", label: "Tableau de bord" },
+    { href: "/bibliotheque", label: "Bibliothèque" },
+    { href: "/contributions", label: "Mes leçons" },
+  ],
+  admin: [
+    { href: "/admin", label: "Admin" },
+    { href: "/admin/moderation", label: "Modération" },
+    { href: "/admin/annonces", label: "Annonces" },
+  ],
 };
 
 export function Header() {
@@ -91,6 +100,14 @@ export function Header() {
 
   const homeHref = actingRole ? actingRoleHome(actingRole) : "/";
   const links = actingRole ? NAV_LINKS[actingRole] : [];
+  // Le lien actif est le plus spécifique : sur /admin/moderation, c'est
+  // « Modération » qui s'allume, pas « Admin ».
+  const activeHref = links.reduce<string | null>((best, link) => {
+    const matches =
+      pathname === link.href || pathname.startsWith(`${link.href}/`);
+    if (!matches) return best;
+    return best && best.length >= link.href.length ? best : link.href;
+  }, null);
 
   return (
     <>
@@ -107,9 +124,7 @@ export function Header() {
             {isAuthenticated ? (
               <>
                 {links.map((link) => {
-                  const isActive =
-                    pathname === link.href ||
-                    pathname.startsWith(link.href + "/");
+                  const isActive = link.href === activeHref;
                   return (
                     <Link
                       key={link.href}

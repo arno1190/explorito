@@ -1,17 +1,28 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { Gamepad2, BookOpen, LayoutDashboard, BookMarked } from "lucide-react";
+import {
+  Gamepad2,
+  BookOpen,
+  LayoutDashboard,
+  BookMarked,
+  Compass,
+  Library,
+  Upload,
+} from "lucide-react";
 import { useActingRole } from "@/lib/navigation";
 
 const CHILD_TABS = [
   { href: "/play", icon: Gamepad2, label: "Jouer" },
   { href: "/subjects", icon: BookOpen, label: "Matières" },
+  { href: "/decouvrir", icon: Compass, label: "Découvrir" },
   { href: "/collection", icon: BookMarked, label: "Collections" },
 ];
 
 const PARENT_TABS = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Tableau" },
+  { href: "/bibliotheque", icon: Library, label: "Bibliothèque" },
+  { href: "/contributions", icon: Upload, label: "Mes leçons" },
 ];
 
 export function BottomNav() {
@@ -43,7 +54,9 @@ export function BottomNav() {
               }`}
             >
               <tab.icon className="h-6 w-6" />
-              <span className="text-xs font-semibold mt-0.5">{tab.label}</span>
+              <span className="mt-0.5 whitespace-nowrap text-xs font-semibold">
+                {tab.label}
+              </span>
             </button>
           );
         })}

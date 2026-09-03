@@ -17,12 +17,10 @@ from app.core.config import settings
 from app.models.content import (
     DifficultyEnum,
     Exercise,
-    LearningPath,
     Lesson,
     LevelEnum,
-    Subject,
 )
-from tests.helpers import child_headers, make_child
+from tests.helpers import child_headers, make_child, make_lesson, make_pack, make_subject
 
 
 def _mcq(lesson_id, order_index: int, difficulty: DifficultyEnum) -> Exercise:
@@ -37,15 +35,20 @@ def _mcq(lesson_id, order_index: int, difficulty: DifficultyEnum) -> Exercise:
     )
 
 
+def _ratified_lesson(db: Session, xp_reward: int) -> Lesson:
+    """Leçon d'un pack **ratifié** : c'est la condition de l'XP graduée (issue #10)."""
+    subject = make_subject(db, name="Maths", slug="maths")
+    pack = make_pack(db, title="Calcul CP", level=LevelEnum.CP, difficulty_ratified=True)
+    lesson = make_lesson(db, pack=pack, subject=subject, level=LevelEnum.CP, tier=1, name="Leçon")
+    lesson.xp_reward = xp_reward
+    db.flush()
+    return lesson
+
+
 def _seed_lesson(db: Session, difficulties: list[DifficultyEnum], xp_reward: int = 50) -> list[Exercise]:
-    subject = Subject(name="Maths", slug="maths")
-    db.add(subject)
-    db.flush()
-    path = LearningPath(subject_id=subject.id, name="Calcul", level=LevelEnum.CP)
-    db.add(path)
-    db.flush()
-    lesson = Lesson(path_id=path.id, name="Leçon", order_index=1, xp_reward=xp_reward, is_published=True)
-    db.add(lesson)
+    # Pack ratifié : la pondération par difficulté n'a de sens qu'après
+    # ratification humaine (issue #10), sinon le tarif est forfaitaire.
+    lesson = _ratified_lesson(db, xp_reward)
     db.flush()
     exercises = [_mcq(lesson.id, i, d) for i, d in enumerate(difficulties)]
     db.add_all(exercises)
@@ -56,16 +59,8 @@ def _seed_lesson(db: Session, difficulties: list[DifficultyEnum], xp_reward: int
 
 
 def _seed_level_lesson(db: Session, levels: list[int]) -> list[Exercise]:
-    """Leçon dont chaque exercice porte un difficulty_level explicite (1-5)."""
-    subject = Subject(name="Maths", slug="maths")
-    db.add(subject)
-    db.flush()
-    path = LearningPath(subject_id=subject.id, name="Calcul", level=LevelEnum.CP)
-    db.add(path)
-    db.flush()
-    lesson = Lesson(path_id=path.id, name="Leçon", order_index=1, xp_reward=0, is_published=True)
-    db.add(lesson)
-    db.flush()
+    """Leçon (pack ratifié) dont chaque exercice porte un difficulty_level explicite (1-5)."""
+    lesson = _ratified_lesson(db, 0)
     exercises = [_mcq(lesson.id, i, DifficultyEnum.EASY) for i in range(len(levels))]
     for e, lvl in zip(exercises, levels, strict=True):
         e.difficulty_level = lvl

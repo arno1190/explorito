@@ -13,6 +13,7 @@ from app.api.auth import get_current_active_user
 from app.api.subjects import acting_child, child_content_level, require_admin
 from app.core.database import get_db
 from app.models.content import Exercise, LearningPath, Lesson, Subject
+from app.models.pack import Pack
 from app.models.progress import ProgressStatus, UserProgress
 from app.models.user import User
 from app.schemas.exercise import ExerciseResponse
@@ -23,6 +24,7 @@ from app.schemas.lesson import (
     LessonWithExercises,
     RecentLessonResponse,
 )
+from app.services.packs import accessible_pack_ids, ensure_official_pack
 from app.services.progression import lesson_locked
 
 router = APIRouter()
@@ -50,6 +52,11 @@ async def recent_lessons(
     )
     if level is not None:
         query = query.filter(LearningPath.level == level)
+    # Un pack communautaire ne doit pas fuiter dans « Nouveautés » avant qu'un
+    # garde ne l'ait activé : le niveau ne suffit pas comme filtre.
+    allowed_packs = accessible_pack_ids(acting.id, level, db)
+    if allowed_packs is not None:
+        query = query.filter(Lesson.pack_id.in_(allowed_packs))
     rows = query.order_by(Lesson.created_at.desc()).limit(limit).all()
 
     return [
@@ -118,7 +125,7 @@ async def create_lesson(
     Crée une nouvelle leçon (admin uniquement)
 
     Args:
-        lesson_data: Données de la leçon à créer
+        lesson_data: Données de la leçon à créer (``pack_id`` optionnel)
         db: Session de base de données
         current_user: Utilisateur administrateur authentifié
 
@@ -126,7 +133,7 @@ async def create_lesson(
         Leçon créée
 
     Raises:
-        HTTPException: Si le parcours n'existe pas
+        HTTPException: Si le parcours ou le pack demandé n'existe pas
     """
     # Vérifier que le parcours existe
     path = db.query(LearningPath).filter(LearningPath.id == lesson_data.path_id).first()
@@ -136,8 +143,25 @@ async def create_lesson(
             detail="Parcours d'apprentissage non trouvé",
         )
 
-    # Créer la leçon
-    new_lesson = Lesson(**lesson_data.model_dump())
+    payload = lesson_data.model_dump()
+    pack_id = payload.pop("pack_id", None)
+    if pack_id is not None:
+        pack = db.query(Pack).filter(Pack.id == pack_id).first()
+        if pack is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pack non trouvé")
+    else:
+        # Aucune leçon ne peut naître sans pack : à défaut de pack explicite, elle
+        # rejoint le pack officiel de sa matière et de son niveau.
+        subject = db.query(Subject).filter(Subject.id == path.subject_id).first()
+        pack = ensure_official_pack(
+            db,
+            path.subject_id,
+            path.level,
+            subject.name if subject is not None else "Explorito",
+            subject.icon if subject is not None else None,
+        )
+
+    new_lesson = Lesson(**payload, pack_id=pack.id)
     db.add(new_lesson)
     db.commit()
     db.refresh(new_lesson)

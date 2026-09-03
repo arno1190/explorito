@@ -34,6 +34,7 @@ from app.models.content import (
     Subject,
 )
 from app.schemas.exercise import validate_exercise_payload
+from app.services.packs import derive_lesson_xp, ensure_official_pack
 
 TIER_DIFFICULTY = {1: DifficultyEnum.EASY, 2: DifficultyEnum.MEDIUM, 3: DifficultyEnum.HARD}
 
@@ -918,12 +919,20 @@ def _seed_one(data: dict[str, Any], db: Any, *, dry_run: bool) -> str:
     if existing is not None:
         return f"= déjà présent : {label}"
 
+    # Aucune leçon ne peut naître sans pack (``lessons.pack_id`` NOT NULL) :
+    # l'identité du pack officiel est déterministe, donc ré-exécuter un seeder
+    # n'en crée jamais un second pour la même matière+niveau.
+    pack = ensure_official_pack(db, subject.id, level, subject.name, subject.icon)
+
     lesson = Lesson(
         path_id=path.id,
+        pack_id=pack.id,
         name=lesson_spec["name"],
         description=lesson_spec.get("description"),
         order_index=tier,
-        xp_reward=int(lesson_spec.get("xp_reward", 50)),
+        # XP dérivée des difficultés des exercices : un xp_reward déclaré dans le
+        # contenu ne doit jamais atteindre la base (issue #10).
+        xp_reward=derive_lesson_xp([raw.get("level") for raw in data["exercises"]]),
         is_published=True,
     )
     db.add(lesson)

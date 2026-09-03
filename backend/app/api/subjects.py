@@ -15,6 +15,7 @@ from app.models.user import Profile, User, UserRole
 from app.schemas.lesson import LessonResponse
 from app.schemas.subject import SubjectCreate, SubjectResponse, SubjectUpdate
 from app.services.guardianship import is_guardian
+from app.services.packs import accessible_pack_ids
 from app.services.progression import lesson_locked
 
 router = APIRouter()
@@ -327,11 +328,18 @@ async def get_subject_lessons(
         paths_query = paths_query.filter(LearningPath.level == level)
     learning_paths = paths_query.all()
 
+    # Un pack communautaire ne doit pas fuiter dans la lentille « Matières »
+    # avant qu'un garde ne l'ait activé : le niveau du parcours ne suffit pas
+    # comme filtre. ``None`` (parent/admin) = aucune restriction.
+    allowed_packs = accessible_pack_ids(acting.id, level, db)
+
     lessons: list[Lesson] = []
     for path in learning_paths:
         lessons_query = db.query(Lesson).filter(Lesson.path_id == path.id)
         if level is not None:
             lessons_query = lessons_query.filter(Lesson.is_published.is_(True))
+        if allowed_packs is not None:
+            lessons_query = lessons_query.filter(Lesson.pack_id.in_(allowed_packs))
         lessons.extend(lessons_query.order_by(Lesson.order_index).all())
 
     # ``locked`` calculé côté serveur : source de vérité unique du verrouillage.

@@ -17,12 +17,10 @@ from app.core.config import settings
 from app.models.content import (
     DifficultyEnum,
     Exercise,
-    LearningPath,
     Lesson,
     LevelEnum,
-    Subject,
 )
-from tests.helpers import child_headers, make_child
+from tests.helpers import child_headers, make_child, make_lesson, make_pack, make_subject
 
 
 def _mcq(lesson_id, order_index: int) -> Exercise:
@@ -38,14 +36,12 @@ def _mcq(lesson_id, order_index: int) -> Exercise:
 
 
 def _seed_lesson(db: Session, n_exercises: int, xp_reward: int) -> tuple[Lesson, list[Exercise]]:
-    subject = Subject(name="Maths", slug="maths")
-    db.add(subject)
-    db.flush()
-    path = LearningPath(subject_id=subject.id, name="Calcul", level=LevelEnum.CP)
-    db.add(path)
-    db.flush()
-    lesson = Lesson(path_id=path.id, name="Leçon", order_index=1, xp_reward=xp_reward, is_published=True)
-    db.add(lesson)
+    subject = make_subject(db, name="Maths", slug="maths")
+    # Pack officiel ratifié : ces tests portent sur la décote de redo, pas sur le
+    # tarif forfaitaire des packs non ratifiés (cf. test_pack_xp.py).
+    pack = make_pack(db, title="Calcul CP", level=LevelEnum.CP)
+    lesson = make_lesson(db, pack=pack, subject=subject, level=LevelEnum.CP, tier=1, name="Leçon")
+    lesson.xp_reward = xp_reward
     db.flush()
     exercises = [_mcq(lesson.id, i) for i in range(n_exercises)]
     db.add_all(exercises)

@@ -81,13 +81,19 @@ async def health():
 # Import des routers (après la config de l'app ; import tardif volontaire)
 from app.api import (  # noqa: E402
     admin,
+    announcements,
     auth,
     children,
     collection,
+    contributions,
+    discover,
     exercises,
     gamification,
     invitations,
     lessons,
+    library,
+    moderation,
+    packs,
     progress,
     pythagore,
     subjects,
@@ -126,6 +132,36 @@ app.include_router(
     invitations.router,
     prefix=f"{settings.API_PREFIX}/invitations",
     tags=["invitations"],
+)
+app.include_router(
+    packs.router,
+    prefix=f"{settings.API_PREFIX}/packs",
+    tags=["packs"],
+)
+app.include_router(
+    contributions.router,
+    prefix=f"{settings.API_PREFIX}/contributions",
+    tags=["contributions"],
+)
+app.include_router(
+    moderation.router,
+    prefix=f"{settings.API_PREFIX}/moderation",
+    tags=["moderation"],
+)
+app.include_router(
+    library.router,
+    prefix=f"{settings.API_PREFIX}/library",
+    tags=["library"],
+)
+app.include_router(
+    discover.router,
+    prefix=f"{settings.API_PREFIX}/discover",
+    tags=["discover"],
+)
+app.include_router(
+    announcements.router,
+    prefix=f"{settings.API_PREFIX}/announcements",
+    tags=["announcements"],
 )
 
 if __name__ == "__main__":

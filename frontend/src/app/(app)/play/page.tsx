@@ -11,6 +11,7 @@ import {
   getUnseenAwardsApiV1CollectionAwardsUnseenGet,
   ackAwardsApiV1CollectionAwardsAckPost,
 } from "@/lib/api/generated/collection/collection";
+import { PackPath } from "@/components/packs";
 import type {
   ChildStatsResponse,
   SubjectOverviewItem,
@@ -193,6 +194,11 @@ export default function PlayPage() {
             Choisis une matière pour commencer!
           </p>
         </div>
+      </div>
+
+      {/* Chemin des packs : surface principale (Continuer + lentilles) */}
+      <div className="max-w-4xl mx-auto mb-8">
+        <PackPath />
       </div>
 
       {/* Défis — mini-jeux pour gagner de l'XP libre */}

@@ -50,6 +50,9 @@ class User(Base):
     # et dernière connexion, pour le tableau de bord admin.
     login_count = Column(Integer, default=0, nullable=False)
     last_login_at = Column(DateTime, nullable=True)
+    # Désinscription des annonces produit (emails « nouveautés »). Les emails
+    # transactionnels ne passent pas par ce drapeau.
+    email_opt_out = Column(Boolean, nullable=False, default=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -101,6 +104,12 @@ class Profile(Base):
     level = Column(Enum(LevelEnum), nullable=True)  # Niveau scolaire (défini par le parent)
     parent_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     settings = Column(JSON, default={})  # Préférences UI, son, etc.
+    # Lentille d'accueil choisie par l'enfant : 'themes' (défaut) ou 'matieres'.
+    pack_lens = Column(String, nullable=False, default="themes")
+    # Firehose optionnel : activer automatiquement tout pack communautaire
+    # approuvé au niveau de l'enfant. Par enfant, désactivé par défaut — l'opt-in
+    # explicite est ce qui garde deux adultes dans la chaîne.
+    auto_enable_approved_packs = Column(Boolean, nullable=False, default=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     # Relations

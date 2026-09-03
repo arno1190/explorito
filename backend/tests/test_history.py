@@ -6,8 +6,8 @@ activité quotidienne, frise des leçons, journal des erreurs, réussite/matièr
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.models.content import DifficultyEnum, Exercise, LearningPath, Lesson, LevelEnum, Subject
-from tests.helpers import child_headers, dev_login, make_child
+from app.models.content import DifficultyEnum, Exercise, Lesson, LevelEnum, Subject
+from tests.helpers import child_headers, dev_login, make_child, make_lesson, make_pack, make_subject
 
 
 def _mcq(lesson_id, order_index: int) -> Exercise:
@@ -23,14 +23,10 @@ def _mcq(lesson_id, order_index: int) -> Exercise:
 
 
 def _seed_lesson(db: Session) -> tuple[Subject, Lesson, list[Exercise]]:
-    subject = Subject(name="Maths", slug="maths", icon="🌋")
-    db.add(subject)
-    db.flush()
-    path = LearningPath(subject_id=subject.id, name="Calcul", level=LevelEnum.CP)
-    db.add(path)
-    db.flush()
-    lesson = Lesson(path_id=path.id, name="Additions", order_index=1, xp_reward=50, is_published=True)
-    db.add(lesson)
+    subject = make_subject(db, name="Maths", slug="maths", icon="🌋")
+    pack = make_pack(db, title="Additions CP", level=LevelEnum.CP)
+    lesson = make_lesson(db, pack=pack, subject=subject, level=LevelEnum.CP, tier=1, name="Additions")
+    lesson.xp_reward = 50
     db.flush()
     exercises = [_mcq(lesson.id, 0), _mcq(lesson.id, 1)]
     db.add_all(exercises)

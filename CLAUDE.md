@@ -88,12 +88,21 @@ With Orval, types are auto-generated from `openapi.json`. Manual types in `front
 # Check endpoint exists (note port 8005)
 curl http://localhost:8005/openapi.json | jq '.paths | keys' | grep "endpoint"
 
-# Test with auth
-TOKEN=$(curl -s -X POST http://localhost:8005/api/v1/auth/login \
+# Test with auth — there is NO password login. `api/auth.py` exposes only
+# /google (id_token), /dev-login (DEBUG builds only), /pin, /verify-pin, /refresh.
+# In dev, /dev-login takes an email and returns a parent token; the account is
+# created on the fly and promoted to admin if the email is in ADMIN_EMAILS.
+TOKEN=$(curl -s -X POST http://localhost:8005/api/v1/auth/dev-login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@explorito.fr","password":"admin123"}' | jq -r .access_token)
+  -d '{"email":"admin@explorito.fr"}' | jq -r .access_token)
 
 curl -H "Authorization: Bearer $TOKEN" http://localhost:8005/api/v1/your-endpoint
+
+# Moderation surface: scoped token instead of an admin session. Grants
+# /api/v1/moderation/* ONLY (never user deletion or impersonation), and is
+# disabled entirely when MODERATION_TOKEN is empty.
+curl -H "X-Moderation-Token: $MODERATION_TOKEN" \
+  "http://localhost:8005/api/v1/moderation/queue?status=pending"
 ```
 
 ### 5. Code Quality
@@ -187,12 +196,17 @@ docker compose exec postgres psql -U explorito explorito
 ./scripts/validate-frontend.sh
 ```
 
-## User Credentials
+## Dev Accounts
 
-| Role  | Email              | Password |
-|-------|-------------------|----------|
-| Admin | admin@explorito.fr | admin123 |
-| Child | alice (login)    | alice123 |
+Passwords do not exist: parents sign in with Google, children have no login at
+all (a parent "acts as" a child via the `X-Acting-Child-Id` header).
+
+| Role | How to authenticate |
+|-------|-------------------|
+| Admin | `POST /api/v1/auth/dev-login {"email":"admin@explorito.fr"}` — email must be listed in `ADMIN_EMAILS` |
+| Parent | `POST /api/v1/auth/dev-login {"email":"parent@explorito.fr"}` |
+| Child | No login. Parent token + `X-Acting-Child-Id: <child_id>` |
+| Moderator | `X-Moderation-Token: $MODERATION_TOKEN` on `/api/v1/moderation/*` only |
 
 ## Design System - Fun Palette
 

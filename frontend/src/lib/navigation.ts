@@ -19,6 +19,18 @@ const CHILD_PREFIXES = [
   "/pokedex",
   "/pythagore",
   "/sudoku",
+  // Découvrir : l'enfant parcourt les packs communautaires approuvés et en
+  // demande un ; la demande n'accorde jamais l'accès (c'est l'adulte qui tranche).
+  "/decouvrir",
+];
+
+// Surfaces d'adulte ajoutées par les packs communautaires : le catalogue
+// (activation par enfant) et la contribution (envoi, aperçu, jetons).
+const PARENT_PREFIXES = [
+  "/dashboard",
+  "/progress",
+  "/bibliotheque",
+  "/contributions",
 ];
 
 export function resolveActingRole(
@@ -57,12 +69,13 @@ export function isPathAllowedForRole(
   if (role === "admin")
     return (
       pathname.startsWith("/admin") ||
-      pathname.startsWith("/dashboard") ||
-      pathname.startsWith("/progress")
+      PARENT_PREFIXES.some(
+        (p) => pathname === p || pathname.startsWith(`${p}/`)
+      )
     );
   if (role === "parent")
-    return (
-      pathname.startsWith("/dashboard") || pathname.startsWith("/progress")
+    return PARENT_PREFIXES.some(
+      (p) => pathname === p || pathname.startsWith(`${p}/`)
     );
   // child (ou parent en incarnation)
   return CHILD_PREFIXES.some(

@@ -15,12 +15,11 @@ from sqlalchemy.orm import Session
 from app.models.content import (
     DifficultyEnum,
     Exercise,
-    LearningPath,
     Lesson,
     LevelEnum,
     Subject,
 )
-from tests.helpers import child_headers, dev_login, make_child
+from tests.helpers import child_headers, dev_login, make_child, make_lesson, make_pack, make_subject
 
 
 def _mcq(lesson_id, order_index: int) -> Exercise:
@@ -36,14 +35,11 @@ def _mcq(lesson_id, order_index: int) -> Exercise:
 
 
 def _seed_two_tiers(db: Session) -> tuple[Subject, Lesson, Exercise, Lesson, Exercise]:
-    subject = Subject(name="Maths", slug="maths")
-    db.add(subject)
-    db.flush()
-    path = LearningPath(subject_id=subject.id, name="Calcul", level=LevelEnum.CP)
-    db.add(path)
-    db.flush()
-    l1 = Lesson(path_id=path.id, name="Palier 1", order_index=1, xp_reward=0, is_published=True)
-    l2 = Lesson(path_id=path.id, name="Palier 2", order_index=2, xp_reward=0, is_published=True)
+    """Deux paliers du **même pack** : la portée du verrou est le pack (issue #9)."""
+    subject = make_subject(db, name="Maths", slug="maths")
+    pack = make_pack(db, title="Calcul CP", level=LevelEnum.CP)
+    l1 = make_lesson(db, pack=pack, subject=subject, level=LevelEnum.CP, tier=1, name="Palier 1")
+    l2 = make_lesson(db, pack=pack, subject=subject, level=LevelEnum.CP, tier=2, name="Palier 2")
     db.add_all([l1, l2])
     db.flush()
     e1 = _mcq(l1.id, 0)
@@ -108,13 +104,9 @@ def test_impersonating_parent_sees_child_level_and_locks(client: TestClient, db_
     child = make_child(db_session, level=LevelEnum.CP)  # rattaché au parent par défaut
     subject, l1, _e1, l2, _e2 = _seed_two_tiers(db_session)  # contenu CP
     # une matière d'un autre niveau ne doit pas apparaître pour l'enfant CP
-    other = Subject(name="Histoire", slug="histoire")
-    db_session.add(other)
-    db_session.flush()
-    ce2_path = LearningPath(subject_id=other.id, name="Hist CE2", level=LevelEnum.CE2)
-    db_session.add(ce2_path)
-    db_session.flush()
-    db_session.add(Lesson(path_id=ce2_path.id, name="Hist P1", order_index=1, is_published=True))
+    other = make_subject(db_session, name="Histoire", slug="histoire")
+    ce2_pack = make_pack(db_session, title="Hist CE2", level=LevelEnum.CE2)
+    make_lesson(db_session, pack=ce2_pack, subject=other, level=LevelEnum.CE2, tier=1, name="Hist P1")
     db_session.commit()
 
     h_imp = child_headers(client, child)  # parent propriétaire + X-Acting-Child-Id

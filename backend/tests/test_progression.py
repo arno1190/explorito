@@ -11,47 +11,26 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.models.content import (
-    DifficultyEnum,
-    Exercise,
-    LearningPath,
-    Lesson,
-    LevelEnum,
-    Subject,
-)
+from app.models.content import Exercise, Lesson, LevelEnum
 from app.models.progress import ProgressStatus, UserProgress
-from tests.helpers import child_headers, dev_login, make_child
+from tests.helpers import (
+    child_headers,
+    dev_login,
+    make_child,
+    make_exercise,
+    make_lesson,
+    make_pack,
+    make_subject,
+)
 
 
 def _seed_lesson_with_two_mcq(db: Session) -> tuple[Lesson, list[Exercise]]:
-    subject = Subject(name="Maths", slug="maths")
-    db.add(subject)
-    db.flush()
-    path = LearningPath(subject_id=subject.id, name="Calcul", level=LevelEnum.CP)
-    db.add(path)
-    db.flush()
-    lesson = Lesson(path_id=path.id, name="Additions", xp_reward=50, is_published=True)
-    db.add(lesson)
-    db.flush()
-    e1 = Exercise(
-        lesson_id=lesson.id,
-        type="multiple_choice",
-        question="1+1?",
-        content={"options": [{"id": "a", "text": "2"}, {"id": "b", "text": "3"}], "multiple": False},
-        correct_answer={"option_ids": ["a"]},
-        order_index=0,
-        difficulty=DifficultyEnum.EASY,
-    )
-    e2 = Exercise(
-        lesson_id=lesson.id,
-        type="multiple_choice",
-        question="2+2?",
-        content={"options": [{"id": "a", "text": "4"}, {"id": "b", "text": "5"}], "multiple": False},
-        correct_answer={"option_ids": ["a"]},
-        order_index=1,
-        difficulty=DifficultyEnum.EASY,
-    )
-    db.add_all([e1, e2])
+    subject = make_subject(db, name="Maths", slug="maths")
+    pack = make_pack(db, title="Calcul CP", level=LevelEnum.CP)
+    lesson = make_lesson(db, pack=pack, subject=subject, level=LevelEnum.CP, tier=0, name="Additions")
+    lesson.xp_reward = 50
+    e1 = make_exercise(db, lesson=lesson, order_index=0, question="1+1?")
+    e2 = make_exercise(db, lesson=lesson, order_index=1, question="2+2?")
     db.commit()
     db.refresh(e1)
     db.refresh(e2)

@@ -41,6 +41,9 @@ class LessonCreate(LessonBase):
     """Schéma pour la création d'une leçon"""
 
     path_id: UUID = Field(..., description="ID du parcours d'apprentissage")
+    # Optionnel : à défaut, la leçon rejoint le pack officiel de sa matière et de
+    # son niveau (``services.packs.ensure_official_pack``). Jamais nul en base.
+    pack_id: UUID | None = Field(None, description="Pack propriétaire de la leçon")
 
     class Config:
         json_schema_extra = {

@@ -13,14 +13,13 @@ from sqlalchemy.orm import Session
 from app.models.content import (
     DifficultyEnum,
     Exercise,
-    LearningPath,
     Lesson,
     LevelEnum,
     Subject,
 )
 from app.models.progress import ProgressStatus, SubjectProgress, UserProgress
 from app.models.user import Profile, User
-from tests.helpers import child_headers, make_child
+from tests.helpers import child_headers, make_child, make_lesson, make_pack, make_subject
 
 _children: dict[str, User] = {}
 
@@ -44,15 +43,11 @@ def _mcq(lesson_id, order_index: int) -> Exercise:
 
 
 def _subject_two_tiers(db: Session, name: str, slug: str, level: LevelEnum) -> tuple[Subject, Lesson, Exercise, Lesson]:
-    subject = Subject(name=name, slug=slug)
-    db.add(subject)
-    db.flush()
-    path = LearningPath(subject_id=subject.id, name=f"{name} path", level=level)
-    db.add(path)
-    db.flush()
-    l1 = Lesson(path_id=path.id, name=f"{name} P1", order_index=1, xp_reward=0, is_published=True)
-    l2 = Lesson(path_id=path.id, name=f"{name} P2", order_index=2, xp_reward=0, is_published=True)
-    db.add_all([l1, l2])
+    """Deux paliers d'un **même pack** : c'est là que le verrou séquentiel s'applique."""
+    subject = make_subject(db, name=name, slug=slug)
+    pack = make_pack(db, title=f"{name} {level.name}", level=level)
+    l1 = make_lesson(db, pack=pack, subject=subject, level=level, tier=1, name=f"{name} P1")
+    l2 = make_lesson(db, pack=pack, subject=subject, level=level, tier=2, name=f"{name} P2")
     db.flush()
     e1 = _mcq(l1.id, 0)
     db.add(e1)

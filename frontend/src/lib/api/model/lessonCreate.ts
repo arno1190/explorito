@@ -38,4 +38,6 @@ export interface LessonCreate {
   is_published?: boolean;
   /** ID du parcours d'apprentissage */
   path_id: string;
+  /** Pack propriétaire de la leçon */
+  pack_id?: string | null;
 }

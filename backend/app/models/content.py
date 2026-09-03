@@ -38,6 +38,28 @@ class LevelEnum(str, enum.Enum):
     CM2 = "cm2"
 
 
+#: Ordre pédagogique des niveaux. Indispensable : l'ordre alphabétique des
+#: valeurs est faux (``ce1`` < ``cp``, ``gs`` < ``ps``), donc toute comparaison
+#: de niveaux — bornes d'un pack, contenu « au niveau de l'enfant » — doit passer
+#: par ce rang et jamais par la chaîne.
+LEVEL_ORDER: dict[LevelEnum, int] = {level: rank for rank, level in enumerate(LevelEnum)}
+
+
+def level_rank(level: LevelEnum | str) -> int:
+    """Rang pédagogique d'un niveau (``ps`` = 0 → ``cm2`` = 7)."""
+    return LEVEL_ORDER[LevelEnum(level)]
+
+
+def levels_between(low: LevelEnum | str, high: LevelEnum | str) -> list[LevelEnum]:
+    """Niveaux inclus dans l'intervalle ``[low, high]``, dans l'ordre pédagogique.
+
+    Renvoie une liste vide si l'intervalle est inversé, ce qui rend les filtres
+    SQL ``IN (...)`` naturellement vides plutôt que faussement permissifs.
+    """
+    lo, hi = level_rank(low), level_rank(high)
+    return [level for level, rank in LEVEL_ORDER.items() if lo <= rank <= hi]
+
+
 class DifficultyEnum(str, enum.Enum):
     """Niveaux de difficulté"""
 
@@ -137,6 +159,19 @@ class Lesson(Base):
         ForeignKey("learning_paths.id", ondelete="CASCADE"),
         nullable=False,
     )
+    # Pack propriétaire : unité d'auteur, de revue, de thème **et portée du
+    # verrou de progression**. ``RESTRICT`` volontaire : supprimer un pack ne doit
+    # jamais cascader sur ``lessons`` (donc sur ``user_progress``) — retirer du
+    # contenu se fait par changement de ``Pack.community_status``.
+    # ``NOT NULL`` volontaire : une leçon sans pack ne serait pas seulement mal
+    # rangée, elle serait mal verrouillée — toutes les leçons sans pack se
+    # verrouilleraient mutuellement (cf. services/progression.py).
+    pack_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("packs.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     order_index = Column(Integer, default=0)
@@ -152,6 +187,7 @@ class Lesson(Base):
 
     # Relations
     path = relationship("LearningPath", back_populates="lessons")
+    pack = relationship("Pack", back_populates="lessons")
     exercises = relationship("Exercise", back_populates="lesson", cascade="all, delete-orphan")
     user_progress = relationship("UserProgress", back_populates="lesson", cascade="all, delete-orphan")
 

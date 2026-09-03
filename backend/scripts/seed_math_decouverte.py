@@ -26,6 +26,7 @@ from app.models.content import (
     LevelEnum,
     Subject,
 )
+from app.services.packs import ensure_official_pack
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -121,6 +122,16 @@ def create_lessons_with_exercises(
     lessons_data: list[dict[str, Any]],
 ) -> int:
     total_ex = 0
+    # ``lessons.pack_id`` est NOT NULL : toutes les leçons du parcours rejoignent
+    # le pack officiel (matière, niveau), d'identité déterministe.
+    subject = session.query(Subject).filter(Subject.id == path.subject_id).first()
+    pack = ensure_official_pack(
+        session,
+        path.subject_id,
+        path.level,
+        subject.name if subject is not None else "Explorito",
+        subject.icon if subject is not None else None,
+    )
     for idx, ld in enumerate(lessons_data):
         existing = session.query(Lesson).filter_by(path_id=path.id, order_index=idx).first()
         if existing:
@@ -129,6 +140,7 @@ def create_lessons_with_exercises(
         else:
             lesson = Lesson(
                 path_id=path.id,
+                pack_id=pack.id,
                 name=ld["name"],
                 description=ld["desc"],
                 order_index=idx,

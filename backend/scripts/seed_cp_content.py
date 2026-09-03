@@ -35,6 +35,7 @@ from app.models.content import (
     Subject,
 )
 from app.schemas.exercise import validate_exercise_payload
+from app.services.packs import ensure_official_pack
 
 CONTENT_JSON = Path(__file__).parent / "cp_content.json"
 
@@ -148,10 +149,15 @@ def seed(db, data: dict) -> dict[str, int]:
             db.flush()
             counters["paths"] += 1
 
+            # ``lessons.pack_id`` est NOT NULL : la leçon rejoint le pack
+            # officiel (matière, niveau), d'identité déterministe.
+            pack = ensure_official_pack(db, subject.id, level_enum, subject.name, subject.icon)
+
             for diff in sorted(int(d) for d in island_levels):
                 raw_exercises = island_levels[str(diff)] if str(diff) in island_levels else island_levels[diff]
                 lesson = Lesson(
                     path_id=path.id,
+                    pack_id=pack.id,
                     name=LESSON_NAMES.get(diff, f"Niveau {diff}"),
                     description=None,
                     order_index=diff,

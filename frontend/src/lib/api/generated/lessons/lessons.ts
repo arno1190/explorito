@@ -381,7 +381,7 @@ export function useListLessonsApiV1LessonsGet<
  * Crée une nouvelle leçon (admin uniquement)
 
 Args:
-    lesson_data: Données de la leçon à créer
+    lesson_data: Données de la leçon à créer (``pack_id`` optionnel)
     db: Session de base de données
     current_user: Utilisateur administrateur authentifié
 
@@ -389,7 +389,7 @@ Returns:
     Leçon créée
 
 Raises:
-    HTTPException: Si le parcours n'existe pas
+    HTTPException: Si le parcours ou le pack demandé n'existe pas
  * @summary Create Lesson
  */
 export const createLessonApiV1LessonsPost = (

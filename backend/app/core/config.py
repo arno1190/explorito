@@ -84,6 +84,54 @@ class Settings(BaseSettings):
     PYTHAGORE_FAILURE_PENALTY: int = 1  # −XP par erreur (payout planché à 0)
     PYTHAGORE_DAILY_XP_CAP: int = 100  # XP max/jour gagnable via les défis Pythagore
 
+    # ----------------------------------------------------------------- #
+    # Packs communautaires (issues #7–#20)
+    # ----------------------------------------------------------------- #
+    # Version du format `.explorito` produite et acceptée. Une version inconnue
+    # est refusée proprement plutôt que devinée.
+    PACK_FORMAT_VERSION: int = 1
+    # Plafonds durs, appliqués côté serveur (refus). Ils bornent le coût d'un
+    # envoi hostile ou simplement délirant ; ce ne sont pas des règles de qualité.
+    PACK_MAX_LESSONS: int = 12
+    PACK_MAX_EXERCISES_PER_LESSON: int = 20
+    PACK_MAX_TEXT_LENGTH: int = 2000
+    PACK_MAX_FILE_SIZE: int = 512 * 1024
+    PACK_MAX_TAGS: int = 8
+    # Limitation de débit par compte.
+    PACK_MAX_UPLOADS_PER_DAY: int = 5
+    PACK_MAX_PENDING: int = 3
+    # Demandes « Je veux ça ! » par enfant et par jour (sinon trente en attente).
+    PACK_MAX_REQUESTS_PER_CHILD_PER_DAY: int = 3
+    # Nombre de packs approuvés à partir duquel un auteur devient « de confiance »
+    # (publication directe, contrôle a posteriori). Promotion explicite et révocable.
+    PACK_TRUST_THRESHOLD: int = 3
+    # Version des conditions de contribution acceptées au premier envoi.
+    CONTRIBUTOR_TERMS_VERSION: str = "2026-09-01"
+    # Jeton de modération : porte d'entrée *uniquement* sur /moderation/*, jamais
+    # sur la suppression d'utilisateur ni l'incarnation. Vide = surface désactivée.
+    MODERATION_TOKEN: str = ""
+
+    # ----------------------------------------------------------------- #
+    # Email (annonces produit)
+    # ----------------------------------------------------------------- #
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_STARTTLS: bool = True
+    SMTP_SSL: bool = False
+    MAIL_FROM: str = "arnaud@pascalfamily.fr"
+    MAIL_FROM_NAME: str = "Explorito"
+    MAIL_REPLY_TO: str = "arnaud@pascalfamily.fr"
+    # URL publique de l'application, utilisée dans les liens des emails et les
+    # URLs d'aperçu renvoyées aux outils d'envoi.
+    PUBLIC_APP_URL: str = "http://localhost:3005"
+
+    @property
+    def mail_configured(self) -> bool:
+        """Vrai si un serveur SMTP est configuré (sinon l'envoi est refusé net)."""
+        return bool(self.SMTP_HOST and self.MAIL_FROM)
+
     @model_validator(mode="after")
     def _enforce_secure_secret_key(self) -> "Settings":
         """Refuse de démarrer en production avec la clé secrète par défaut."""

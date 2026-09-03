@@ -9,11 +9,12 @@ from typing import Any
 from uuid import UUID
 
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.config import settings
 from app.models.content import Exercise, Lesson
 from app.models.gamification import Achievement, DailyGoal, Streak, UserAchievement
+from app.models.pack import Pack
 from app.models.progress import (
     ExerciseResult,
     ProgressStatus,
@@ -336,10 +337,18 @@ def update_daily_goal_lesson_count(user_id: UUID, db: Session) -> None:
     db.commit()
 
 
-def xp_for_exercise(exercise: Exercise) -> int:
-    """XP de base d'un exercice selon sa difficulté (issue #6).
+def xp_for_exercise(exercise: Exercise, pack: Pack | None = None) -> int:
+    """XP de base d'un exercice selon sa difficulté (issues #6 et #10).
 
-    Priorité :
+    Tant que le pack propriétaire n'a pas vu sa difficulté **ratifiée par un
+    humain** à la revue, l'exercice paie un tarif forfaitaire : les étiquettes
+    ``difficulty_level`` viennent de l'auteur, et l'XP achète des
+    collectionnables — un pack non ratifié serait donc une imprimante à billets
+    (15 exercices triviaux déclarés en difficulté 5). Le tarif forfaitaire
+    s'applique aussi à la famille de l'auteur, précisément là où vit
+    l'incitation à tricher.
+
+    Après ratification, priorité :
     1. ``difficulty_level`` (1→5, évalué par exercice) via ``XP_BY_LEVEL`` ;
     2. repli sur l'ancienne ``difficulty`` (easy/medium/hard) via
        ``XP_BY_DIFFICULTY`` ;
@@ -347,10 +356,18 @@ def xp_for_exercise(exercise: Exercise) -> int:
 
     Args:
         exercise: Exercice évalué.
+        pack: Pack propriétaire, déjà chargé par l'appelant. À défaut, il est
+            résolu via ``exercise.lesson.pack`` (chargement paresseux).
 
     Returns:
         Nombre de points de base à attribuer pour une première bonne réponse.
     """
+    owner = pack
+    if owner is None:
+        lesson = exercise.lesson
+        owner = lesson.pack if lesson is not None else None
+    if owner is not None and not owner.difficulty_ratified:
+        return settings.XP_PER_EXERCISE
     level = exercise.difficulty_level
     if level is not None and int(level) in settings.XP_BY_LEVEL:
         return settings.XP_BY_LEVEL[int(level)]
@@ -383,6 +400,10 @@ def process_exercise_result(
     complétion de la leçon (tous les exercices réussis au moins une fois) et
     débloque les achievements éligibles.
 
+    L'XP est cumulé au fil de l'eau dans :class:`SubjectProgress` et jamais
+    recalculé depuis les difficultés : ratifier un pack après coup ne réécrit
+    donc pas l'XP déjà attribuée, seulement les attributions suivantes.
+
     Args:
         user_id: ID de l'utilisateur.
         exercise: Exercice soumis (avec ``lesson`` chargeable).
@@ -394,8 +415,18 @@ def process_exercise_result(
         Résumé de progression : xp attribué, xp total, série courante, complétion
         de la leçon, score/étoiles éventuels et nouveaux achievements.
     """
-    lesson: Lesson = exercise.lesson
+    # Une seule requête pour la leçon, son parcours (matière) et son pack : la
+    # ratification de la difficulté conditionne l'XP (issue #10) et y accéder via
+    # ``exercise.lesson.pack`` déclencherait un SELECT ``packs`` supplémentaire à
+    # chaque exercice corrigé.
+    lesson: Lesson = (
+        db.query(Lesson)
+        .options(joinedload(Lesson.path), joinedload(Lesson.pack))
+        .filter(Lesson.id == exercise.lesson_id)
+        .one()
+    )
     subject_id: UUID = lesson.path.subject_id
+    pack: Pack | None = lesson.pack
 
     # --- UserProgress de la leçon (créé au premier passage) ---
     progress = (
@@ -460,7 +491,7 @@ def process_exercise_result(
         )
         prior_correct = int(correct_count) - 1  # hors résultat courant
         prior_attempts = int(result_count) - 1
-        base_xp = xp_for_exercise(exercise)  # pondéré par la difficulté (issue #6)
+        base_xp = xp_for_exercise(exercise, pack)  # difficulté (issue #6), ratifiée ou non (issue #10)
         if prior_correct > 0:
             exercise_xp = 0
         elif prior_attempts > 0:
@@ -526,8 +557,14 @@ def process_exercise_result(
             db.flush()
 
             # Bonus XP forfaitaire de leçon (désactivé par défaut, issue #6) +
-            # mise à jour de l'objectif quotidien.
-            lesson_reward = int(lesson.xp_reward or 0)
+            # mise à jour de l'objectif quotidien. ``lesson.xp_reward`` est dérivé
+            # des difficultés déclarées par l'auteur : tant que le pack n'est pas
+            # ratifié on retombe sur le tarif forfaitaire par exercice, sinon le
+            # bonus rouvrirait la porte que xp_for_exercise vient de fermer.
+            if pack is not None and not pack.difficulty_ratified:
+                lesson_reward = int(total_exercises) * settings.XP_PER_EXERCISE
+            else:
+                lesson_reward = int(lesson.xp_reward or 0)
             if settings.AWARD_LESSON_COMPLETION_BONUS and lesson_reward > 0:
                 xp_awarded += lesson_reward
                 total_xp = award_xp(user_id, lesson_reward, subject_id, db)

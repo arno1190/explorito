@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import {
   createChildApiV1ChildrenPost,
@@ -49,6 +50,8 @@ import {
   LogOut,
   UserPlus,
   Pencil,
+  Library,
+  PenLine,
 } from "lucide-react";
 import { EditChildDialog } from "@/components/profile/EditChildDialog";
 import type { ChildResponse, ChildStatsResponse } from "@/lib/api/model";
@@ -325,6 +328,36 @@ export default function DashboardPage() {
             </DialogContent>
           </Dialog>
         </div>
+      </div>
+
+      {/* ---- Packs communautaires : catalogue et contribution ---- */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Link
+          href="/bibliotheque"
+          className="rounded-2xl border-2 border-fun-green bg-white p-4 text-left candy-shadow transition-all hover:candy-shadow-lg"
+        >
+          <p className="flex items-center gap-2 font-bold text-fun-text">
+            <Library className="h-5 w-5 text-fun-green" />
+            Bibliothèque
+          </p>
+          <p className="mt-1 text-sm text-fun-text-muted">
+            Lire les packs écrits par d&apos;autres parents et choisir, enfant
+            par enfant, ceux que vous activez.
+          </p>
+        </Link>
+        <Link
+          href="/contributions"
+          className="rounded-2xl border-2 border-fun-violet bg-white p-4 text-left candy-shadow transition-all hover:candy-shadow-lg"
+        >
+          <p className="flex items-center gap-2 font-bold text-fun-text">
+            <PenLine className="h-5 w-5 text-fun-violet" />
+            Créer des leçons
+          </p>
+          <p className="mt-1 text-sm text-fun-text-muted">
+            Écrire un pack pour votre enfant, puis le proposer aux autres
+            familles si vous le souhaitez.
+          </p>
+        </Link>
       </div>
 
       {loading ? (
