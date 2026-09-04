@@ -96,6 +96,38 @@ class UploadToken(Base):
         return f"<UploadToken {self.prefix}… user={self.user_id} active={self.is_active}>"
 
 
+class UploadPairing(Base):
+    """Code d'appariement court, à lire à voix haute à son assistant.
+
+    Existe pour une seule raison : un parent ne configurera pas de variable
+    d'environnement, et recopier un secret de 43 caractères depuis un téléphone
+    fait abandonner. Le parent lit huit caractères, l'assistant les échange
+    contre un vrai jeton d'envoi et le stocke lui-même.
+
+    Compromis de sécurité assumé et borné : l'échange est **non authentifié**
+    (le code *est* la preuve), donc le code est à usage unique, expire en
+    quelques minutes, et n'ouvre au mieux que la création de brouillons sur un
+    compte. Comme pour les jetons, seul le SHA-256 du code est stocké.
+    """
+
+    __tablename__ = "upload_pairings"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    code_hash = Column(String, nullable=False, unique=True, index=True)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    expires_at = Column(DateTime, nullable=False)
+    claimed_at = Column(DateTime, nullable=True)
+    # Jeton émis lors de l'échange : garde la trace de ce que ce code a produit,
+    # pour que révoquer le jeton reste lisible depuis l'appariement.
+    token_id = Column(UUID(as_uuid=True), ForeignKey("upload_tokens.id", ondelete="SET NULL"), nullable=True)
+
+    user = relationship("User", foreign_keys=[user_id])
+
+    def __repr__(self) -> str:
+        return f"<UploadPairing user={self.user_id} claimed={self.claimed_at is not None}>"
+
+
 class ReportStatus(str, enum.Enum):
     """Statut d'un signalement de pack."""
 

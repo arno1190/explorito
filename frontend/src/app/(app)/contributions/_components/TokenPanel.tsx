@@ -24,7 +24,7 @@ import { parseApiFailure } from "../_lib/contrib";
  * brouillon**. Le secret n'existe côté serveur que haché, il n'est donc lisible
  * qu'à l'émission — d'où l'encadré unique.
  */
-export function TokenPanel() {
+export function TokenPanel({ disabled = false }: { disabled?: boolean }) {
   const queryClient = useQueryClient();
   const tokensQuery = useTokens();
   const [label, setLabel] = useState("");
@@ -131,10 +131,11 @@ export function TokenPanel() {
         </div>
         <Button
           type="button"
-          onClick={() =>
-            createToken.mutate({ data: { label: label.trim() || null } })
-          }
-          disabled={createToken.isPending}
+          onClick={() => {
+            if (disabled) return;
+            createToken.mutate({ data: { label: label.trim() || null } });
+          }}
+          disabled={disabled || createToken.isPending}
         >
           {createToken.isPending ? "Création…" : "Créer un jeton"}
         </Button>
@@ -185,8 +186,11 @@ export function TokenPanel() {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => revokeToken.mutate({ tokenId: token.id })}
-                disabled={revokeToken.isPending}
+                onClick={() => {
+                  if (disabled) return;
+                  revokeToken.mutate({ tokenId: token.id });
+                }}
+                disabled={disabled || revokeToken.isPending}
               >
                 <Trash2 className="h-4 w-4" />
                 Révoquer
@@ -202,6 +206,7 @@ export function TokenPanel() {
           variant="destructive"
           className="mt-3"
           onClick={() => {
+            if (disabled) return;
             if (
               confirm(
                 "Révoquer tous les jetons actifs ? Votre assistant ne pourra plus rien déposer avant que vous en créiez un nouveau."
@@ -210,7 +215,7 @@ export function TokenPanel() {
               revokeAll.mutate();
             }
           }}
-          disabled={revokeAll.isPending}
+          disabled={disabled || revokeAll.isPending}
         >
           <Trash2 className="h-4 w-4" />
           Tout révoquer

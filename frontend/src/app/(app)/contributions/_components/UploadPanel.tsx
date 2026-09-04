@@ -1,16 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ClipboardPaste, FileUp, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import {
-  getListMyPacksApiV1ContributionsGetQueryKey,
-  useGetTermsApiV1ContributionsTermsGet as useContributorTerms,
-} from "@/lib/api/generated/contributions/contributions";
+import { getListMyPacksApiV1ContributionsGetQueryKey } from "@/lib/api/generated/contributions/contributions";
 import type { UploadResult } from "@/lib/api/model";
 
 import {
@@ -18,14 +15,22 @@ import {
   uploadFailureTitle,
   uploadPack,
   type ApiFailure,
-  type UploadSource,
 } from "../_lib/contrib";
 import { IssueList } from "./IssueList";
-import { TermsDialog } from "./TermsDialog";
 
 type Mode = "file" | "text";
 
-export function UploadPanel() {
+/**
+ * Dépôt d'un pack. Les conditions se prennent maintenant à l'arrivée sur la
+ * page : ici, un 428 ne fait que renvoyer le parent vers ce même dialogue.
+ */
+export function UploadPanel({
+  disabled = false,
+  onTermsRequired,
+}: {
+  disabled?: boolean;
+  onTermsRequired: () => void;
+}) {
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -33,69 +38,32 @@ export function UploadPanel() {
   const [file, setFile] = useState<File | null>(null);
   const [text, setText] = useState("");
   const [failure, setFailure] = useState<ApiFailure | null>(null);
-  const [termsOpen, setTermsOpen] = useState(false);
-  const [termsError, setTermsError] = useState<string | null>(null);
-  const [terms, setTerms] = useState<{
-    version: string;
-    text: string;
-  } | null>(null);
-
-  // La source est mémorisée hors du rendu : après un 428, l'envoi est rejoué
-  // tel quel avec l'acceptation, sans redemander le fichier au parent.
-  const pendingSource = useRef<UploadSource | null>(null);
-
-  // Repli quand le 428 n'a pas porté le texte (envoi via la compétence, par ex.).
-  const termsQuery = useContributorTerms({
-    query: { enabled: termsOpen && terms === null },
-  });
-  const shownTerms =
-    terms ??
-    (termsQuery.data
-      ? { version: termsQuery.data.version, text: termsQuery.data.text }
-      : null);
 
   const upload = useMutation({
     mutationFn: uploadPack,
     onSuccess: (result: UploadResult) => {
-      setTermsOpen(false);
       setFailure(null);
       queryClient.invalidateQueries({
         queryKey: getListMyPacksApiV1ContributionsGetQueryKey(),
       });
       router.push(`/contributions/${result.pack_id}`);
     },
-    onError: (error: unknown, variables) => {
+    onError: (error: unknown) => {
       const parsed = parseApiFailure(error);
       if (parsed.status === 428) {
-        if (parsed.terms) setTerms(parsed.terms);
-        setTermsOpen(true);
-        return;
-      }
-      // Un échec parti du dialogue (pseudonyme refusé, déjà pris…) doit
-      // s'afficher dans le dialogue, sinon il reste invisible sous l'overlay.
-      if (variables.acceptTerms) {
-        setTermsError(parsed.message);
+        onTermsRequired();
         return;
       }
       setFailure(parsed);
     },
   });
 
-  const submit = (source: UploadSource, accept?: { handle: string }) => {
-    pendingSource.current = source;
-    setFailure(null);
-    setTermsError(null);
-    upload.mutate({
-      source,
-      acceptTerms: accept ? true : undefined,
-      handle: accept?.handle,
-    });
-  };
-
   const submitCurrent = () => {
+    if (disabled) return;
+    setFailure(null);
     if (mode === "file") {
       if (!file) return;
-      submit({ kind: "file", file });
+      upload.mutate({ source: { kind: "file", file } });
       return;
     }
     try {
@@ -108,11 +76,10 @@ export function UploadPanel() {
         message:
           "Le texte collé n'est pas du JSON valide. Recopiez tout le fichier, des premières accolades aux dernières.",
         issues: [],
-        terms: null,
       });
       return;
     }
-    submit({ kind: "text", text });
+    upload.mutate({ source: { kind: "text", text } });
   };
 
   const canSubmit = mode === "file" ? file !== null : text.trim().length > 0;
@@ -198,7 +165,7 @@ export function UploadPanel() {
         className="mt-4 w-full sm:w-auto"
         size="lg"
         onClick={submitCurrent}
-        disabled={!canSubmit || upload.isPending}
+        disabled={disabled || !canSubmit || upload.isPending}
       >
         {upload.isPending ? "Envoi…" : "Envoyer le brouillon"}
       </Button>
@@ -232,21 +199,6 @@ export function UploadPanel() {
           )}
         </div>
       )}
-
-      <TermsDialog
-        open={termsOpen}
-        onOpenChange={(open) => {
-          setTermsOpen(open);
-          if (!open) setTermsError(null);
-        }}
-        terms={shownTerms}
-        pending={upload.isPending}
-        error={termsError}
-        onAccept={(handle) => {
-          const source = pendingSource.current;
-          if (source) submit(source, { handle });
-        }}
-      />
     </section>
   );
 }

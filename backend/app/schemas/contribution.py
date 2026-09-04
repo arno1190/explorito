@@ -91,3 +91,39 @@ class ContributorTerms(BaseModel):
     accepted: bool = False
     handle: str | None = None
     trusted: bool = False
+
+
+class ContributorTermsAccept(BaseModel):
+    """Acceptation explicite des conditions, avec le pseudonyme public choisi.
+
+    Le pseudonyme est obligatoire ici : c'est la seule identité publiée d'un
+    contributeur, et la faire choisir au moment de l'acceptation évite qu'un
+    pseudonyme généré (``Parent-a1b2c3``) devienne son nom public par défaut.
+    """
+
+    handle: str = Field(..., min_length=3, max_length=24, description="Pseudonyme public")
+
+
+class PairingCode(BaseModel):
+    """Code court à dicter à son assistant, en échange d'un jeton d'envoi."""
+
+    code: str = Field(..., description="Code à usage unique, à lire à voix haute")
+    expires_at: datetime
+    expires_in_seconds: int
+
+
+class PairingClaim(BaseModel):
+    """Code présenté par un assistant pour se configurer."""
+
+    code: str = Field(..., min_length=4, max_length=32)
+
+
+class PairingResult(BaseModel):
+    """Jeton d'envoi remis à l'assistant, plus ce qu'il doit savoir du compte."""
+
+    token: str = Field(..., description="Secret en clair — à stocker localement, non récupérable ensuite")
+    prefix: str
+    handle: str | None = None
+    terms_accepted: bool = False
+    terms_version: str
+    app_url: str = Field(..., description="URL publique de l'application, à mémoriser avec le jeton")

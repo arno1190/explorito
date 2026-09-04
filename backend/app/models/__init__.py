@@ -12,6 +12,7 @@ from app.models.contribution import (
     ContributorProfile,
     PackAuditLog,
     PackReport,
+    UploadPairing,
     UploadToken,
 )
 from app.models.gamification import (
@@ -40,6 +41,7 @@ __all__ = [
     "PackRequest",
     "ContributorProfile",
     "UploadToken",
+    "UploadPairing",
     "PackReport",
     "PackAuditLog",
     "ContributionQuota",

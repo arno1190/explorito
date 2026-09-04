@@ -25,7 +25,11 @@ from app.models.pack import CommunityStatus, Pack
 from app.models.user import User, UserRole
 from app.schemas.contribution import (
     ContributorTerms,
+    ContributorTermsAccept,
     PackQuickEdit,
+    PairingClaim,
+    PairingCode,
+    PairingResult,
     UploadResult,
     UploadTokenCreate,
     UploadTokenCreated,
@@ -33,10 +37,13 @@ from app.schemas.contribution import (
 )
 from app.schemas.pack import PackDetail, PackSummary, ValidationIssue
 from app.services.contribution import (
+    PAIRING_TTL_SECONDS,
     assert_can_upload,
     assert_pack_mutable,
+    claim_pairing,
     clone_pack,
     contributor_terms_state,
+    create_pairing,
     ensure_contributor,
     ingest_pack,
     issue_upload_token,
@@ -262,6 +269,78 @@ async def get_terms(
         accepted=accepted,
         handle=handle,
         trusted=trusted,
+    )
+
+
+@router.post("/terms/accept", response_model=ContributorTerms)
+async def accept_terms(
+    body: ContributorTermsAccept,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> ContributorTerms:
+    """Enregistre l'acceptation des conditions et le pseudonyme public.
+
+    Séparé de l'envoi à dessein : le parent doit pouvoir accepter **avant**
+    d'avoir un pack sous la main. Tant que cette route n'a pas été appelée, la
+    page de contribution reste inactive côté client — c'était sinon un 428
+    surgissant au premier envoi, c'est-à-dire au pire moment.
+
+    Session obligatoire : un jeton d'envoi ne peut pas accepter des conditions
+    juridiques au nom d'une personne.
+    """
+    profile = ensure_contributor(db, current_user, handle=body.handle, accept_terms=True)
+    db.commit()
+    db.refresh(profile)
+    return ContributorTerms(
+        version=CONTRIBUTOR_TERMS_VERSION,
+        text=CONTRIBUTOR_TERMS,
+        accepted=True,
+        handle=profile.handle,
+        trusted=bool(profile.trusted),
+    )
+
+
+@router.post("/pairing", response_model=PairingCode, status_code=status.HTTP_201_CREATED)
+async def start_pairing(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> PairingCode:
+    """Affiche un code court à dicter à son assistant.
+
+    Remplace la mise en place d'une variable d'environnement, qui perdait la
+    quasi-totalité des parents : huit caractères lus à voix haute, et
+    l'assistant va chercher le jeton lui-même.
+    """
+    code, expires_at = create_pairing(db, current_user)
+    db.commit()
+    return PairingCode(
+        code=code,
+        expires_at=expires_at,
+        expires_in_seconds=PAIRING_TTL_SECONDS,
+    )
+
+
+@router.post("/pairing/claim", response_model=PairingResult)
+async def claim_pairing_code(
+    body: PairingClaim,
+    db: Annotated[Session, Depends(get_db)],
+) -> PairingResult:
+    """Échange un code d'appariement contre un jeton d'envoi (sans session).
+
+    Volontairement non authentifié : c'est tout l'intérêt, l'assistant n'a rien
+    à configurer. Le code est la preuve, donc il est à usage unique, expire en
+    quinze minutes et ne débloque qu'un jeton de **brouillon**.
+    """
+    user, token, secret = claim_pairing(db, body.code)
+    profile, accepted = contributor_terms_state(db, user)
+    db.commit()
+    return PairingResult(
+        token=secret,
+        prefix=token.prefix,
+        handle=profile.handle if profile is not None else None,
+        terms_accepted=accepted,
+        terms_version=CONTRIBUTOR_TERMS_VERSION,
+        app_url=settings.PUBLIC_APP_URL,
     )
 
 

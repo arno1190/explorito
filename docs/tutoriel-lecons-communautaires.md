@@ -42,17 +42,67 @@ Arthur par Tom. Les leçons n'y perdent rien, et votre enfant reste invisible.
 
 La relecture attrape ces cas, mais autant ne pas les écrire.
 
-## Où récupérer votre jeton d'envoi
+## Connecter votre assistant : un code, lu à voix haute
 
-Dans Explorito : **Mes leçons → Jeton d'envoi → Créer un jeton**.
-Copiez-le tout de suite, il ne s'affiche qu'une fois. C'est un jeton *limité* :
-il ne peut que déposer des brouillons sur votre compte — il ne peut rien publier,
-rien supprimer, ni toucher au compte de votre enfant. Si vous le perdez,
-révoquez-le et créez-en un autre.
+Dans Explorito : **Mes leçons** dans la barre de navigation — la page s'intitule
+« Mes contributions » — puis, sur la carte **« Connecter mon assistant »**,
+cliquez **« Afficher mon code »**. Un code de huit caractères
+s'affiche, du type `K7QF-3M2P`, avec le compte à rebours « Valable encore
+mm:ss ». Vous le **lisez à votre assistant**, et c'est tout : il s'en sert pour
+récupérer son jeton d'envoi et le ranger lui-même sur votre ordinateur. Rien à
+copier, rien à coller, rien à retenir.
 
-C'est aussi là que vous choisissez votre **pseudonyme public** : c'est lui qui
-apparaîtra comme auteur du pack. Ni votre nom, ni votre e-mail, ni votre photo
-ne sont montrés.
+La même page s'ouvre aussi depuis la Bibliothèque, bouton
+**« Créer ou envoyer des leçons »**.
+
+Si vous préférez ne rien dicter, **« Copier la phrase »** met dans votre
+presse-papiers une demande complète, code compris, à coller dans votre
+assistant : « Connecte-toi à Explorito avec le code K7QF-3M2P, puis fais-moi un
+pack sur les dinosaures pour un CE1. » **« Copier le code »** ne copie que le
+code.
+
+Le code vaut **15 minutes** et ne sert **qu'une fois**. Passé ce délai, ou s'il a
+déjà servi, le bouton devient **« Afficher un nouveau code »** : reprenez-en un
+neuf. Ces codes n'emploient aucun caractère prêtant à confusion — ni `O` ni `0`,
+ni `I` ni `1` ni `L`, ni `U` ni `V`. Si vous croyez lire un « O », c'est un `Q` :
+relisez le caractère plutôt que de laisser votre assistant deviner.
+
+Le jeton que votre assistant obtient est *limité* : il ne peut que déposer des
+brouillons sur votre compte — il ne peut rien publier, rien supprimer, ni
+toucher au compte de votre enfant. Pour le couper, dépliez **« Je préfère gérer
+un jeton moi-même »** sur cette même page et cliquez **« Révoquer »** (ou
+**« Tout révoquer »**) : l'assistant perd l'accès immédiatement.
+
+### Les conditions et votre pseudonyme, dans l'application
+
+À votre première arrivée sur **Mes contributions**, une fenêtre
+**« Conditions de contribution »** s'ouvre d'elle-même : cochez « J'ai lu et
+j'accepte les conditions de contribution. », choisissez votre **pseudonyme
+public** (3 à 24 caractères) — c'est lui qui apparaîtra comme auteur des packs,
+ni votre nom, ni votre e-mail, ni votre photo ne sont montrés — puis
+**« Accepter et activer la page »**. Si vous répondez « Plus tard », la page
+reste inerte derrière le bandeau « Cette page est inactive », et
+**« Lire et accepter les conditions »** rouvre la fenêtre quand vous voulez.
+
+Votre assistant ne peut pas accepter à votre place : c'est le seul geste qui
+n'appartient qu'à vous. S'il vous dit que les conditions manquent, c'est là qu'il
+faut cliquer. Il arrive aussi qu'une nouvelle version des conditions soit
+publiée : la page se reverrouille derrière la même fenêtre, vous acceptez, et
+votre assistant renvoie son pack tel quel.
+
+### Si vous préférez tenir le jeton vous-même
+
+Voie secondaire, pour qui aime voir ses secrets : sur la même page, dépliez
+**« Je préfère gérer un jeton moi-même »**, section **« Jeton d'envoi »**, puis
+**« Créer un jeton »**. Il s'affiche en clair une seule fois (43 caractères) —
+copiez-le tout de suite. Il se révoque (**« Révoquer »**) et se recrée au même
+endroit. Vous le
+collez ensuite dans le fichier `~/.explorito/credentials.json` — celui-là même
+que votre assistant écrit tout seul par la voie du code :
+
+```json
+{"url": "https://explorito.fr", "token": "votre-jeton", "handle": "VotrePseudo"}
+```
 
 ---
 
@@ -65,26 +115,23 @@ niveau scolaire, et il envoie le pack lui-même.
 `.claude/skills/explorito-pack-author/` du dépôt Explorito dans votre projet ou
 dans `~/.claude/skills/`.
 
-**2. Donnez votre jeton et l'adresse du site**, une fois pour toutes :
-
-```bash
-export EXPLORITO_URL="https://explorito.fr"
-export EXPLORITO_UPLOAD_TOKEN="collez-votre-jeton-ici"
-```
-
-**3. Demandez le pack en une phrase :**
+**2. Demandez le pack en une phrase :**
 
 > Fais-moi un pack Explorito sur les volcans, niveau CE2, et envoie-le.
+
+La première fois, l'agent vous demandera le code de « Connecter mon assistant » :
+lisez-le-lui, il se configure seul. Les fois suivantes, il ne vous demande plus
+rien et envoie directement.
 
 L'agent vous rendra un lien d'aperçu, du type
 `https://explorito.fr/contributions/…`.
 
-**4. Relisez l'aperçu.** Vous y voyez chaque leçon et chaque exercice comme votre
+**3. Relisez l'aperçu.** Vous y voyez chaque leçon et chaque exercice comme votre
 enfant les verra, et vous pouvez corriger un mot sur place. C'est le bon moment
 pour vérifier les calculs et le ton — vous connaissez votre enfant mieux que
 n'importe quel modèle.
 
-**5. Activez pour votre enfant**, et si le pack vous plaît, proposez-le à la
+**4. Activez pour votre enfant**, et si le pack vous plaît, proposez-le à la
 communauté depuis ce même écran.
 
 Si l'envoi est refusé, l'agent lit le message d'erreur (il nomme la leçon et
@@ -169,7 +216,8 @@ Réponds uniquement par le JSON, sans commentaire autour.
 `volcans.explorito` (l'extension compte peu, c'est du JSON).
 
 **3. Déposez-le** dans Explorito : **Mes leçons → Déposer un pack → Un
-fichier**. Vous obtenez le même aperçu que dans la voie A.
+fichier**, choisissez le fichier puis **« Envoyer le brouillon »**. Vous obtenez
+le même aperçu que dans la voie A.
 
 Si le fichier est refusé, l'écran affiche exactement ce qui cloche et où
 (« leçon 2, exercice 3 : difficulty_level manquant »). Recollez ce message à
@@ -180,14 +228,16 @@ votre assistant en lui demandant de corriger, et redéposez le fichier.
 Si vous êtes à l'aise avec un terminal :
 
 ```bash
-curl -X POST "https://explorito.fr/api/v1/contributions?accept_terms=true&handle=VotrePseudo" \
+curl -X POST "https://explorito.fr/api/v1/contributions" \
   -H "X-Upload-Token: VOTRE_JETON" \
   -H "Content-Type: application/json" \
   --data-binary @volcans.explorito
 ```
 
-La réponse contient `preview_url` : ouvrez-la dans votre navigateur. Les
-paramètres `accept_terms` et `handle` ne servent qu'au premier envoi.
+La réponse contient `preview_url` : ouvrez-la dans votre navigateur. Le
+pseudonyme et les conditions étant réglés dans l'application, il n'y a aucun
+paramètre à ajouter ; une réponse `428 terms_required` signifie simplement qu'il
+reste à les accepter sur « Mes leçons ».
 
 ---
 

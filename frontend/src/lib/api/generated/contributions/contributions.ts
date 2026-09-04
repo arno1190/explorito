@@ -22,10 +22,14 @@ import type {
 
 import type {
   ContributorTerms,
+  ContributorTermsAccept,
   HTTPValidationError,
   PackDetail,
   PackQuickEdit,
   PackSummary,
+  PairingClaim,
+  PairingCode,
+  PairingResult,
   UploadResult,
   UploadTokenCreate,
   UploadTokenCreated,
@@ -185,6 +189,298 @@ export function useGetTermsApiV1ContributionsTermsGet<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
+/**
+ * Enregistre l'acceptation des conditions et le pseudonyme public.
+
+Séparé de l'envoi à dessein : le parent doit pouvoir accepter **avant**
+d'avoir un pack sous la main. Tant que cette route n'a pas été appelée, la
+page de contribution reste inactive côté client — c'était sinon un 428
+surgissant au premier envoi, c'est-à-dire au pire moment.
+
+Session obligatoire : un jeton d'envoi ne peut pas accepter des conditions
+juridiques au nom d'une personne.
+ * @summary Accept Terms
+ */
+export const acceptTermsApiV1ContributionsTermsAcceptPost = (
+  contributorTermsAccept: ContributorTermsAccept,
+  signal?: AbortSignal
+) => {
+  return axiosInstance<ContributorTerms>({
+    url: `/api/v1/contributions/terms/accept`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: contributorTermsAccept,
+    signal,
+  });
+};
+
+export const getAcceptTermsApiV1ContributionsTermsAcceptPostMutationOptions = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof acceptTermsApiV1ContributionsTermsAcceptPost>>,
+    TError,
+    { data: ContributorTermsAccept },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof acceptTermsApiV1ContributionsTermsAcceptPost>>,
+  TError,
+  { data: ContributorTermsAccept },
+  TContext
+> => {
+  const mutationKey = ["acceptTermsApiV1ContributionsTermsAcceptPost"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof acceptTermsApiV1ContributionsTermsAcceptPost>>,
+    { data: ContributorTermsAccept }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return acceptTermsApiV1ContributionsTermsAcceptPost(data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AcceptTermsApiV1ContributionsTermsAcceptPostMutationResult =
+  NonNullable<
+    Awaited<ReturnType<typeof acceptTermsApiV1ContributionsTermsAcceptPost>>
+  >;
+export type AcceptTermsApiV1ContributionsTermsAcceptPostMutationBody =
+  ContributorTermsAccept;
+export type AcceptTermsApiV1ContributionsTermsAcceptPostMutationError =
+  HTTPValidationError;
+
+/**
+ * @summary Accept Terms
+ */
+export const useAcceptTermsApiV1ContributionsTermsAcceptPost = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof acceptTermsApiV1ContributionsTermsAcceptPost>>,
+      TError,
+      { data: ContributorTermsAccept },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof acceptTermsApiV1ContributionsTermsAcceptPost>>,
+  TError,
+  { data: ContributorTermsAccept },
+  TContext
+> => {
+  return useMutation(
+    getAcceptTermsApiV1ContributionsTermsAcceptPostMutationOptions(options),
+    queryClient
+  );
+};
+/**
+ * Affiche un code court à dicter à son assistant.
+
+Remplace la mise en place d'une variable d'environnement, qui perdait la
+quasi-totalité des parents : huit caractères lus à voix haute, et
+l'assistant va chercher le jeton lui-même.
+ * @summary Start Pairing
+ */
+export const startPairingApiV1ContributionsPairingPost = (
+  signal?: AbortSignal
+) => {
+  return axiosInstance<PairingCode>({
+    url: `/api/v1/contributions/pairing`,
+    method: "POST",
+    signal,
+  });
+};
+
+export const getStartPairingApiV1ContributionsPairingPostMutationOptions = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof startPairingApiV1ContributionsPairingPost>>,
+    TError,
+    void,
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof startPairingApiV1ContributionsPairingPost>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["startPairingApiV1ContributionsPairingPost"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof startPairingApiV1ContributionsPairingPost>>,
+    void
+  > = () => {
+    return startPairingApiV1ContributionsPairingPost();
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type StartPairingApiV1ContributionsPairingPostMutationResult =
+  NonNullable<
+    Awaited<ReturnType<typeof startPairingApiV1ContributionsPairingPost>>
+  >;
+
+export type StartPairingApiV1ContributionsPairingPostMutationError =
+  HTTPValidationError;
+
+/**
+ * @summary Start Pairing
+ */
+export const useStartPairingApiV1ContributionsPairingPost = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof startPairingApiV1ContributionsPairingPost>>,
+      TError,
+      void,
+      TContext
+    >;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof startPairingApiV1ContributionsPairingPost>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(
+    getStartPairingApiV1ContributionsPairingPostMutationOptions(options),
+    queryClient
+  );
+};
+/**
+ * Échange un code d'appariement contre un jeton d'envoi (sans session).
+
+Volontairement non authentifié : c'est tout l'intérêt, l'assistant n'a rien
+à configurer. Le code est la preuve, donc il est à usage unique, expire en
+quinze minutes et ne débloque qu'un jeton de **brouillon**.
+ * @summary Claim Pairing Code
+ */
+export const claimPairingCodeApiV1ContributionsPairingClaimPost = (
+  pairingClaim: PairingClaim,
+  signal?: AbortSignal
+) => {
+  return axiosInstance<PairingResult>({
+    url: `/api/v1/contributions/pairing/claim`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: pairingClaim,
+    signal,
+  });
+};
+
+export const getClaimPairingCodeApiV1ContributionsPairingClaimPostMutationOptions =
+  <TError = HTTPValidationError, TContext = unknown>(options?: {
+    mutation?: UseMutationOptions<
+      Awaited<
+        ReturnType<typeof claimPairingCodeApiV1ContributionsPairingClaimPost>
+      >,
+      TError,
+      { data: PairingClaim },
+      TContext
+    >;
+  }): UseMutationOptions<
+    Awaited<
+      ReturnType<typeof claimPairingCodeApiV1ContributionsPairingClaimPost>
+    >,
+    TError,
+    { data: PairingClaim },
+    TContext
+  > => {
+    const mutationKey = ["claimPairingCodeApiV1ContributionsPairingClaimPost"];
+    const { mutation: mutationOptions } = options
+      ? options.mutation &&
+        "mutationKey" in options.mutation &&
+        options.mutation.mutationKey
+        ? options
+        : { ...options, mutation: { ...options.mutation, mutationKey } }
+      : { mutation: { mutationKey } };
+
+    const mutationFn: MutationFunction<
+      Awaited<
+        ReturnType<typeof claimPairingCodeApiV1ContributionsPairingClaimPost>
+      >,
+      { data: PairingClaim }
+    > = (props) => {
+      const { data } = props ?? {};
+
+      return claimPairingCodeApiV1ContributionsPairingClaimPost(data);
+    };
+
+    return { mutationFn, ...mutationOptions };
+  };
+
+export type ClaimPairingCodeApiV1ContributionsPairingClaimPostMutationResult =
+  NonNullable<
+    Awaited<
+      ReturnType<typeof claimPairingCodeApiV1ContributionsPairingClaimPost>
+    >
+  >;
+export type ClaimPairingCodeApiV1ContributionsPairingClaimPostMutationBody =
+  PairingClaim;
+export type ClaimPairingCodeApiV1ContributionsPairingClaimPostMutationError =
+  HTTPValidationError;
+
+/**
+ * @summary Claim Pairing Code
+ */
+export const useClaimPairingCodeApiV1ContributionsPairingClaimPost = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<
+        ReturnType<typeof claimPairingCodeApiV1ContributionsPairingClaimPost>
+      >,
+      TError,
+      { data: PairingClaim },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<
+    ReturnType<typeof claimPairingCodeApiV1ContributionsPairingClaimPost>
+  >,
+  TError,
+  { data: PairingClaim },
+  TContext
+> => {
+  return useMutation(
+    getClaimPairingCodeApiV1ContributionsPairingClaimPostMutationOptions(
+      options
+    ),
+    queryClient
+  );
+};
 /**
  * Jetons d'envoi du compte (préfixe et usage seulement, jamais le secret).
  * @summary List Tokens

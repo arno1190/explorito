@@ -18,8 +18,6 @@ export interface ApiFailure {
   message: string;
   /** Constats du validateur (422 « pack_invalid »). */
   issues: ValidationIssue[];
-  /** Conditions renvoyées par le 428, pour les afficher sans second appel. */
-  terms: { version: string; text: string } | null;
 }
 
 const GENERIC = "Une erreur est survenue. Réessayez dans un instant.";
@@ -30,7 +28,6 @@ export function parseApiFailure(error: unknown): ApiFailure {
     code: null,
     message: GENERIC,
     issues: [],
-    terms: null,
   };
   if (!axios.isAxiosError(error)) return empty;
 
@@ -54,16 +51,6 @@ export function parseApiFailure(error: unknown): ApiFailure {
       issues: Array.isArray(body.issues)
         ? (body.issues as ValidationIssue[])
         : [],
-      terms:
-        typeof body.terms === "string"
-          ? {
-              version:
-                typeof body.terms_version === "string"
-                  ? body.terms_version
-                  : "",
-              text: body.terms,
-            }
-          : null,
     };
   }
   return { ...empty, status };
@@ -79,8 +66,6 @@ export type UploadSource =
 
 export interface UploadArgs {
   source: UploadSource;
-  acceptTerms?: boolean;
-  handle?: string | null;
 }
 
 /**
@@ -88,16 +73,8 @@ export interface UploadArgs {
  * requête brute (JSON collé **ou** multipart), ce que l'OpenAPI ne décrit pas.
  * On passe donc par l'instance axios partagée, qui porte déjà la session.
  */
-export function uploadPack({
-  source,
-  acceptTerms,
-  handle,
-}: UploadArgs): Promise<UploadResult> {
-  const params = new URLSearchParams();
-  if (acceptTerms) params.set("accept_terms", "true");
-  if (handle) params.set("handle", handle);
-  const query = params.toString();
-  const url = `/api/v1/contributions${query ? `?${query}` : ""}`;
+export function uploadPack({ source }: UploadArgs): Promise<UploadResult> {
+  const url = "/api/v1/contributions";
 
   if (source.kind === "file") {
     const form = new FormData();

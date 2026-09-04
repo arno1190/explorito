@@ -17,16 +17,18 @@ export const metadata: Metadata = {
 const STEPS = [
   {
     n: 1,
-    title: "Récupérez votre jeton d'envoi",
+    title: "Connectez votre assistant : un code, lu à voix haute",
     body: (
       <>
         Dans Explorito, ouvrez <strong>Mes leçons</strong> depuis votre espace
-        parent, puis <strong>« Créer un jeton »</strong>. Copiez-le : il ne
-        s&apos;affiche qu&apos;une seule fois.
+        parent, puis <strong>« Connecter mon assistant »</strong>. Un code de 8
+        caractères s&apos;affiche : lisez-le à votre assistant, il se configure
+        tout seul. Rien à installer, rien à recopier.
         <br />
-        Ce jeton ne sait faire qu&apos;<strong>une</strong> chose : déposer un
-        brouillon. Il ne peut rien publier, rien supprimer, rien lire de votre
-        compte. S&apos;il fuite, révoquez-le d&apos;un clic.
+        Le code vaut 15 minutes et ne sert qu&apos;une fois. Ce qu&apos;il donne
+        à votre assistant ne sait faire qu&apos;<strong>une</strong> chose :
+        déposer un brouillon. Ni publier, ni supprimer, ni lire quoi que ce soit
+        d&apos;autre — et vous le révoquez d&apos;un clic depuis la même page.
       </>
     ),
   },
@@ -109,17 +111,19 @@ export default function TutorielLeconsCommunautairesPage() {
             Avec Claude Code (ou un agent équivalent)
           </h2>
           <p className="mb-3 text-fun-text-muted">
-            Installez la compétence d&apos;écriture, donnez-lui votre jeton,
-            puis demandez votre pack. Elle connaît le programme de chaque
-            niveau, du PS au CM2, vérifie ses calculs et corrige elle-même si
-            Explorito refuse l&apos;envoi.
+            Installez la compétence d&apos;écriture et demandez votre pack :
+            elle vous réclamera le code d&apos;appariement la première fois, et
+            plus rien ensuite. Elle connaît le programme de chaque niveau, du PS
+            au CM2, vérifie ses calculs et corrige elle-même si Explorito refuse
+            l&apos;envoi.
           </p>
           <pre className="overflow-x-auto rounded-2xl bg-fun-text p-4 text-sm text-fun-surface">
-            <code>{`export EXPLORITO_UPLOAD_TOKEN="votre-jeton"
+            <code>{`« Utilise la compétence explorito-pack-author :
+  un pack sur les dinosaures pour un CE1. »
 
-# puis, dans votre agent :
-« Utilise la compétence explorito-pack-author :
-  un pack sur les dinosaures pour un CE1. »`}</code>
+# la première fois, elle demande :
+#   « lis-moi le code affiché dans Mes leçons »
+# puis elle garde l'accès dans ~/.explorito/credentials.json`}</code>
           </pre>
         </section>
 

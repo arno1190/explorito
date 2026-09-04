@@ -22,7 +22,7 @@ Trois invariants portés ici et nulle part ailleurs :
 import hashlib
 import secrets
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -38,7 +38,12 @@ from app.models.content import (
     Subject,
     level_rank,
 )
-from app.models.contribution import ContributionQuota, ContributorProfile, UploadToken
+from app.models.contribution import (
+    ContributionQuota,
+    ContributorProfile,
+    UploadPairing,
+    UploadToken,
+)
 from app.models.pack import ChildPackAccess, CommunityStatus, Pack, PackOrigin
 from app.models.user import User
 from app.schemas.pack import (
@@ -196,6 +201,108 @@ def issue_upload_token(db: Session, user: User, label: str | None) -> tuple[Uplo
     db.add(token)
     db.flush()
     return token, raw_token
+
+
+#: Alphabet sans caractère ambigu — ni ``O``/``0``, ni ``I``/``1``/``L``, ni
+#: ``U``/``V`` — parce que ce code est **dicté à voix haute**. 29 symboles,
+#: 8 tirés : environ 5·10¹¹ combinaisons, ce qui rend le tirage au hasard sans
+#: intérêt sur une fenêtre de quinze minutes et un usage unique.
+PAIRING_ALPHABET = "23456789ABCDEFGHJKMNPQRSTWXYZ"
+PAIRING_LENGTH = 8
+PAIRING_TTL_SECONDS = 15 * 60
+
+
+def _normalise_pairing_code(raw: str) -> str:
+    """Forme canonique d'un code dicté : majuscules, sans tirets ni espaces.
+
+    Aucune correction de confusion n'est tentée : les caractères ambigus sont
+    absents de l'alphabet, donc en rencontrer un signale une erreur de saisie.
+    Deviner l'intention (``O`` → ``Q`` ?) transformerait une faute claire en
+    échange silencieusement faux.
+    """
+    return "".join(char for char in raw.upper() if char.isalnum())
+
+
+def create_pairing(db: Session, user: User) -> tuple[str, datetime]:
+    """Émet un code d'appariement et périme les précédents du compte.
+
+    Un seul code vivant par compte : sinon un code affiché puis abandonné sur un
+    écran resterait échangeable, et le parent n'aurait aucun moyen de le savoir.
+
+    Args:
+        db: Session de base de données.
+        user: Parent qui connecte son assistant.
+
+    Returns:
+        Le couple (code en clair, date d'expiration). Le code n'est plus
+        récupérable ensuite : seule son empreinte est stockée.
+    """
+    now = datetime.utcnow()
+    db.query(UploadPairing).filter(
+        UploadPairing.user_id == user.id,
+        UploadPairing.claimed_at.is_(None),
+        UploadPairing.expires_at > now,
+    ).update({"expires_at": now}, synchronize_session=False)
+
+    code = "".join(secrets.choice(PAIRING_ALPHABET) for _ in range(PAIRING_LENGTH))
+    expires_at = now + timedelta(seconds=PAIRING_TTL_SECONDS)
+    db.add(
+        UploadPairing(
+            user_id=user.id,
+            code_hash=_hash_token(code),
+            expires_at=expires_at,
+        )
+    )
+    db.flush()
+    return code, expires_at
+
+
+def claim_pairing(db: Session, raw_code: str) -> tuple[User, UploadToken, str]:
+    """Échange un code d'appariement contre un jeton d'envoi.
+
+    **Non authentifié** : le code est la preuve. C'est ce qui permet à
+    l'assistant de se configurer seul, et c'est pourquoi le code est à usage
+    unique, expire vite et n'ouvre que la création de brouillons.
+
+    Args:
+        db: Session de base de données.
+        raw_code: Code dicté par le parent, sous n'importe quelle graphie.
+
+    Returns:
+        Le triplet (parent, ligne de jeton, secret en clair).
+
+    Raises:
+        HTTPException: 404 si le code est inconnu, expiré ou déjà utilisé — les
+            trois cas sont indistinguables, pour ne pas confirmer l'existence
+            d'un code à qui en essaie au hasard.
+    """
+    code = _normalise_pairing_code(raw_code)
+    pairing = db.query(UploadPairing).filter(UploadPairing.code_hash == _hash_token(code)).first()
+    now = datetime.utcnow()
+    if pairing is None or pairing.claimed_at is not None or pairing.expires_at <= now:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "code": "pairing_invalid",
+                "message": (
+                    "Ce code est inconnu, expiré ou déjà utilisé. Demandez au parent d'en "
+                    "afficher un nouveau depuis « Connecter mon assistant »."
+                ),
+            },
+        )
+
+    user = db.query(User).filter(User.id == pairing.user_id).first()
+    if user is None or not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": "pairing_invalid", "message": "Ce code n'est plus valide."},
+        )
+
+    token, secret = issue_upload_token(db, user, "Assistant IA")
+    pairing.claimed_at = now
+    pairing.token_id = token.id
+    db.flush()
+    return user, token, secret
 
 
 def resolve_upload_token(db: Session, raw_token: str) -> User | None:
