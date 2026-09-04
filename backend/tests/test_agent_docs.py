@@ -77,3 +77,22 @@ def test_unknown_document_names_what_exists(client: TestClient):
     assert detail["code"] == "unknown_doc"
     # Le message doit permettre de rebondir plutôt que d'abandonner.
     assert "pack-author" in detail["message"]
+
+
+def test_forwarded_proto_is_honoured(client: TestClient):
+    """Derrière Caddy, les URLs doivent être en https, sinon l'agent récolte un 308.
+
+    Régression constatée en production : ``request.base_url`` renvoyait
+    ``http://`` parce qu'uvicorn ne fait pas confiance aux en-têtes du reverse
+    proxy par défaut, et les URLs servies à un assistant pointaient vers une
+    redirection au lieu du document.
+    """
+    headers = {"X-Forwarded-Proto": "https", "X-Forwarded-Host": "api.exemple.fr"}
+
+    manifest = client.get("/api/v1/agent", headers=headers).json()
+    assert manifest["docs"][0]["url"].startswith("https://api.exemple.fr/")
+    assert manifest["endpoints"]["upload"].startswith("https://api.exemple.fr/")
+
+    guide = client.get("/api/v1/agent/pack-author.md", headers=headers).text
+    assert "https://api.exemple.fr/api/v1/contributions" in guide
+    assert "http://api.exemple.fr" not in guide

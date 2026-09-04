@@ -53,12 +53,23 @@ def _read_doc(slug: str) -> str:
 def _api_base(request: Request) -> str:
     """Base publique de l'API, déduite de la requête reçue.
 
-    Déduite plutôt que configurée : derrière Caddy, la requête porte déjà le
-    bon hôte et le bon schéma, et un réglage de plus serait un réglage de plus à
-    oublier — c'est exactement ce qui a rendu ``PUBLIC_APP_URL`` absente en
+    Déduite plutôt que configurée : un réglage de plus serait un réglage de plus
+    à oublier — c'est exactement ce qui a rendu ``PUBLIC_APP_URL`` absente en
     production.
+
+    Mais ``request.base_url`` seul renvoyait ``http://`` en production : derrière
+    Caddy, uvicorn ne fait pas confiance à ``X-Forwarded-Proto`` (son
+    ``forwarded_allow_ips`` par défaut ne couvre pas l'IP du réseau Docker), et
+    un agent qui suivait ces URLs récoltait une redirection 308 au lieu du
+    document. On relit donc les en-têtes du reverse proxy ici.
+
+    Les usurper ne donne rien : ces documents sont publics et le seul effet
+    serait un schéma faux dans un texte qu'on vient de servir à l'usurpateur.
     """
-    return str(request.base_url).rstrip("/")
+    base = request.base_url
+    scheme = request.headers.get("x-forwarded-proto", "").split(",")[0].strip() or base.scheme
+    host = request.headers.get("x-forwarded-host", "").split(",")[0].strip() or base.netloc
+    return f"{scheme}://{host}{base.path}".rstrip("/")
 
 
 def _render(slug: str, request: Request) -> str:
