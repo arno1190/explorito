@@ -208,6 +208,47 @@ def test_english_text_is_refused_but_short_math_strings_are_not():
     assert "not_french" not in codes(issues)
 
 
+@pytest.mark.parametrize(
+    "question",
+    [
+        # Cas réel : refusé en espagnol à 0,92 de confiance par lingua. C'est
+        # l'énoncé de maths CE1 le plus banal qui soit, et la rubrique impose
+        # justement des phrases courtes saturées de chiffres.
+        "Tom range 3 os par boîte. Il remplit 9 boîtes. Combien d'os ?",
+        "5 plaques par rangée, 4 rangées. Combien de plaques en tout ?",
+        "Un squelette compte 100 os. Il en manque 35. Combien en a-t-on ?",
+        # Sans le moindre accent : seuls les mots outils portent le français.
+        "Compte les billes puis ecris combien il en reste dans la boite.",
+    ],
+)
+def test_short_number_dense_french_is_never_refused(question: str):
+    """Un refus de langue exige deux signaux d'accord, jamais le détecteur seul.
+
+    Régression : ``_is_non_french`` s'en remettait au premier choix de ``lingua``,
+    sans confiance ni contre-signal. Or la confiance ne sépare pas les cas (un
+    vrai texte espagnol sort à 1,00, celui-ci à 0,92) : il faut un indice de
+    nature différente — diacritique, élision ou densité de mots outils.
+    """
+    _, issues, _ = validate_pack(pack(lessons=[lesson(exercises=[problem(question=question), mcq()])]))
+    assert "not_french" not in codes(issues)
+
+
+@pytest.mark.parametrize(
+    "question",
+    [
+        "Count the bones and write how many you found in the box today.",
+        "Cuenta los huesos y escribe cuantos encontraste dentro de la caja.",
+        "Die Dinosaurier lebten vor sehr langer Zeit auf unserem Planeten.",
+        "I dinosauri vivevano molto tempo fa e mangiavano soltanto piante verdi.",
+    ],
+)
+def test_genuinely_foreign_text_is_still_refused(question: str):
+    """Le contre-signal assouplit le refus sans l'ouvrir : ces quatre restent refusés."""
+    with pytest.raises(PackRejected) as excinfo:
+        validate_pack(pack(lessons=[lesson(exercises=[problem(question=question)])]))
+    assert "not_french" in codes(excinfo.value.issues)
+
+
 def test_declared_xp_never_survives_normalisation():
     money_printer = pack(
         lessons=[

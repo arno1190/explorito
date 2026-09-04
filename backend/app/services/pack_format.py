@@ -231,6 +231,45 @@ def _words(text: str) -> list[str]:
     return _WORD_RE.findall(_strip_accents(text).lower())
 
 
+#: Signes orthographiques propres au français : diacritiques que l'espagnol,
+#: l'italien, l'allemand et l'anglais n'emploient pas de cette façon, et élisions
+#: (``d'os``, ``l'arbre``). Volontairement sans ``í ñ ã ¿`` : ces caractères
+#: signeraient une autre langue, pas le français.
+_FRENCH_DIACRITICS = frozenset("éèêëàâäîïôöûùüÿçœæ")
+
+_FRENCH_ELISION_RE = re.compile(r"\b[cdjlmnstCDJLMNST]['’]|\bqu['’]", re.UNICODE)
+
+
+def _french_evidence(text: str) -> bool:
+    """Le texte porte-t-il une marque **positive** de français ?
+
+    Trois indices indépendants, dont un seul suffit : un diacritique français,
+    une élision, ou une proportion suffisante de mots outils français.
+
+    Sert de contre-signal au détecteur statistique. Un énoncé de CE1 conforme à
+    la rubrique est court et saturé de chiffres (« Tom range 3 os par boîte. Il
+    remplit 9 boîtes. »), et ``lingua`` y voit de l'espagnol avec 0,92 de
+    confiance : sur ce seul signal, le contenu le plus banal de l'application
+    serait refusé. La confiance ne sépare pas ces cas — un vrai texte espagnol
+    sort à 1,00 — donc il faut un indice de nature différente.
+
+    Args:
+        text: Texte à examiner.
+
+    Returns:
+        Vrai si un indice de français est présent.
+    """
+    if any(char in _FRENCH_DIACRITICS for char in text.lower()):
+        return True
+    if _FRENCH_ELISION_RE.search(text):
+        return True
+    words = _words(text)
+    if not words:
+        return True
+    hits = sum(1 for word in words if word in _FRENCH_STOPWORDS)
+    return hits / len(words) >= 0.2
+
+
 def _looks_french(text: str) -> bool:
     """Heuristique de repli : le texte ressemble-t-il à du français ?
 
@@ -275,13 +314,23 @@ def _detector() -> Any:  # pragma: no cover - trivial, dépend de l'environnemen
 
 
 def _is_non_french(text: str) -> bool:
-    """Vrai seulement si le texte est **avec confiance** dans une autre langue.
+    """Vrai seulement si le texte est, à deux titres, dans une autre langue.
 
-    Le doute profite toujours à l'auteur : texte court, langue indéterminée ou
-    détecteur absent et heuristique satisfaite ⇒ accepté.
+    Le refus de langue est le seul refus dur qui porte sur du *sens* et non sur
+    la forme : il doit donc demander l'accord de **deux signaux indépendants**,
+    le détecteur statistique et la présence d'indices français
+    (:func:`_french_evidence`). Un seul ne suffit pas, parce que chacun se
+    trompe dans un sens différent — ``lingua`` classe « Tom range 3 os par
+    boîte » en espagnol à 0,92, et le comptage de mots outils accepte « en la
+    caja » comme du français.
+
+    Le doute profite toujours à l'auteur : texte court, langue indéterminée, ou
+    moindre indice de français ⇒ accepté.
     """
     stripped = text.strip()
     if len(stripped) < MIN_LANGUAGE_CHARS:
+        return False
+    if _french_evidence(stripped):
         return False
     if _LINGUA_AVAILABLE:
         detected = _detector().detect_language_of(stripped)
