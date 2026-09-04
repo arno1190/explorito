@@ -44,6 +44,7 @@ from app.services.contribution import (
     clone_pack,
     contributor_terms_state,
     create_pairing,
+    delete_pack,
     ensure_contributor,
     ingest_pack,
     issue_upload_token,
@@ -690,3 +691,26 @@ async def clone_my_pack(
     db.commit()
     db.refresh(clone)
     return pack_detail(db, clone)
+
+
+@router.delete("/{pack_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_my_pack(
+    pack_id: UUID,
+    actor: Annotated[ContributionActor, Depends(contribution_actor)],
+    db: Annotated[Session, Depends(get_db)],
+) -> None:
+    """Supprime un de ses brouillons (ou un pack refusé), sous conditions.
+
+    Sans cette route, un envoi raté restait à vie dans « Mes packs » : il n'y
+    avait aucun retour en arrière. La suppression est la seule opération
+    destructrice de contenu de l'application, donc elle est gardée par
+    :func:`app.services.contribution.delete_pack` — statut non publié, pack non
+    verrouillé, et surtout **aucune progression enfant** attachée.
+
+    Session obligatoire : un jeton d'envoi crée des brouillons, il n'en détruit
+    pas.
+    """
+    user = _require_session(actor)
+    pack = _owned_pack(db, pack_id, user)
+    delete_pack(db, pack=pack, actor=user, is_admin=user.role == UserRole.ADMIN)
+    db.commit()

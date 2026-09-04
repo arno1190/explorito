@@ -108,6 +108,7 @@ export * from "./listAchievementsApiV1GamificationAchievementsGetParams";
 export * from "./listExercisesApiV1ExercisesGetParams";
 export * from "./listLessonsApiV1LessonsGetParams";
 export * from "./listSubjectsApiV1SubjectsGetParams";
+export * from "./manifestApiV1AgentGet200";
 export * from "./moderationPackDetail";
 export * from "./moderationQueue";
 export * from "./moderationQueueEntry";

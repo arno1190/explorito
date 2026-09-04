@@ -11,6 +11,8 @@ import {
   formatCountdown,
   formatPairingCode,
   pairingSentence,
+  SENTENCE_EXAMPLE_LEVEL,
+  SENTENCE_EXAMPLE_THEME,
 } from "../_lib/pairing";
 
 /** Fin de validité calculée à la réception : insensible à l'heure du poste. */
@@ -74,8 +76,9 @@ export function PairingCard({ disabled = false }: { disabled?: boolean }) {
         Connecter mon assistant
       </h2>
       <p className="mt-1 text-sm text-fun-text-muted">
-        Affichez un code, lisez-le à voix haute à votre assistant IA&nbsp;: il
-        se configure tout seul. Rien à installer, rien à recopier.
+        Affichez un code, puis copiez la phrase à votre assistant IA&nbsp;: elle
+        contient le lien du mode d&apos;emploi, il se configure tout seul. Rien
+        à installer.
       </p>
 
       {(session === null || expired) && (
@@ -103,7 +106,7 @@ export function PairingCard({ disabled = false }: { disabled?: boolean }) {
       {session !== null && !expired && (
         <div className="mt-4 rounded-2xl border-2 border-fun-green-light bg-fun-green-light p-4">
           <p className="text-sm font-semibold text-fun-text">
-            Dictez ce code à votre assistant&nbsp;:
+            Votre code d&apos;appairage&nbsp;:
           </p>
           <p className="mt-2 break-all font-display text-3xl font-extrabold tracking-[0.25em] text-fun-text sm:text-4xl">
             {formatPairingCode(session.code)}
@@ -129,7 +132,7 @@ export function PairingCard({ disabled = false }: { disabled?: boolean }) {
           </div>
 
           <p className="mt-3 text-sm font-semibold text-fun-text">
-            À dire à votre assistant&nbsp;:
+            À copier-coller à votre assistant&nbsp;:
           </p>
           <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
             <p className="min-w-0 flex-1 rounded-xl border-2 border-fun-border bg-white p-3 text-sm text-fun-text">
@@ -149,6 +152,18 @@ export function PairingCard({ disabled = false }: { disabled?: boolean }) {
               {copied === "phrase" ? "Copié" : "Copier la phrase"}
             </Button>
           </div>
+          <p className="mt-2 text-xs text-fun-text-muted">
+            Remplacez «&nbsp;{SENTENCE_EXAMPLE_THEME}&nbsp;» et «&nbsp;
+            {SENTENCE_EXAMPLE_LEVEL}&nbsp;» par le thème et le niveau de votre
+            enfant&nbsp;; le reste de la phrase doit rester tel quel.
+          </p>
+          <p className="mt-2 text-xs text-fun-text-muted">
+            Un assistant qui dispose d&apos;un terminal (Claude Code, Cursor…)
+            se connecte tout seul avec ce code et dépose le pack ici. Un chat
+            web sans terminal ne le peut pas&nbsp;: demandez-lui plutôt le
+            fichier <code>.explorito</code> et glissez-le dans «&nbsp;Déposer un
+            pack&nbsp;» ci-dessous.
+          </p>
         </div>
       )}
 

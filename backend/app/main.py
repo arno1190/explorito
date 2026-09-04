@@ -81,6 +81,7 @@ async def health():
 # Import des routers (après la config de l'app ; import tardif volontaire)
 from app.api import (  # noqa: E402
     admin,
+    agent,
     announcements,
     auth,
     children,
@@ -102,6 +103,7 @@ from app.api import (  # noqa: E402
 
 # Enregistrer les routers
 app.include_router(auth.router, prefix=f"{settings.API_PREFIX}/auth", tags=["auth"])
+app.include_router(agent.router, prefix=f"{settings.API_PREFIX}/agent", tags=["agent"])
 app.include_router(admin.router, prefix=f"{settings.API_PREFIX}/admin", tags=["admin"])
 app.include_router(children.router, prefix=f"{settings.API_PREFIX}/children", tags=["children"])
 app.include_router(subjects.router, prefix=f"{settings.API_PREFIX}/subjects", tags=["subjects"])

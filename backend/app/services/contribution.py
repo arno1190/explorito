@@ -45,6 +45,7 @@ from app.models.contribution import (
     UploadToken,
 )
 from app.models.pack import ChildPackAccess, CommunityStatus, Pack, PackOrigin
+from app.models.progress import ExerciseResult, UserProgress
 from app.models.user import User
 from app.schemas.pack import (
     PackDetail,
@@ -626,6 +627,107 @@ def submit_pack(db: Session, pack: Pack, actor: User) -> Pack:
         log_pack_action(db, pack_id=pack.id, actor_id=actor.id, action="submitted", detail={"auto_approved": False})
     db.flush()
     return pack
+
+
+#: Statuts qu'un auteur peut supprimer lui-même. Un pack approuvé n'en fait pas
+#: partie : d'autres familles l'ont dans leur liste blanche, et il se retire par
+#: un verdict de modération, pas par un geste unilatéral de l'auteur.
+DELETABLE_STATUSES = (CommunityStatus.DRAFT, CommunityStatus.REJECTED)
+
+
+def pack_progress_counts(db: Session, pack: Pack) -> tuple[int, int]:
+    """Nombre de lignes de progression et de résultats attachées à un pack."""
+    lesson_ids = [row[0] for row in db.query(Lesson.id).filter(Lesson.pack_id == pack.id)]
+    if not lesson_ids:
+        return 0, 0
+    progress = db.query(UserProgress).filter(UserProgress.lesson_id.in_(lesson_ids)).count()
+    results = (
+        db.query(ExerciseResult)
+        .join(Exercise, Exercise.id == ExerciseResult.exercise_id)
+        .filter(Exercise.lesson_id.in_(lesson_ids))
+        .count()
+    )
+    return progress, results
+
+
+def delete_pack(db: Session, *, pack: Pack, actor: User, is_admin: bool) -> None:
+    """Supprime définitivement un pack non publié et sans progression.
+
+    C'est la seule suppression physique de contenu de l'application, et elle est
+    étroitement gardée. ``user_progress.lesson_id`` et
+    ``exercise_results.exercise_id`` sont en ``ON DELETE CASCADE`` : effacer un
+    pack joué effacerait silencieusement les complétions d'un enfant et l'XP qui
+    en découle. Le garde-fou n'est donc pas cosmétique — c'est lui qui rend la
+    suppression acceptable.
+
+    Quatre conditions :
+
+    1. l'appelant est l'auteur (ou un admin) ;
+    2. le pack est ``draft`` ou ``rejected`` — jamais publié à d'autres familles ;
+    3. le pack n'est pas verrouillé ;
+    4. **aucune ligne de progression ni de résultat** ne le référence.
+
+    Args:
+        db: Session de base de données.
+        pack: Pack à supprimer.
+        actor: Utilisateur à l'origine de la demande.
+        is_admin: Vrai si l'appelant est administrateur.
+
+    Raises:
+        HTTPException: 409 si le statut, le verrou ou la progression l'interdit.
+    """
+    status_value = str(pack.community_status)
+    if status_value not in {member.value for member in DELETABLE_STATUSES}:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "code": "pack_not_deletable",
+                "message": (
+                    "Seuls un brouillon et un pack refusé peuvent être supprimés. "
+                    "Un pack publié se retire par la modération, car d'autres familles l'utilisent."
+                ),
+            },
+        )
+    if bool(pack.locked) and not is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"code": "pack_locked", "message": "Ce pack est verrouillé : il ne peut plus être supprimé."},
+        )
+
+    progress, results = pack_progress_counts(db, pack)
+    if progress or results:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "code": "pack_has_progress",
+                "message": (
+                    f"Un enfant a déjà travaillé dans ce pack ({progress} leçon(s) commencée(s), "
+                    f"{results} réponse(s) enregistrée(s)). Le supprimer effacerait sa progression "
+                    "et l'XP gagnée, donc c'est refusé."
+                ),
+                "progress_rows": progress,
+                "result_rows": results,
+            },
+        )
+
+    title = str(pack.title)
+    lesson_ids = [row[0] for row in db.query(Lesson.id).filter(Lesson.pack_id == pack.id)]
+    if lesson_ids:
+        db.query(Exercise).filter(Exercise.lesson_id.in_(lesson_ids)).delete(synchronize_session=False)
+        # Les leçons partent avant le pack : ``lessons.pack_id`` est en RESTRICT,
+        # précisément pour qu'aucune suppression de pack ne cascade sur du contenu.
+        db.query(Lesson).filter(Lesson.id.in_(lesson_ids)).delete(synchronize_session=False)
+    db.delete(pack)
+    # Trace posée avec ``pack_id`` à NULL : la ligne d'audit est en CASCADE sur le
+    # pack, donc la rattacher la ferait disparaître avec lui.
+    log_pack_action(
+        db,
+        pack_id=None,
+        actor_id=actor.id,
+        action="pack_deleted",
+        detail={"pack_id": str(pack.id), "title": title, "status": status_value, "lessons": len(lesson_ids)},
+    )
+    db.flush()
 
 
 def clone_pack(db: Session, *, pack: Pack, author: User) -> Pack:

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 
+import { pairingSentence } from "@/app/(app)/contributions/_lib/pairing";
+
 /**
  * Tutoriel public « créer ses propres leçons avec son IA ».
  *
@@ -14,16 +16,26 @@ export const metadata: Metadata = {
     "Comment créer un pack de leçons pour votre enfant avec votre assistant IA, et le proposer à toute la communauté Explorito.",
 };
 
+/**
+ * La page est publique : elle n'a pas de vrai code d'appairage à montrer. On
+ * réutilise malgré tout `pairingSentence` pour que le modèle affiché ici et la
+ * phrase copiée depuis « Mes leçons » ne divergent jamais.
+ */
+const TUTORIAL_CODE_PLACEHOLDER = "XXXXXXXX";
+const TUTORIAL_CODE_PLACEHOLDER_LABEL =
+  "remplacez XXXX-XXXX par le code affiché dans Mes leçons";
+
 const STEPS = [
   {
     n: 1,
-    title: "Connectez votre assistant : un code, lu à voix haute",
+    title: "Connectez votre assistant : un code et une phrase à copier",
     body: (
       <>
         Dans Explorito, ouvrez <strong>Mes leçons</strong> depuis votre espace
         parent, puis <strong>« Connecter mon assistant »</strong>. Un code de 8
-        caractères s&apos;affiche : lisez-le à votre assistant, il se configure
-        tout seul. Rien à installer, rien à recopier.
+        caractères s&apos;affiche, accompagné d&apos;une phrase à copier telle
+        quelle : elle indique à votre assistant où lire le mode d&apos;emploi.
+        Rien à installer.
         <br />
         Le code vaut 15 minutes et ne sert qu&apos;une fois. Ce qu&apos;il donne
         à votre assistant ne sait faire qu&apos;<strong>une</strong> chose :
@@ -37,10 +49,11 @@ const STEPS = [
     title: "Demandez un pack à votre IA",
     body: (
       <>
-        Une phrase suffit :{" "}
-        <em>« Fais-moi un pack Explorito sur les dinosaures pour un CE1 »</em>.
-        Votre assistant écrit plusieurs leçons qui montent en difficulté,
-        vérifie ses propres calculs, puis envoie le tout à Explorito.
+        Collez la phrase affichée dans <strong>Mes leçons</strong> en changeant
+        simplement le thème et le niveau, par exemple{" "}
+        <em>« un pack sur les volcans pour un CM1 »</em>. Votre assistant écrit
+        plusieurs leçons qui montent en difficulté, vérifie ses propres calculs,
+        puis envoie le tout à Explorito.
         <br />
         Explorito n&apos;appelle jamais d&apos;IA lui-même : c&apos;est
         <strong> votre</strong> assistant qui écrit, et vous gardez la main sur
@@ -111,29 +124,33 @@ export default function TutorielLeconsCommunautairesPage() {
             Avec Claude Code (ou un agent équivalent)
           </h2>
           <p className="mb-3 text-fun-text-muted">
-            Installez la compétence d&apos;écriture et demandez votre pack :
-            elle vous réclamera le code d&apos;appariement la première fois, et
-            plus rien ensuite. Elle connaît le programme de chaque niveau, du PS
-            au CM2, vérifie ses calculs et corrige elle-même si Explorito refuse
-            l&apos;envoi.
+            Affichez un code dans <strong>Mes leçons</strong>, puis collez la
+            phrase ci-dessous à votre agent en remplaçant le thème, le niveau et
+            le code. Rien à installer&nbsp;: n&apos;importe quel assistant
+            capable de lire une URL peut suivre ce mode d&apos;emploi, sans
+            plugin ni compétence à ajouter. Il y trouve le programme de chaque
+            niveau, du PS au CM2, le format attendu, et comment corriger son
+            envoi si Explorito le refuse.
           </p>
           <pre className="overflow-x-auto rounded-2xl bg-fun-text p-4 text-sm text-fun-surface">
-            <code>{`« Utilise la compétence explorito-pack-author :
-  un pack sur les dinosaures pour un CE1. »
+            <code>{`${pairingSentence(TUTORIAL_CODE_PLACEHOLDER)}
 
-# la première fois, elle demande :
-#   « lis-moi le code affiché dans Mes leçons »
-# puis elle garde l'accès dans ~/.explorito/credentials.json`}</code>
+# ${TUTORIAL_CODE_PLACEHOLDER_LABEL}
+# le code vaut 15 minutes et ne sert qu'une fois
+# l'agent garde ensuite son accès dans ~/.explorito/credentials.json`}</code>
           </pre>
         </section>
 
         <section className="mb-10">
           <h2 className="mb-3 text-2xl font-bold text-fun-text">
-            Sans agent, avec n&apos;importe quel assistant
+            Sans terminal, avec un chat web
           </h2>
           <p className="mb-3 text-fun-text-muted">
-            Copiez ce message dans ChatGPT, Claude, Gemini ou autre. Vous
-            récupérez un fichier, que vous déposez ensuite dans Explorito via
+            Un chat web (ChatGPT, Claude, Gemini… dans le navigateur) ne peut
+            pas se connecter avec le code&nbsp;: il n&apos;a pas de terminal
+            pour appeler Explorito. Demandez-lui alors le fichier —&nbsp;
+            copiez-collez le message ci-dessous, enregistrez sa réponse sous{" "}
+            <code>mon-pack.explorito</code>&nbsp;— puis déposez-le vous-même via
             <strong> Contributions → Déposer un pack</strong>.
           </p>
           <pre className="overflow-x-auto rounded-2xl bg-fun-text p-4 text-sm text-fun-surface">

@@ -1414,6 +1414,102 @@ export const useQuickEditPackApiV1ContributionsPackIdPatch = <
   );
 };
 /**
+ * Supprime un de ses brouillons (ou un pack refusé), sous conditions.
+
+Sans cette route, un envoi raté restait à vie dans « Mes packs » : il n'y
+avait aucun retour en arrière. La suppression est la seule opération
+destructrice de contenu de l'application, donc elle est gardée par
+:func:`app.services.contribution.delete_pack` — statut non publié, pack non
+verrouillé, et surtout **aucune progression enfant** attachée.
+
+Session obligatoire : un jeton d'envoi crée des brouillons, il n'en détruit
+pas.
+ * @summary Delete My Pack
+ */
+export const deleteMyPackApiV1ContributionsPackIdDelete = (
+  packId: string,
+  signal?: AbortSignal
+) => {
+  return axiosInstance<void>({
+    url: `/api/v1/contributions/${packId}`,
+    method: "DELETE",
+    signal,
+  });
+};
+
+export const getDeleteMyPackApiV1ContributionsPackIdDeleteMutationOptions = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteMyPackApiV1ContributionsPackIdDelete>>,
+    TError,
+    { packId: string },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteMyPackApiV1ContributionsPackIdDelete>>,
+  TError,
+  { packId: string },
+  TContext
+> => {
+  const mutationKey = ["deleteMyPackApiV1ContributionsPackIdDelete"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteMyPackApiV1ContributionsPackIdDelete>>,
+    { packId: string }
+  > = (props) => {
+    const { packId } = props ?? {};
+
+    return deleteMyPackApiV1ContributionsPackIdDelete(packId);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteMyPackApiV1ContributionsPackIdDeleteMutationResult =
+  NonNullable<
+    Awaited<ReturnType<typeof deleteMyPackApiV1ContributionsPackIdDelete>>
+  >;
+
+export type DeleteMyPackApiV1ContributionsPackIdDeleteMutationError =
+  HTTPValidationError;
+
+/**
+ * @summary Delete My Pack
+ */
+export const useDeleteMyPackApiV1ContributionsPackIdDelete = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteMyPackApiV1ContributionsPackIdDelete>>,
+      TError,
+      { packId: string },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteMyPackApiV1ContributionsPackIdDelete>>,
+  TError,
+  { packId: string },
+  TContext
+> => {
+  return useMutation(
+    getDeleteMyPackApiV1ContributionsPackIdDeleteMutationOptions(options),
+    queryClient
+  );
+};
+/**
  * Soumet un brouillon à la revue (et le rend visible à ses propres enfants).
  * @summary Submit My Pack
  */

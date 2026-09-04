@@ -16,7 +16,30 @@ export function formatCountdown(seconds: number): string {
   return `${String(minutes).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;
 }
 
-/** Phrase à dicter à l'assistant, code compris. */
+/**
+ * Base de l'API, comme `src/lib/api/axios-instance.ts` : même variable, même
+ * repli, pour que la phrase copiée désigne l'instance réellement utilisée.
+ */
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8005";
+
+/**
+ * Mode d'emploi public et complet, servi par le backend (sans authentification).
+ * C'est le seul point d'entrée qu'un assistant a besoin de connaître : tout le
+ * reste (appairage, format du pack, envoi) y est décrit.
+ */
+export const PACK_AUTHOR_DOC_URL = `${API_BASE}/api/v1/agent/pack-author.md`;
+
+/** Thème et niveau de l'exemple, repris tels quels dans l'aide de l'interface. */
+export const SENTENCE_EXAMPLE_THEME = "les dinosaures";
+export const SENTENCE_EXAMPLE_LEVEL = "CE1";
+
+/**
+ * Phrase à donner à l'assistant. Elle doit se suffire à elle-même : un
+ * assistant qui n'a jamais entendu parler d'Explorito ne doit rien avoir à
+ * deviner. D'où l'URL des instructions en premier — sans elle, un agent neuf
+ * invente des adresses et tombe sur des 404 — puis le code, puis un exemple de
+ * demande qui montre au parent la forme attendue.
+ */
 export function pairingSentence(code: string): string {
-  return `Connecte-toi à Explorito avec le code ${formatPairingCode(code)}, puis fais-moi un pack sur les dinosaures pour un CE1.`;
+  return `Lis ${PACK_AUTHOR_DOC_URL} et suis ces instructions : connecte-toi avec le code ${formatPairingCode(code)}, puis écris-moi un pack sur ${SENTENCE_EXAMPLE_THEME} pour un ${SENTENCE_EXAMPLE_LEVEL}.`;
 }

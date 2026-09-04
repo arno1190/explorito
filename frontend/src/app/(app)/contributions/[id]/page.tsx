@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Copy, GitBranch, Lock, Send } from "lucide-react";
+import { ArrowLeft, Copy, GitBranch, Lock, Send, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,8 +18,14 @@ import {
 import { IssueList } from "../_components/IssueList";
 import { LessonCard } from "../_components/LessonCard";
 import { PackHeaderCard } from "../_components/PackHeaderCard";
+import { DeletePackDialog } from "../_components/DeletePackDialog";
 import { SubmitDialog } from "../_components/SubmitDialog";
-import { packIssues, parseApiFailure, type ApiFailure } from "../_lib/contrib";
+import {
+  isDeletable,
+  packIssues,
+  parseApiFailure,
+  type ApiFailure,
+} from "../_lib/contrib";
 
 /**
  * Aperçu d'un pack du parent : l'arbre leçons/exercices tel que l'enfant le
@@ -35,6 +41,7 @@ export default function ContributionPreviewPage() {
   const [submitOpen, setSubmitOpen] = useState(false);
   const [submitFailure, setSubmitFailure] = useState<ApiFailure | null>(null);
   const [cloneError, setCloneError] = useState<string | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const { data: pack, isLoading, isError } = usePackDetail(packId);
 
@@ -183,6 +190,16 @@ export default function ContributionPreviewPage() {
               <Copy className="h-4 w-4" />
               {clone.isPending ? "Clonage…" : "Cloner pour réviser"}
             </Button>
+            {isDeletable(pack.community_status) && (
+              <Button
+                variant="destructive"
+                className="min-h-12 bg-fun-red text-white"
+                onClick={() => setDeleteOpen(true)}
+              >
+                <Trash2 className="h-4 w-4" />
+                Supprimer
+              </Button>
+            )}
           </div>
           <p className="mt-2 text-sm text-fun-text-muted">
             {isDraft
@@ -227,6 +244,21 @@ export default function ContributionPreviewPage() {
         pending={submit.isPending}
         failure={submitFailure}
         onConfirm={() => submit.mutate({ packId })}
+      />
+
+      <DeletePackDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        packId={packId}
+        packTitle={pack.title}
+        onDeleted={() => {
+          setDeleteOpen(false);
+          // La page vient de disparaître côté serveur : y revenir donnerait un 404.
+          queryClient.removeQueries({
+            queryKey: getGetMyPackApiV1ContributionsPackIdGetQueryKey(packId),
+          });
+          router.replace("/contributions");
+        }}
       />
     </div>
   );

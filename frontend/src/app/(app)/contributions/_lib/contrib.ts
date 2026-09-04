@@ -18,6 +18,18 @@ export interface ApiFailure {
   message: string;
   /** Constats du validateur (422 « pack_invalid »). */
   issues: ValidationIssue[];
+  /**
+   * Le `detail` objet tel quel : certains refus y joignent des chiffres
+   * (`progress_rows`…) qu'on cite au parent, et qu'un champ typé par cause
+   * obligerait à énumérer ici. Absent des refus construits côté client.
+   */
+  data?: Record<string, unknown>;
+}
+
+/** Entier joint au refus, `null` s'il est absent ou inexploitable. */
+export function failureCount(failure: ApiFailure, key: string): number | null {
+  const value = failure.data?.[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
 const GENERIC = "Une erreur est survenue. Réessayez dans un instant.";
@@ -28,6 +40,7 @@ export function parseApiFailure(error: unknown): ApiFailure {
     code: null,
     message: GENERIC,
     issues: [],
+    data: {},
   };
   if (!axios.isAxiosError(error)) return empty;
 
@@ -51,6 +64,7 @@ export function parseApiFailure(error: unknown): ApiFailure {
       issues: Array.isArray(body.issues)
         ? (body.issues as ValidationIssue[])
         : [],
+      data: body,
     };
   }
   return { ...empty, status };
@@ -160,6 +174,14 @@ export function statusStyle(status: CommunityStatus): StatusStyle {
       hint: "",
     }
   );
+}
+
+/**
+ * Miroir de la règle du serveur : lui seul décide, mais proposer « Supprimer »
+ * sur un pack publié ne mènerait qu'à un 409.
+ */
+export function isDeletable(status: CommunityStatus): boolean {
+  return status === "draft" || status === "rejected";
 }
 
 const SEVERITY_STYLES = {
