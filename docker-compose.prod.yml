@@ -32,6 +32,24 @@ services:
       DEBUG: "false"
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       ADMIN_EMAILS: ${ADMIN_EMAILS}
+      # URL publique du frontend. **Doit** être définie : elle fabrique les
+      # liens d'aperçu rendus aux contributeurs et les liens de désinscription
+      # des emails d'annonce. Sans elle, le défaut de développement
+      # (``http://localhost:3005``) part dans de vrais emails.
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL}
+      # Jeton restreint à /moderation/* (compétence de revue). Vide = surface
+      # désactivée ; la session admin reste le chemin normal.
+      MODERATION_TOKEN: ${MODERATION_TOKEN:-}
+      # Envoi des annonces produit. Vide = envoi refusé proprement (503).
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-true}
+      SMTP_SSL: ${SMTP_SSL:-false}
+      MAIL_FROM: ${MAIL_FROM:-arnaud@pascalfamily.fr}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-Explorito}
+      MAIL_REPLY_TO: ${MAIL_REPLY_TO:-arnaud@pascalfamily.fr}
     volumes:
       - uploads_data:/app/uploads
     depends_on:

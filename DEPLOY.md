@@ -5,9 +5,11 @@ Single small VPS, Docker Compose + Caddy (auto-HTTPS). Target: <50 invited users
 ## 1. Prerequisites
 
 - A VPS (Hetzner / Scaleway / DigitalOcean, ~€5–10/mo) with **Docker** + **Docker Compose v2**.
-- A domain, e.g. `explorito.fr`, with two DNS **A records** pointing at the VPS IP:
-  - `explorito.fr`         → frontend
-  - `api.explorito.fr`     → backend
+- A domain with two DNS **A records** pointing at the VPS IP. The live instance
+  uses `explorito.pascalfamily.fr`; substitute your own everywhere below —
+  nothing in the code hardcodes it, but `.env` must agree with DNS.
+  - `explorito.pascalfamily.fr`      → frontend
+  - `api.explorito.pascalfamily.fr`  → backend
 - Ports **80** and **443** open.
 
 ## 2. Get the code
@@ -28,9 +30,12 @@ Edit `.env` and set **all** of:
 |-----|-------|
 | `POSTGRES_PASSWORD` | a strong random password |
 | `SECRET_KEY` | `openssl rand -hex 32` (the backend refuses to boot in prod with the default) |
-| `DOMAIN` | `explorito.fr` |
-| `CORS_ORIGINS` | `https://explorito.fr` |
-| `NEXT_PUBLIC_API_URL` | `https://api.explorito.fr` (baked into the frontend at build time) |
+| `DOMAIN` | `explorito.pascalfamily.fr` |
+| `CORS_ORIGINS` | `https://explorito.pascalfamily.fr` |
+| `NEXT_PUBLIC_API_URL` | `https://api.explorito.pascalfamily.fr` (baked into the frontend at build time) |
+| `PUBLIC_APP_URL` | `https://explorito.pascalfamily.fr` — **not optional**: the backend builds pack-preview links and email unsubscribe links from it. Left unset, it falls back to `http://localhost:3005` and those URLs ship broken. |
+| `MODERATION_TOKEN` | `openssl rand -hex 32`, or empty to disable the token door (an admin session still reaches `/moderation/*`) |
+| `SMTP_HOST` / `SMTP_USER` / `SMTP_PASSWORD` | your mail relay, or empty — announcement sending then fails cleanly with a 503 instead of silently |
 
 ## 4. Build & start
 
@@ -59,33 +64,35 @@ docker compose -f docker-compose.prod.yml exec backend uv run python scripts/see
 
 ## 6. Create an admin + a parent
 
-Admin (content management):
+There is **no password login**: `api/auth.py` exposes `/google`, `/dev-login`
+(DEBUG only), `/pin`, `/verify-pin` and `/refresh`. Admin rights are granted by
+email allowlist, not by a row you insert — set `ADMIN_EMAILS` in `.env` to the
+Google addresses that should be admins, comma-separated, and the role is applied
+on their next login.
 
 ```bash
-docker compose -f docker-compose.prod.yml exec backend uv run python - <<'PY'
-from app.core.database import SessionLocal
-from app.core.security import get_password_hash
-from app.models.user import User, Profile, UserRole
-db = SessionLocal()
-u = User(email="admin@explorito.fr", password_hash=get_password_hash("CHANGE_ME"), role=UserRole.ADMIN, is_active=True)
-db.add(u); db.flush()
-db.add(Profile(user_id=u.id, display_name="Admin", is_child=False))
-db.commit(); print("admin created:", u.email)
-PY
+# .env
+ADMIN_EMAILS=arnaud@pascalfamily.fr
 ```
 
-Parents self-register at `https://explorito.fr/register` (role `parent`), then create their children's accounts from the dashboard. Children log in with their own credentials at `/login`.
+Parents sign in with Google at `https://explorito.pascalfamily.fr/login`, then
+create their children from the dashboard. **Children have no login of their
+own**: a parent enters child mode from the dashboard, protected by a 4-digit
+PIN.
 
 ## 7. Smoke test
 
 ```bash
-curl https://api.explorito.fr/health          # -> {"status":"ok"}
+curl https://api.explorito.pascalfamily.fr/health          # -> {"status":"ok"}
 ```
 
 Then in a browser:
-1. Register/login as a parent → dashboard → add a child.
-2. Log in as the child → `/play` → pick a subject → complete a lesson.
+1. Sign in with Google as a parent → dashboard → add a child.
+2. Enter child mode ("Jouer comme …", PIN-protected) → `/play` → pick a theme → complete a lesson.
 3. Confirm XP / streak / stars appear and the lesson shows completed.
+4. Check the contribution surface: `/contributions` must show the terms modal on
+   first visit, and a pack upload must return a `preview_url` on your real
+   domain — a `localhost` URL there means `PUBLIC_APP_URL` is missing.
 
 ## 8. Backups (recommended)
 
