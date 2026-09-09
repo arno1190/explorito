@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -137,6 +139,17 @@ export default function LoginPage() {
           <p className="text-xs text-fun-text-muted text-center pt-2">
             Les enfants n&apos;ont pas de compte : le parent lance l&apos;app
             pour eux depuis le tableau de bord.
+          </p>
+
+          <p className="text-xs text-fun-text-muted text-center">
+            En vous connectant, vous acceptez notre{" "}
+            <Link
+              href="/confidentialite"
+              className="underline hover:text-fun-text"
+            >
+              politique de confidentialité
+            </Link>
+            .
           </p>
         </CardContent>
       </Card>

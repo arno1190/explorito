@@ -141,6 +141,8 @@ export * from "./pairingResult";
 export * from "./pinRequest";
 export * from "./pokedexEntry";
 export * from "./pokedexGridEntry";
+export * from "./privacyAccept";
+export * from "./privacyPolicy";
 export * from "./profileResponse";
 export * from "./profileUpdate";
 export * from "./progressDashboard";

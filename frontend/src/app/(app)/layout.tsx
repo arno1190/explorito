@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { ChildLayout } from "@/components/layout/ChildLayout";
 import { ImpersonationBanner } from "@/components/layout/ImpersonationBanner";
+import { PrivacyGate } from "@/components/legal/PrivacyGate";
 import {
   actingRoleHome,
   isPathAllowedForRole,
@@ -47,6 +48,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      <PrivacyGate />
       <ImpersonationBanner />
       <ChildLayout>{children}</ChildLayout>
     </>

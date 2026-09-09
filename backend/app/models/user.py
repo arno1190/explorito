@@ -10,6 +10,7 @@ from sqlalchemy import JSON, Boolean, Column, Date, DateTime, Enum, ForeignKey, 
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
+from app.core.config import settings
 from app.core.database import Base
 from app.models.content import LevelEnum  # noqa: F401  (utilisé par Profile.level)
 
@@ -53,6 +54,11 @@ class User(Base):
     # Désinscription des annonces produit (emails « nouveautés »). Les emails
     # transactionnels ne passent pas par ce drapeau.
     email_opt_out = Column(Boolean, nullable=False, default=False)
+    # Politique de confidentialité acceptée par l'adulte responsable : version
+    # et horodatage. NULL tant qu'elle n'a jamais été acceptée (comptes créés
+    # avant la mise en place, et enfants — qui n'acceptent rien).
+    privacy_version = Column(String, nullable=True)
+    privacy_accepted_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -78,6 +84,20 @@ class User(Base):
     def has_pin(self) -> bool:
         """Vrai si un code PIN parent est défini."""
         return bool(self.pin_hash)
+
+    @property
+    def privacy_accepted(self) -> bool:
+        """Vrai si la **version en vigueur** de la politique a été acceptée.
+
+        Une version périmée vaut refus : le texte a changé, et l'ancien
+        consentement ne couvre pas le nouveau. Le parent revoit alors la case à
+        cocher à sa prochaine visite.
+
+        Défini ici plutôt que dans ``services/family_privacy`` pour rester
+        lisible depuis ``UserResponse`` (comme ``has_pin``) sans cycle
+        d'imports ; le texte et la version, eux, vivent dans le service.
+        """
+        return bool(self.privacy_accepted_at) and self.privacy_version == settings.PRIVACY_POLICY_VERSION
 
     def __repr__(self):
         return f"<User {self.email} ({self.role})>"

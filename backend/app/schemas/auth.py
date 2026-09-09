@@ -101,6 +101,7 @@ class UserResponse(BaseModel):
     role: UserRole
     is_active: bool
     has_pin: bool = False
+    privacy_accepted: bool = False
     created_at: datetime
     profile: ProfileResponse | None = None
 

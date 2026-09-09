@@ -112,6 +112,20 @@ class Settings(BaseSettings):
     MODERATION_TOKEN: str = ""
 
     # ----------------------------------------------------------------- #
+    # Confidentialité des familles (issue #21)
+    # ----------------------------------------------------------------- #
+    # Version de la politique de confidentialité présentée aux parents. La
+    # changer redemande l'acceptation à tout le monde à la prochaine visite :
+    # ne la bouger que si le texte change sur un point qui engage la famille.
+    PRIVACY_POLICY_VERSION: str = "2026-09-10"
+    # Mentions légales minimales, injectées dans le texte de la politique.
+    # Réglables pour qu'un autre hébergeur du projet publie ses propres
+    # mentions sans réécrire le texte.
+    PRIVACY_PUBLISHER: str = "Arnaud Pascal, particulier (Explorito, projet familial sans but lucratif)"
+    PRIVACY_CONTACT_EMAIL: str = "arnaud@pascalfamily.fr"
+    PRIVACY_HOST: str = "Scaleway SAS, 8 rue de la Ville l'Évêque, 75008 Paris, France — serveur situé en France"
+
+    # ----------------------------------------------------------------- #
     # Email (annonces produit)
     # ----------------------------------------------------------------- #
     SMTP_HOST: str = ""
