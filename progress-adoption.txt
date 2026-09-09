@@ -1,6 +1,6 @@
 # Progress — mission adoption (issues #21, #23, #22, #24)
 
-## Current State: IN_PROGRESS
+## Current State: COMPLETED
 
 Ouvert le 2026-09-09 pour la passe autonome de nuit.
 Prompt : `prompts/2026-09-09-adoption.md`.
@@ -8,10 +8,221 @@ Branche attendue : `feat/adoption-blockers`.
 
 | Issue | Sujet | État |
 |---|---|---|
-| #21 | politique de confidentialité côté parent | à faire |
-| #23 | masquer les niveaux sans contenu (CM2) | à faire |
-| #22 | code d'invitation à l'inscription | à faire |
-| #24 | parcours d'accueil du nouveau parent | à faire |
+| #21 | politique de confidentialité côté parent | livrée (7f5d5c4) |
+| #23 | masquer les niveaux sans contenu (CM2) | livrée (d88ac6a) |
+| #22 | code d'invitation à l'inscription | livrée (bc22aea) |
+| #24 | parcours d'accueil du nouveau parent | livrée (f1ff506) |
 | #25 | connexion sans Google | **hors périmètre** |
 
 ## Iteration Log
+
+---
+
+## Iteration 1 - 2026-09-10 01:00:03
+
+### Issue #21 — politique de confidentialité côté parent — LIVRÉE (commit 7f5d5c4)
+
+Branche `feat/adoption-blockers`, créée depuis `main`.
+
+Fait :
+- `services/family_privacy.py` : texte + version, source unique, servie par l'API
+  (le frontend ne recopie pas le texte). Mentions légales (éditeur, contact,
+  hébergeur) réglables via `config.py`.
+- `users.privacy_version` / `privacy_accepted_at` + migration `f3c8b2a41e57`.
+  Nullables, sans défaut : ne pas fabriquer de consentement pour l'existant.
+- `GET /api/v1/legal/privacy` (sans session) et `POST .../accept` (409 si version
+  périmée). `privacy_accepted` exposé sur `/auth/me`.
+- Frontend : page publique `/confidentialite`, liens pied de page + `/login`,
+  `PrivacyGate` (case à cocher) monté dans le layout `(app)`, jamais en mode
+  enfant. Client Orval régénéré (`pnpm generate:api`).
+
+Décision tranchée seul : l'issue demande la case « à l'inscription ». Avec une
+authentification Google-only il n'existe pas d'écran d'inscription où
+l'intercaler ; le consentement est donc recueilli à la première visite qui suit
+la création du compte. C'est le premier instant où le texte peut réellement être
+montré au parent.
+
+Tests (`tests/test_privacy.py`, 6) : lecture sans compte ; compte neuf non
+consentant ; acceptation horodatée + reflétée par `/me` ; version périmée
+refusée ; bump de version qui redemande le consentement ; suppression d'un
+enfant qui efface résultats et progression.
+
+Migration : `upgrade` → `downgrade` → `upgrade` vérifiés sur une base jetable
+(`explorito_migcheck`) du Postgres local, supprimée ensuite. La base de dev n'a
+pas été migrée (son `.env` pointe un port inutilisé) et la prod n'a pas été
+touchée : `alembic upgrade head` reste à jouer au déploiement.
+
+Vérifications :
+- `ruff check app tests scripts` : All checks passed
+- `ruff format --check app tests scripts` : 161 files already formatted
+- `pytest -q` : **275 passed, 1 failed** — l'échec est `test_pythagore.py::
+  test_daily_cap_limits_farming`, **antérieur à mes changements** (voir plus bas).
+- `tsc --noEmit` : aucune erreur ; `prettier --check "src/**/*.{ts,tsx}"` : OK
+
+### Issue #23 — masquer les niveaux sans contenu — LIVRÉE (commit d88ac6a)
+
+Fait :
+- `library.available_levels(db)` : un niveau est proposable s'il existe un pack
+  visible au catalogue (`_catalogue_visible`, réutilisé) qui le couvre
+  (`_level_covered`, réutilisé) **et** qui a au moins une leçon publiée.
+- `GET /api/v1/children/levels`, déclaré avant `/{child_id}`.
+- Frontend : `src/lib/levels.ts` ne garde que libellés + ordre ; `useAvailableLevels`
+  et `levelsFor` (pure, pour les sélecteurs rendus en boucle). La liste dupliquée
+  dans `dashboard/page.tsx` est supprimée. Client Orval régénéré.
+- README : PS → CM2 devient PS → CM1. `CM2` reste dans l'enum.
+
+Deux pièges traités qui ne sautaient pas aux yeux :
+1. le formulaire de création avait « cp » en dur comme valeur initiale — il
+   aurait soumis un niveau vide si le CP cessait d'être semé ; il retombe
+   maintenant sur le premier niveau réellement proposé ;
+2. le niveau actuel d'un enfant reste proposé même sans contenu, sinon
+   l'enregistrement d'un simple renommage changeait son niveau en silence.
+
+Tests (`tests/test_available_levels.py`, 8) : niveau non semé jamais proposé ;
+la liste suit le contenu et l'ordre pédagogique (« ce1 » < « cp » en ASCII) ;
+pack multi-niveaux ; pack communautaire en attente qui n'ouvre rien ; pack sans
+leçon publiée qui n'ouvre rien ; catalogue vide ; enfant déjà en CM2 qui garde
+son niveau ; « levels » non capturé par `/{child_id}`.
+
+Vérifications :
+- `ruff check` / `ruff format --check` app tests scripts : OK
+- `pytest -q` : **283 passed, 1 failed** (toujours le seul échec antérieur)
+- `tsc --noEmit` : OK ; `prettier --check "src/**/*.{ts,tsx}"` : OK
+
+### Issue #22 — code d'invitation à l'inscription — LIVRÉE (commit bc22aea)
+
+Fait :
+- `SIGNUP_INVITE_REQUIRED: bool = False` (config), `INVITE_SIGNUP = "signup"`
+  sur `Invitation`. **Aucune migration** : `kind` est une colonne texte sans
+  contrainte CHECK, `child_id` déjà nullable, `expires_at` déjà NOT NULL.
+- `create_signup_invitation` / `get_usable_signup_invitation` /
+  `consume_signup_invitation` dans `services/guardianship.py` (TTL 30 j).
+- `_upsert_parent` refuse la **création** sans code valide quand le réglage est
+  actif (403 + message actionnable) ; un compte existant passe toujours.
+- Admin : `GET/POST /admin/signup-invites`, `DELETE /admin/signup-invites/{token}`,
+  avec le lien `\/register?invite=<token>` prêt à transmettre + carte dans /admin.
+- Frontend : `/register` devient une vraie page (champ code, `?invite=` prérempli,
+  message d'erreur du serveur) ; `/login` relaie aussi le message du serveur.
+
+Trois pièges fermés, tous liés au fait que les deux usages partagent une table :
+1. un lien de partage de garde ne doit pas valoir code d'inscription — le
+   `kind` est filtré ;
+2. la route d'acceptation des gardes marquait un code `signup` comme accepté
+   sans rien accorder : le code était perdu pour la famille invitée. Elle le
+   refuse désormais (400) ;
+3. l'aperçu public d'un code `signup` tombait dans la branche `all` et
+   publiait les prénoms des enfants de l'admin à quiconque avait le lien.
+
+Tests (`tests/test_signup_invite.py`, 13) : réglage `False` → inscription libre ;
+`True` → 403 sans code, code expiré, révoqué, déjà utilisé, inconnu, et jeton de
+partage ; succès avec code valide + consommation tracée ; compte existant jamais
+bloqué ; code non brûlé par la route de partage ; aperçu public qui ne fuit rien ;
+surface admin (lien, réservée aux admins).
+
+Vérifications :
+- `ruff check` / `ruff format --check` app tests scripts : OK
+- `pytest -q` : **296 passed, 1 failed** (toujours le seul échec antérieur)
+- `tsc --noEmit` : OK ; `prettier --check "src/**/*.{ts,tsx}"` : OK
+
+### Issue #24 — parcours d'accueil — LIVRÉE (commit f1ff506)
+
+Fait :
+- `dashboard/_components/OnboardingFlow.tsx` : trois étapes (enfant → centre
+  d'intérêt → code PIN) puis « Lancer <prénom> » → `/play`. Remplace l'état vide
+  du tableau de bord, qui était en anglais.
+- Seule l'étape 1 est obligatoire ; 2 et 3 se sautent et le lancement reste
+  accessible. « Quitter » est proposé à chaque étape.
+- **Aucun changement backend** : le parcours n'assemble que des routes qui
+  existaient, plus `/children/levels` livrée par #23.
+
+Deux décisions tranchées seul :
+1. « Choisir un centre d'intérêt » = masquer les autres collections pour cet
+   enfant (`disabled_collections`, mécanisme existant). C'est ce qui rend le
+   premier écran désirable plutôt qu'un mur de sept catalogues. Réversible
+   depuis la fiche de l'enfant, et l'écran le dit au parent.
+2. La reprise est stockée en `localStorage`. Elle n'est pas déductible de la
+   base : « j'ai sauté le centre d'intérêt » et « je n'y suis pas encore
+   arrivé » y sont la même absence. Conséquence assumée : la reprise est fidèle
+   sur la machine où le parcours a commencé, ailleurs on retombe sur le tableau
+   de bord normal — jamais sur une étape fausse. **À revoir si tu veux une
+   reprise multi-appareils** : il faudrait un champ d'état dans
+   `Profile.settings`.
+
+Tests (`tests/test_onboarding.py`, 4) : compte neuf → niveaux proposés → enfant
+créé → `/subjects` et `/progress/subjects-overview` répondent en incarnant
+l'enfant ; étapes 2 et 3 réellement facultatives ; mise en avant d'une
+collection et sa réversibilité ; pose et vérification du code PIN.
+
+**Honnêteté sur ces tests** : le trou de l'issue #24 est côté interface, et ces
+tests passeraient déjà sur `main` — ils ne « échouent pas sans le correctif »
+comme la mission le demande. Écrire un test qui échoue aurait supposé un test
+de rendu React, or le dépôt n'a aucune infrastructure de test frontend
+(pas de vitest/jest/testing-library). Je n'en ai pas installé une la nuit sans
+arbitrage. Ce que ces tests apportent : ils verrouillent le chemin exact qu'un
+compte neuf emprunte, y compris les routes que j'avais d'abord devinées de
+travers (`/progress/subjects-overview`, pas `/progress/subjects/overview`).
+
+Vérifications :
+- `ruff check` / `ruff format --check` app tests scripts : OK
+- `pytest -q` : **300 passed, 1 failed** (toujours le seul échec antérieur)
+- `tsc --noEmit` : OK ; `prettier --check "src/**/*.{ts,tsx}"` : OK
+- `pnpm lint` : 21 erreurs / 5 avertissements, aucune dans mes fichiers
+  (22/5 avant la nuit ; l'état vide anglais supprimé en emportait une)
+
+---
+
+## Deux constats à trancher demain, hors périmètre — non corrigés
+
+### 1. Le plafond quotidien Pythagore ne tient pas la nuit (bug réel, en prod)
+
+`tests/test_pythagore.py::test_daily_cap_limits_farming` échoue sur `main`, de
+façon déterministe, **avant toute modification de ma part**. Ce n'est pas un
+test fragile : c'est un vrai bug.
+
+`services/pythagore.py:108` compare `func.date(PythagoreSession.created_at)` à
+`date.today()`. `created_at` est stocké en UTC, `date.today()` renvoie la date
+**locale**. Entre minuit et 02 h heure de Paris (CEST, UTC+2), les deux ne sont
+pas le même jour : la requête ne trouve aucune session « du jour », le plafond
+ne s'applique plus et un enfant peut farmer l'XP sans limite. Le test tournait
+justement à 01 h.
+
+Je ne l'ai pas corrigé : il n'appartient à aucune des quatre issues, et la
+règle « un commit par issue » l'interdisait. Le correctif tient en une ligne
+(comparer en UTC des deux côtés), mais il mérite sa propre issue et son propre
+test aux bornes de minuit.
+
+### 2. La commande `mypy` de la mission ne peut pas passer, même sur `main`
+
+`uv run mypy app/` échoue immédiatement, sur `main` comme sur ma branche :
+
+    app/main.py: error: Source file found twice under different module names:
+    "api.auth" and "app.api.auth"
+
+C'est une erreur de résolution de modules, pas un défaut de typage. La CI, elle,
+lance `uv run mypy -p app`, **explicitement non bloquant** (`continue-on-error`),
+avec ce commentaire : les modèles utilisent l'ancien style `Column()` et non
+`Mapped[]`, ce qui produit des centaines de faux positifs sous `strict = true`.
+
+J'ai donc appliqué la barrière que la CI applique réellement (ruff + pytest +
+tsc + prettier) et vérifié que je n'ajoutais pas d'erreur mypy d'une autre
+nature : 531 erreurs sur `main` → 536 sur ma branche, et les 5 nouvelles sont
+exactement la même famille `Column[X]` que celles déjà présentes dans
+`services/contributor_legal.py` (lignes 204-216). Aucune n'est un vrai défaut.
+La CI frontend ne lance pas eslint non plus — d'où les 21 erreurs qui traînent.
+
+---
+
+## Reste à faire avant d'inviter la première famille
+
+1. **Jouer la migration** `f3c8b2a41e57` au déploiement (`alembic upgrade head`).
+   Vérifiée en local sur une base jetable ; ni la base de dev ni la prod n'ont
+   été touchées de la nuit.
+2. **Relire le texte de la politique** (`services/family_privacy.py`) : j'ai
+   écrit les mentions légales à partir de ce que le dépôt et les notes de
+   déploiement disent (Scaleway France, Cloudflare, Google pour l'identité).
+   L'éditeur, l'adresse de contact et l'adresse de l'hébergeur sont des
+   réglages (`PRIVACY_PUBLISHER`, `PRIVACY_CONTACT_EMAIL`, `PRIVACY_HOST`) —
+   **à confirmer par toi**, c'est un texte qui t'engage juridiquement.
+3. **Activer `SIGNUP_INVITE_REQUIRED=true`** quand tu veux fermer la porte, puis
+   créer les codes depuis `/admin`. Sans ça le réglage ne fait rien.
+4. #25 (connexion sans compte Google) reste entière et hors périmètre.
