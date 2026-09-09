@@ -1,0 +1,17 @@
+# Progress — mission adoption (issues #21, #23, #22, #24)
+
+## Current State: IN_PROGRESS
+
+Ouvert le 2026-09-09 pour la passe autonome de nuit.
+Prompt : `prompts/2026-09-09-adoption.md`.
+Branche attendue : `feat/adoption-blockers`.
+
+| Issue | Sujet | État |
+|---|---|---|
+| #21 | politique de confidentialité côté parent | à faire |
+| #23 | masquer les niveaux sans contenu (CM2) | à faire |
+| #22 | code d'invitation à l'inscription | à faire |
+| #24 | parcours d'accueil du nouveau parent | à faire |
+| #25 | connexion sans Google | **hors périmètre** |
+
+## Iteration Log
