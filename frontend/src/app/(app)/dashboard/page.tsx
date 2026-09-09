@@ -55,6 +55,10 @@ import {
 } from "lucide-react";
 import { EditChildDialog } from "@/components/profile/EditChildDialog";
 import { levelsFor, useAvailableLevels } from "@/lib/levels";
+import {
+  OnboardingFlow,
+  resumableOnboarding,
+} from "./_components/OnboardingFlow";
 import type { ChildResponse, ChildStatsResponse } from "@/lib/api/model";
 
 export default function DashboardPage() {
@@ -89,6 +93,13 @@ export default function DashboardPage() {
     childName?: string;
   } | null>(null);
   const [manageChild, setManageChild] = useState<ChildResponse | null>(null);
+  // Parcours d'accueil (issue #24) : il remplace l'état vide, et se reprend
+  // tant que l'enfant créé n'a pas franchi la dernière étape. « Quitter »
+  // rend la main pour la session en cours sans effacer la reprise.
+  const [onboardingDismissed, setOnboardingDismissed] = useState(false);
+  const resumeChild = resumableOnboarding(children);
+  const showOnboarding =
+    !onboardingDismissed && (children.length === 0 || resumeChild !== null);
 
   const launchChild = (child: ChildResponse) => {
     if (user?.has_pin) {
@@ -363,18 +374,12 @@ export default function DashboardPage() {
         <div className="flex justify-center py-12">
           <div className="animate-[candy-spin-slow_1s_linear_infinite] rounded-full h-12 w-12 border-4 border-fun-green-light border-t-fun-green"></div>
         </div>
-      ) : children.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground mb-4">
-              You haven't added any children yet.
-            </p>
-            <Button onClick={() => setDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add your first child
-            </Button>
-          </CardContent>
-        </Card>
+      ) : showOnboarding ? (
+        <OnboardingFlow
+          resumeChild={resumeChild}
+          onChildCreated={loadChildren}
+          onFinished={() => setOnboardingDismissed(true)}
+        />
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {children.map((child) => {

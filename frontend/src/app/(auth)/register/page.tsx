@@ -40,7 +40,9 @@ function RegisterForm() {
   // re-rend pas à chaque frappe dans le champ code. On lit donc le code au
   // moment du clic, via une ref, plutôt que via la closure du callback.
   const inviteRef = useRef(invite);
-  inviteRef.current = invite;
+  useEffect(() => {
+    inviteRef.current = invite;
+  }, [invite]);
 
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID) return;
@@ -95,6 +97,7 @@ function RegisterForm() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-fun-sky-light via-white to-fun-violet-light px-4">
       <Card className="w-full max-w-md rounded-3xl candy-shadow-lg">
         <CardHeader className="space-y-1 text-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/explorito-badge.png"
             alt="Explorito"
