@@ -24,6 +24,7 @@ import type {
   AdminOverview,
   AdminUserRow,
   HTTPValidationError,
+  SignupInviteRow,
 } from "../../model";
 
 import { axiosInstance } from "../../axios-instance";
@@ -589,6 +590,357 @@ export const useRemoveUserApiV1AdminUsersUserIdDelete = <
 > => {
   return useMutation(
     getRemoveUserApiV1AdminUsersUserIdDeleteMutationOptions(options),
+    queryClient
+  );
+};
+/**
+ * Tous les codes d'inscription, du plus récent au plus ancien.
+ * @summary Get Signup Invites
+ */
+export const getSignupInvitesApiV1AdminSignupInvitesGet = (
+  signal?: AbortSignal
+) => {
+  return axiosInstance<SignupInviteRow[]>({
+    url: `/api/v1/admin/signup-invites`,
+    method: "GET",
+    signal,
+  });
+};
+
+export const getGetSignupInvitesApiV1AdminSignupInvitesGetQueryKey = () => {
+  return [`/api/v1/admin/signup-invites`] as const;
+};
+
+export const getGetSignupInvitesApiV1AdminSignupInvitesGetQueryOptions = <
+  TData = Awaited<
+    ReturnType<typeof getSignupInvitesApiV1AdminSignupInvitesGet>
+  >,
+  TError = HTTPValidationError,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getSignupInvitesApiV1AdminSignupInvitesGet>>,
+      TError,
+      TData
+    >
+  >;
+}) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetSignupInvitesApiV1AdminSignupInvitesGetQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getSignupInvitesApiV1AdminSignupInvitesGet>>
+  > = ({ signal }) => getSignupInvitesApiV1AdminSignupInvitesGet(signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getSignupInvitesApiV1AdminSignupInvitesGet>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetSignupInvitesApiV1AdminSignupInvitesGetQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getSignupInvitesApiV1AdminSignupInvitesGet>>
+>;
+export type GetSignupInvitesApiV1AdminSignupInvitesGetQueryError =
+  HTTPValidationError;
+
+export function useGetSignupInvitesApiV1AdminSignupInvitesGet<
+  TData = Awaited<
+    ReturnType<typeof getSignupInvitesApiV1AdminSignupInvitesGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getSignupInvitesApiV1AdminSignupInvitesGet>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<
+            ReturnType<typeof getSignupInvitesApiV1AdminSignupInvitesGet>
+          >,
+          TError,
+          Awaited<ReturnType<typeof getSignupInvitesApiV1AdminSignupInvitesGet>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetSignupInvitesApiV1AdminSignupInvitesGet<
+  TData = Awaited<
+    ReturnType<typeof getSignupInvitesApiV1AdminSignupInvitesGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getSignupInvitesApiV1AdminSignupInvitesGet>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<
+            ReturnType<typeof getSignupInvitesApiV1AdminSignupInvitesGet>
+          >,
+          TError,
+          Awaited<ReturnType<typeof getSignupInvitesApiV1AdminSignupInvitesGet>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetSignupInvitesApiV1AdminSignupInvitesGet<
+  TData = Awaited<
+    ReturnType<typeof getSignupInvitesApiV1AdminSignupInvitesGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getSignupInvitesApiV1AdminSignupInvitesGet>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get Signup Invites
+ */
+
+export function useGetSignupInvitesApiV1AdminSignupInvitesGet<
+  TData = Awaited<
+    ReturnType<typeof getSignupInvitesApiV1AdminSignupInvitesGet>
+  >,
+  TError = HTTPValidationError,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getSignupInvitesApiV1AdminSignupInvitesGet>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions =
+    getGetSignupInvitesApiV1AdminSignupInvitesGetQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Ouvre la porte à une famille : un code, une inscription.
+ * @summary Create Signup Invite
+ */
+export const createSignupInviteApiV1AdminSignupInvitesPost = (
+  signal?: AbortSignal
+) => {
+  return axiosInstance<SignupInviteRow>({
+    url: `/api/v1/admin/signup-invites`,
+    method: "POST",
+    signal,
+  });
+};
+
+export const getCreateSignupInviteApiV1AdminSignupInvitesPostMutationOptions = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createSignupInviteApiV1AdminSignupInvitesPost>>,
+    TError,
+    void,
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createSignupInviteApiV1AdminSignupInvitesPost>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["createSignupInviteApiV1AdminSignupInvitesPost"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createSignupInviteApiV1AdminSignupInvitesPost>>,
+    void
+  > = () => {
+    return createSignupInviteApiV1AdminSignupInvitesPost();
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateSignupInviteApiV1AdminSignupInvitesPostMutationResult =
+  NonNullable<
+    Awaited<ReturnType<typeof createSignupInviteApiV1AdminSignupInvitesPost>>
+  >;
+
+export type CreateSignupInviteApiV1AdminSignupInvitesPostMutationError =
+  HTTPValidationError;
+
+/**
+ * @summary Create Signup Invite
+ */
+export const useCreateSignupInviteApiV1AdminSignupInvitesPost = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createSignupInviteApiV1AdminSignupInvitesPost>>,
+      TError,
+      void,
+      TContext
+    >;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof createSignupInviteApiV1AdminSignupInvitesPost>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(
+    getCreateSignupInviteApiV1AdminSignupInvitesPostMutationOptions(options),
+    queryClient
+  );
+};
+/**
+ * Révoque un code non encore utilisé (un code déjà consommé reste tracé).
+ * @summary Revoke Signup Invite
+ */
+export const revokeSignupInviteApiV1AdminSignupInvitesTokenDelete = (
+  token: string,
+  signal?: AbortSignal
+) => {
+  return axiosInstance<void>({
+    url: `/api/v1/admin/signup-invites/${token}`,
+    method: "DELETE",
+    signal,
+  });
+};
+
+export const getRevokeSignupInviteApiV1AdminSignupInvitesTokenDeleteMutationOptions =
+  <TError = HTTPValidationError, TContext = unknown>(options?: {
+    mutation?: UseMutationOptions<
+      Awaited<
+        ReturnType<typeof revokeSignupInviteApiV1AdminSignupInvitesTokenDelete>
+      >,
+      TError,
+      { token: string },
+      TContext
+    >;
+  }): UseMutationOptions<
+    Awaited<
+      ReturnType<typeof revokeSignupInviteApiV1AdminSignupInvitesTokenDelete>
+    >,
+    TError,
+    { token: string },
+    TContext
+  > => {
+    const mutationKey = [
+      "revokeSignupInviteApiV1AdminSignupInvitesTokenDelete",
+    ];
+    const { mutation: mutationOptions } = options
+      ? options.mutation &&
+        "mutationKey" in options.mutation &&
+        options.mutation.mutationKey
+        ? options
+        : { ...options, mutation: { ...options.mutation, mutationKey } }
+      : { mutation: { mutationKey } };
+
+    const mutationFn: MutationFunction<
+      Awaited<
+        ReturnType<typeof revokeSignupInviteApiV1AdminSignupInvitesTokenDelete>
+      >,
+      { token: string }
+    > = (props) => {
+      const { token } = props ?? {};
+
+      return revokeSignupInviteApiV1AdminSignupInvitesTokenDelete(token);
+    };
+
+    return { mutationFn, ...mutationOptions };
+  };
+
+export type RevokeSignupInviteApiV1AdminSignupInvitesTokenDeleteMutationResult =
+  NonNullable<
+    Awaited<
+      ReturnType<typeof revokeSignupInviteApiV1AdminSignupInvitesTokenDelete>
+    >
+  >;
+
+export type RevokeSignupInviteApiV1AdminSignupInvitesTokenDeleteMutationError =
+  HTTPValidationError;
+
+/**
+ * @summary Revoke Signup Invite
+ */
+export const useRevokeSignupInviteApiV1AdminSignupInvitesTokenDelete = <
+  TError = HTTPValidationError,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<
+        ReturnType<typeof revokeSignupInviteApiV1AdminSignupInvitesTokenDelete>
+      >,
+      TError,
+      { token: string },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<
+    ReturnType<typeof revokeSignupInviteApiV1AdminSignupInvitesTokenDelete>
+  >,
+  TError,
+  { token: string },
+  TContext
+> => {
+  return useMutation(
+    getRevokeSignupInviteApiV1AdminSignupInvitesTokenDeleteMutationOptions(
+      options
+    ),
     queryClient
   );
 };

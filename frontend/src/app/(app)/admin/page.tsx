@@ -14,6 +14,7 @@ import {
 import type { AdminOverview, AdminUserRow } from "@/lib/api/model";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SignupInvitesCard } from "./_components/SignupInvitesCard";
 import {
   Dialog,
   DialogContent,
@@ -251,6 +252,9 @@ export default function AdminPage() {
           </p>
         </Link>
       </div>
+
+      {/* ---- Codes d'inscription ---- */}
+      <SignupInvitesCard />
 
       {/* ---- Vue d'ensemble ---- */}
       <section className="space-y-4">

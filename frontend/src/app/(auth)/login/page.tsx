@@ -50,8 +50,19 @@ export default function LoginPage() {
       setError("");
       try {
         await googleLogin(resp.credential);
-      } catch {
-        setError("Connexion Google échouée. Réessaie.");
+      } catch (failure) {
+        // Le serveur refuse aussi la *création* d'un compte sans code
+        // d'invitation (issue #22) : son message dit quoi faire, là où un
+        // « Connexion Google échouée » enverrait chercher une panne
+        // inexistante.
+        const detail = (
+          failure as { response?: { data?: { detail?: unknown } } } | undefined
+        )?.response?.data?.detail;
+        setError(
+          typeof detail === "string" && detail
+            ? detail
+            : "Connexion Google échouée. Réessaie."
+        );
       }
     };
 
@@ -139,6 +150,13 @@ export default function LoginPage() {
           <p className="text-xs text-fun-text-muted text-center pt-2">
             Les enfants n&apos;ont pas de compte : le parent lance l&apos;app
             pour eux depuis le tableau de bord.
+          </p>
+
+          <p className="text-xs text-fun-text-muted text-center">
+            Pas encore de compte ?{" "}
+            <Link href="/register" className="underline hover:text-fun-text">
+              S&apos;inscrire avec un code
+            </Link>
           </p>
 
           <p className="text-xs text-fun-text-muted text-center">

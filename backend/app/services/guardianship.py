@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from app.models.guardianship import (
     INVITE_ALL,
     INVITE_CHILD,
+    INVITE_SIGNUP,
     ROLE_OWNER,
     ROLE_PARENT,
     CoParentLink,
@@ -119,6 +120,61 @@ def get_usable_invitation(token: str, db: Session) -> Invitation | None:
     return inv
 
 
+SIGNUP_INVITE_TTL_DAYS = 30
+
+
+def create_signup_invitation(inviter_id: UUID, db: Session, *, ttl_days: int = SIGNUP_INVITE_TTL_DAYS) -> Invitation:
+    """Crée un code d'inscription (kind ``signup``), sans garde attachée.
+
+    Durée de vie plus longue qu'un partage de garde : un code d'inscription est
+    remis de la main à la main à une famille qui s'inscrira quand elle en aura
+    le temps, pas dans la minute.
+
+    Args:
+        inviter_id: Admin qui ouvre la porte.
+        db: Session de base de données.
+        ttl_days: Durée de validité, en jours.
+
+    Returns:
+        L'invitation créée (non commitée) ; ``token`` sert à construire le lien.
+    """
+    inv = Invitation(
+        token=secrets.token_urlsafe(24),
+        inviter_id=inviter_id,
+        kind=INVITE_SIGNUP,
+        child_id=None,
+        # ``role`` est sans objet pour un code d'inscription : la colonne est
+        # NOT NULL, on y met le rôle par défaut et personne ne le lit.
+        role=ROLE_PARENT,
+        expires_at=datetime.utcnow() + timedelta(days=ttl_days),
+    )
+    db.add(inv)
+    db.flush()
+    return inv
+
+
+def get_usable_signup_invitation(token: str | None, db: Session) -> Invitation | None:
+    """Code d'inscription encore consommable, ou ``None``.
+
+    Refuse explicitement les jetons d'un autre ``kind`` : une invitation de
+    partage de garde n'est pas un droit d'inscription, et l'accepter ici
+    laisserait n'importe quel lien de partage ouvrir la porte.
+    """
+    if not token:
+        return None
+    inv = db.query(Invitation).filter(Invitation.token == token).first()
+    if inv is None or inv.kind != INVITE_SIGNUP or not inv.is_usable:
+        return None
+    return inv
+
+
+def consume_signup_invitation(inv: Invitation, new_user_id: UUID, db: Session) -> None:
+    """Marque un code d'inscription comme utilisé (un code = une famille)."""
+    inv.accepted_at = datetime.utcnow()
+    inv.accepted_by = new_user_id
+    db.flush()
+
+
 def accept_invitation(token: str, accepting_user_id: UUID, db: Session) -> list[UUID]:
     """Accepte une invitation et crée les gardes. Renvoie les IDs d'enfants accordés.
 
@@ -132,6 +188,10 @@ def accept_invitation(token: str, accepting_user_id: UUID, db: Session) -> list[
     inv = get_usable_invitation(token, db)
     if inv is None:
         raise ValueError("invitation invalide ou expirée")
+    if inv.kind == INVITE_SIGNUP:
+        # Un code d'inscription se consomme à la création du compte, pas ici :
+        # cette route n'accorderait aucune garde tout en brûlant le code.
+        raise ValueError("ce code est un code d'inscription, pas un partage")
     if inv.inviter_id == accepting_user_id:
         raise ValueError("on ne peut pas accepter sa propre invitation")
 

@@ -13,4 +13,6 @@ export interface DevLoginRequest {
   email: string;
   /** Nom d'affichage à la création */
   display_name?: string | null;
+  /** Code d'invitation (mêmes règles que la connexion Google) */
+  invite?: string | null;
 }

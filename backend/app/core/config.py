@@ -32,6 +32,11 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str = ""
     # Emails (séparés par des virgules) promus au rôle admin à la connexion.
     ADMIN_EMAILS: str = ""
+    # Porte d'entrée : exiger un code d'invitation pour **créer** un compte
+    # parent. Défaut False = inscription libre, comportement historique
+    # inchangé tant que le réglage n'est pas activé. Un compte déjà existant se
+    # connecte toujours sans code, quel que soit ce réglage (issue #22).
+    SIGNUP_INVITE_REQUIRED: bool = False
 
     @property
     def admin_emails_set(self) -> set[str]:

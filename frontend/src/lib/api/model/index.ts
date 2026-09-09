@@ -168,6 +168,7 @@ export * from "./reportRow";
 export * from "./reportStatus";
 export * from "./rewardResponse";
 export * from "./sendApiV1AnnouncementsAnnouncementIdSendPostParams";
+export * from "./signupInviteRow";
 export * from "./solveRequest";
 export * from "./solveResponse";
 export * from "./startLessonApiV1LessonsLessonIdStartPost201";

@@ -31,6 +31,7 @@ from app.schemas.auth import (
     UserResponse,
 )
 from app.services.admin import record_login
+from app.services.guardianship import consume_signup_invitation, get_usable_signup_invitation
 from app.services.uploads import save_avatar
 
 logger = logging.getLogger("explorito.admin")
@@ -78,6 +79,16 @@ def _issue_token(user: User, db: Session) -> Token:
     )
 
 
+SIGNUP_INVITE_REQUIRED_MESSAGE = (
+    "Explorito est en accès sur invitation. Demandez un code d'invitation à la "
+    "personne qui vous a parlé de l'application, puis réessayez."
+)
+
+SIGNUP_INVITE_INVALID_MESSAGE = (
+    "Ce code d'invitation est invalide, expiré, ou a déjà servi à créer un compte. Demandez-en un nouveau."
+)
+
+
 def _upsert_parent(
     db: Session,
     email: str,
@@ -85,14 +96,50 @@ def _upsert_parent(
     display_name: str | None = None,
     google_sub: str | None = None,
     avatar_url: str | None = None,
+    invite_token: str | None = None,
 ) -> User:
-    """Récupère ou crée le compte parent associé à un email (inscription libre).
+    """Récupère ou crée le compte parent associé à un email.
 
     Le rôle est (re)calculé à chaque connexion depuis l'allowlist admin. Un profil
     parent est créé au premier accès. ``google_sub`` est lié s'il est fourni.
+
+    La porte d'entrée ne se referme que sur la **création** : quand
+    ``SIGNUP_INVITE_REQUIRED`` est actif, un compte inconnu exige un code
+    ``signup`` valide, tandis qu'un compte existant se connecte toujours sans
+    code. Activer le réglage ne doit jamais verrouiller dehors une famille déjà
+    installée.
+
+    Args:
+        db: Session de base de données.
+        email: Email du parent (déjà normalisé en minuscules).
+        display_name: Nom d'affichage, à la création seulement.
+        google_sub: Identifiant stable Google, lié s'il est fourni.
+        avatar_url: Photo de profil, à la création seulement.
+        invite_token: Code d'invitation présenté à l'inscription.
+
+    Returns:
+        Le compte parent, créé ou récupéré.
+
+    Raises:
+        HTTPException: 403 si la création exige un code et qu'aucun code
+            valide n'est présenté.
     """
     user = get_user_by_email(db, email)
     if user is None:
+        invitation = None
+        if settings.SIGNUP_INVITE_REQUIRED:
+            if not invite_token:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=SIGNUP_INVITE_REQUIRED_MESSAGE,
+                )
+            invitation = get_usable_signup_invitation(invite_token, db)
+            if invitation is None:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=SIGNUP_INVITE_INVALID_MESSAGE,
+                )
+
         user = User(email=email, role=_role_for_email(email), is_active=True, google_sub=google_sub)
         db.add(user)
         db.flush()
@@ -105,6 +152,10 @@ def _upsert_parent(
                 settings={},
             )
         )
+        if invitation is not None:
+            # Consommé après la création pour pouvoir enregistrer qui l'a
+            # utilisé ; un code = une famille.
+            consume_signup_invitation(invitation, user.id, db)
     else:
         # Synchronise le rôle avec l'allowlist et lie l'identité Google.
         user.role = _role_for_email(email)
@@ -227,6 +278,7 @@ async def google_login(payload: GoogleAuthRequest, db: Annotated[Session, Depend
         display_name=info.get("name"),
         google_sub=info.get("sub"),
         avatar_url=info.get("picture"),
+        invite_token=payload.invite,
     )
     if not user.is_active:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Compte désactivé.")
@@ -238,7 +290,12 @@ if settings.DEBUG:
     @router.post("/dev-login", response_model=Token)
     async def dev_login(payload: DevLoginRequest, db: Annotated[Session, Depends(get_db)]) -> Token:
         """Connexion sans Google pour le dev et les tests (email → jeton parent)."""
-        user = _upsert_parent(db, payload.email.lower(), display_name=payload.display_name)
+        user = _upsert_parent(
+            db,
+            payload.email.lower(),
+            display_name=payload.display_name,
+            invite_token=payload.invite,
+        )
         return _issue_token(user, db)
 
 

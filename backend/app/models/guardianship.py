@@ -6,7 +6,8 @@
 - :class:`CoParentLink` : lien familial persistant ``owner → co-parent`` ; à la
   création d'un nouvel enfant, les co-parents reçoivent automatiquement une garde.
 - :class:`Invitation` : jeton d'invitation (lien à partager), à usage unique et
-  avec expiration.
+  avec expiration. Trois usages : partager un enfant (``child``), inviter un
+  co-parent (``all``), ou ouvrir la porte d'inscription (``signup``).
 """
 
 import uuid
@@ -28,7 +29,11 @@ GUARDIAN_ROLES = {ROLE_OWNER, ROLE_PARENT, ROLE_GRANDPARENT, ROLE_GUARDIAN}
 # Types d'invitation.
 INVITE_CHILD = "child"  # partage d'un enfant précis
 INVITE_ALL = "all"  # invitation d'un co-parent (tous les enfants + enfants futurs)
-INVITE_KINDS = {INVITE_CHILD, INVITE_ALL}
+# Code d'inscription : ouvre la création d'un compte parent quand
+# ``SIGNUP_INVITE_REQUIRED`` est actif. ``child_id`` est NULL et ``role`` sans
+# objet — il n'accorde aucune garde, seulement le droit d'exister.
+INVITE_SIGNUP = "signup"
+INVITE_KINDS = {INVITE_CHILD, INVITE_ALL, INVITE_SIGNUP}
 
 
 class Guardianship(Base):
@@ -74,7 +79,7 @@ class Invitation(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     token = Column(String, unique=True, nullable=False, index=True)
     inviter_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    kind = Column(String, nullable=False)  # 'child' | 'all'
+    kind = Column(String, nullable=False)  # 'child' | 'all' | 'signup'
     # Enfant partagé (kind='child') ; NULL pour une invitation co-parent.
     child_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
     role = Column(String, nullable=False, default=ROLE_GUARDIAN)  # rôle accordé à l'acceptation

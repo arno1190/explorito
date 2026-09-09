@@ -42,3 +42,17 @@ class AdminUserRow(BaseModel):
     login_count: int = 0
     last_exercise_at: datetime | None = None
     exercises_count: int = 0
+
+
+class SignupInviteRow(BaseModel):
+    """Un code d'inscription, tel que listé dans la surface admin."""
+
+    token: str
+    expires_at: datetime
+    created_at: datetime
+    accepted_at: datetime | None = None
+    accepted_by_email: str | None = None
+    revoked_at: datetime | None = None
+    is_usable: bool
+    #: Lien complet à transmettre à la famille invitée.
+    url: str
