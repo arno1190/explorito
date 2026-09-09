@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LEVELS } from "@/lib/levels";
+import { useAvailableLevels } from "@/lib/levels";
 import { updateChildApiV1ChildrenChildIdPut } from "@/lib/api/generated/children/children";
 import { listCatalogsApiV1CollectionCatalogsGet } from "@/lib/api/generated/collection/collection";
 import type { CatalogMeta, ChildResponse, LevelEnum } from "@/lib/api/model";
@@ -37,6 +37,9 @@ export function EditChildDialog({
   const [name, setName] = useState(child.name);
   const [birthDate, setBirthDate] = useState(child.birth_date ?? "");
   const [level, setLevel] = useState<LevelEnum | "">(child.level ?? "");
+  // Le niveau actuel de l'enfant reste proposé même s'il n'a plus de contenu :
+  // sinon l'enregistrement le changerait en silence (issue #23).
+  const { levels } = useAvailableLevels(child.level);
   const [catalogs, setCatalogs] = useState<CatalogMeta[]>([]);
   const [disabled, setDisabled] = useState<Set<string>>(
     new Set(child.disabled_collections ?? [])
@@ -120,7 +123,7 @@ export function EditChildDialog({
               className="h-11 w-full rounded-xl border-2 border-fun-border bg-white px-3 text-fun-text outline-none focus:border-fun-sky"
             >
               <option value="">Choisir…</option>
-              {LEVELS.map((l) => (
+              {levels.map((l) => (
                 <option key={l.value} value={l.value}>
                   {l.label}
                 </option>

@@ -17,6 +17,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from app.api.auth import get_current_user
 from app.core.database import get_db
 from app.models.collection import WALLET_POINTS, WALLETS
+from app.models.content import LevelEnum
 from app.models.guardianship import ROLE_GUARDIAN, ROLE_OWNER
 from app.models.user import Profile, User, UserRole
 from app.schemas.children import ChildCreate, ChildResponse, ChildUpdate
@@ -32,6 +33,7 @@ from app.services.guardianship import (
     on_child_created,
     remove_guardian,
 )
+from app.services.library import available_levels
 from app.services.uploads import save_avatar
 
 router = APIRouter()
@@ -109,6 +111,27 @@ async def get_children(
         return []
     profiles = db.query(Profile).filter(Profile.user_id.in_(child_ids), Profile.is_child.is_(True)).all()
     return [_child_response(p, current_user, db) for p in profiles]
+
+
+@router.get("/levels", response_model=list[LevelEnum])
+async def get_available_levels(
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+) -> list[LevelEnum]:
+    """Niveaux scolaires réellement proposables à un enfant, du plus petit au plus grand.
+
+    Déclaré **avant** ``/{child_id}`` : « levels » serait sinon capturé comme un
+    identifiant d'enfant.
+
+    Dérivé du contenu publié, jamais codé en dur côté frontend (issue #23). Un
+    niveau annoncé mais non semé ouvre sur une application vide, ce qui est le
+    pire premier contact possible et reste invisible depuis l'intérieur.
+
+    Ne filtre pas le niveau **actuel** d'un enfant déjà enregistré : c'est au
+    formulaire d'y ajouter le niveau existant pour ne pas le changer en silence.
+    """
+    _require_parent(current_user)
+    return available_levels(db)
 
 
 @router.get("/{child_id}", response_model=ChildResponse)

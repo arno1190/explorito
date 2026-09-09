@@ -1,7 +1,7 @@
 # Explorito 🦉
 
 A playful, Duolingo-style learning web app for primary-school children (French
-curriculum, **PS → CM2**). Kids progress through bite-sized lessons, earn points,
+curriculum, **PS → CM1**). Kids progress through bite-sized lessons, earn points,
 keep streaks, and spend their points to unlock collectibles. Parents run
 everything from a dashboard and can reward offline effort and good behaviour.
 

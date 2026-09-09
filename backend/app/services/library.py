@@ -87,6 +87,42 @@ def _subject_exists(subject_slug: str) -> Any:
     )
 
 
+def _has_published_lesson() -> Any:
+    """Condition SQL « ce pack contient au moins une leçon publiée ».
+
+    Un pack visible mais vide de leçons publiées ouvre sur une application
+    vide : du point de vue du parent, c'est identique à un niveau non semé.
+    """
+    return select(Lesson.id).where(Lesson.pack_id == Pack.id, Lesson.is_published.is_(True)).exists()
+
+
+def available_levels(db: Session) -> list[LevelEnum]:
+    """Niveaux scolaires réellement jouables, dans l'ordre pédagogique.
+
+    Un niveau est proposable s'il existe au moins un pack visible au catalogue
+    (:func:`_catalogue_visible`) dont l'intervalle le couvre **et** qui contient
+    au moins une leçon publiée.
+
+    Dérivé du contenu, jamais codé en dur : une liste figée finirait par
+    promettre un niveau qu'on a cessé de semer, ce qui est exactement le
+    problème que l'issue #23 constate pour le CM2. Le corollaire est que semer
+    un niveau suffit à le faire apparaître, sans rien redéployer.
+
+    Args:
+        db: Session de base de données.
+
+    Returns:
+        Les niveaux jouables, du plus petit au plus grand. Liste vide si la base
+        ne contient aucun contenu publié.
+    """
+    return [
+        level
+        for level in LevelEnum
+        if db.query(Pack.id).filter(_catalogue_visible(), _level_covered(level), _has_published_lesson()).first()
+        is not None
+    ]
+
+
 # --------------------------------------------------------------------------- #
 # Agrégats de cartes (comptages en lot, jamais N+1)
 # --------------------------------------------------------------------------- #

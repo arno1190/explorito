@@ -54,18 +54,8 @@ import {
   PenLine,
 } from "lucide-react";
 import { EditChildDialog } from "@/components/profile/EditChildDialog";
+import { levelsFor, useAvailableLevels } from "@/lib/levels";
 import type { ChildResponse, ChildStatsResponse } from "@/lib/api/model";
-
-const LEVELS: { value: LevelEnum; label: string }[] = [
-  { value: "ps", label: "Petite Section" },
-  { value: "ms", label: "Moyenne Section" },
-  { value: "gs", label: "Grande Section" },
-  { value: "cp", label: "CP" },
-  { value: "ce1", label: "CE1" },
-  { value: "ce2", label: "CE2" },
-  { value: "cm1", label: "CM1" },
-  { value: "cm2", label: "CM2" },
-];
 
 export default function DashboardPage() {
   const { user, impersonateChild } = useAuth();
@@ -79,6 +69,15 @@ export default function DashboardPage() {
   const [name, setName] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [level, setLevel] = useState<LevelEnum>("cp");
+  // Niveaux dérivés du contenu publié : ne jamais proposer un niveau vide.
+  const { levels: creatableLevels, available: availableLevels } =
+    useAvailableLevels();
+  // « cp » n'est qu'un défaut d'initialisation : si le CP n'a pas de contenu,
+  // le formulaire retomberait sur un niveau vide. On retient donc le premier
+  // niveau réellement proposé plutôt que la valeur figée du state.
+  const effectiveLevel = creatableLevels.some((l) => l.value === level)
+    ? level
+    : (creatableLevels[0]?.value ?? level);
   // Lancement du mode enfant : protégé par le code PIN parent. S'il n'existe pas
   // encore, on invite à le définir avant de basculer.
   const [pinOpen, setPinOpen] = useState(false);
@@ -172,7 +171,7 @@ export default function DashboardPage() {
       await createChildApiV1ChildrenPost({
         name,
         birth_date: birthDate || undefined,
-        level,
+        level: effectiveLevel,
       });
       setDialogOpen(false);
       setName("");
@@ -309,11 +308,11 @@ export default function DashboardPage() {
                     <Label htmlFor="level">Niveau scolaire</Label>
                     <select
                       id="level"
-                      value={level}
+                      value={effectiveLevel}
                       onChange={(e) => setLevel(e.target.value as LevelEnum)}
                       className="h-11 w-full rounded-xl border-2 border-fun-border bg-white px-3 text-fun-text outline-none focus:border-fun-sky"
                     >
-                      {LEVELS.map((l) => (
+                      {creatableLevels.map((l) => (
                         <option key={l.value} value={l.value}>
                           {l.label}
                         </option>
@@ -455,7 +454,7 @@ export default function DashboardPage() {
                       className="h-9 rounded-lg border-2 border-fun-border bg-white px-2 text-sm font-semibold text-fun-text outline-none focus:border-fun-sky"
                     >
                       {!child.level && <option value="">Choisir…</option>}
-                      {LEVELS.map((l) => (
+                      {levelsFor(availableLevels, child.level).map((l) => (
                         <option key={l.value} value={l.value}>
                           {l.label}
                         </option>
