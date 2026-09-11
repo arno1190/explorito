@@ -56,10 +56,15 @@ export function levelsFor(
  * famille le choisit et arrive sur une application vide (issue #23). La liste
  * vient donc de l'API et suit le contenu.
  *
+ * Les trois raisons d'avoir une liste vide sont distinctes et demandent trois
+ * réponses différentes à l'écran — « patientez », « réessayer », « aucune
+ * classe n'a encore de contenu » — donc elles sont exposées séparément plutôt
+ * que confondues dans un tableau vide.
+ *
  * @param keep Voir {@link levelsFor}.
  */
 export function useAvailableLevels(keep?: LevelEnum | null) {
-  const { data, isLoading, isError } = useApiAvailableLevels();
+  const { data, isLoading, isError, refetch } = useApiAvailableLevels();
 
   return {
     levels: levelsFor(data, keep),
@@ -67,5 +72,9 @@ export function useAvailableLevels(keep?: LevelEnum | null) {
     available: data,
     isLoading,
     isError,
+    /** L'API a répondu, et aucune classe n'a de contenu publié. */
+    isEmpty: !isLoading && !isError && (data?.length ?? 0) === 0,
+    /** Nouvelle tentative, pour le bouton « Réessayer ». */
+    refetch,
   };
 }

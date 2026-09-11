@@ -87,21 +87,55 @@ def _subject_exists(subject_slug: str) -> Any:
     )
 
 
-def _has_published_lesson() -> Any:
-    """Condition SQL « ce pack contient au moins une leçon publiée ».
+def _delivered_without_a_parent_gesture() -> Any:
+    """Condition SQL « ce pack arrive à un enfant sans qu'un garde n'ait rien fait ».
 
-    Un pack visible mais vide de leçons publiées ouvre sur une application
-    vide : du point de vue du parent, c'est identique à un niveau non semé.
+    Plus étroit que :func:`_catalogue_visible`, et volontairement : approuvé
+    signifie listé au catalogue parent, jamais livré aux enfants. Un pack
+    communautaire n'atteint un enfant que par une ligne
+    :class:`~app.models.pack.ChildPackAccess` ou l'interrupteur
+    ``auto_enable_approved_packs``, dont le défaut est ``False`` (cf.
+    :func:`app.services.packs.accessible_pack_ids`). Le compter ici annoncerait
+    un niveau vide pour toute nouvelle famille.
     """
-    return select(Lesson.id).where(Lesson.pack_id == Pack.id, Lesson.is_published.is_(True)).exists()
+    return and_(
+        Pack.origin == PackOrigin.OFFICIAL.value,
+        Pack.community_status != CommunityStatus.BLOCKED.value,
+    )
+
+
+def _has_published_lesson_at(level: LevelEnum) -> Any:
+    """Condition SQL « ce pack contient une leçon publiée **de ce niveau-là** ».
+
+    L'intervalle ``[level_min, level_max]`` du pack ne suffit pas : il est
+    déduit de l'étendue des leçons ingérées (``contribution.ingest_pack``) et
+    peut donc couvrir un niveau creux. Or toutes les routes qui servent un
+    enfant filtrent sur le niveau du parcours de la leçon elle-même
+    (``LearningPath.level``, cf. ``api/lessons.py``, ``api/subjects.py``,
+    ``services/pack_path.py``). Un pack CP→CM1 sans leçon CE1 ne donne donc
+    rien à un enfant de CE1.
+    """
+    return (
+        select(Lesson.id)
+        .join(LearningPath, LearningPath.id == Lesson.path_id)
+        .where(
+            Lesson.pack_id == Pack.id,
+            Lesson.is_published.is_(True),
+            LearningPath.level == level,
+        )
+        .exists()
+    )
 
 
 def available_levels(db: Session) -> list[LevelEnum]:
     """Niveaux scolaires réellement jouables, dans l'ordre pédagogique.
 
-    Un niveau est proposable s'il existe au moins un pack visible au catalogue
-    (:func:`_catalogue_visible`) dont l'intervalle le couvre **et** qui contient
-    au moins une leçon publiée.
+    Un niveau est proposable si — et seulement si — un enfant qu'on y placerait
+    aujourd'hui recevrait vraiment une leçon : il faut un pack livré d'office
+    (:func:`_delivered_without_a_parent_gesture`) dont l'intervalle couvre le
+    niveau (:func:`_level_covered`, comme le fait
+    :func:`app.services.packs.official_pack_ids_for_level`) **et** qui contient
+    une leçon publiée à ce niveau précis (:func:`_has_published_lesson_at`).
 
     Dérivé du contenu, jamais codé en dur : une liste figée finirait par
     promettre un niveau qu'on a cessé de semer, ce qui est exactement le
@@ -113,12 +147,18 @@ def available_levels(db: Session) -> list[LevelEnum]:
 
     Returns:
         Les niveaux jouables, du plus petit au plus grand. Liste vide si la base
-        ne contient aucun contenu publié.
+        ne contient aucun contenu publié livré d'office.
     """
     return [
         level
         for level in LevelEnum
-        if db.query(Pack.id).filter(_catalogue_visible(), _level_covered(level), _has_published_lesson()).first()
+        if db.query(Pack.id)
+        .filter(
+            _delivered_without_a_parent_gesture(),
+            _level_covered(level),
+            _has_published_lesson_at(level),
+        )
+        .first()
         is not None
     ]
 

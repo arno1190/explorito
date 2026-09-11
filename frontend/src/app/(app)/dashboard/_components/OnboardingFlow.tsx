@@ -30,13 +30,28 @@ const STORAGE_KEY = "explorito_onboarding";
  * commencé, et un retour depuis un autre appareil retombe simplement sur le
  * tableau de bord normal, jamais sur une étape fausse.
  */
-type Saved = { childId: string; step: Step };
+type Saved = { childId: string; step: Step; at?: number };
+
+/**
+ * Durée au-delà de laquelle une reprise n'en est plus une.
+ *
+ * Sans borne, une entrée oubliée suit la famille indéfiniment et lui propose
+ * de « reprendre » une inscription vieille de plusieurs mois.
+ */
+const RESUME_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 function readSaved(): Saved | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as Saved) : null;
+    if (!raw) return null;
+    const saved = JSON.parse(raw) as Saved;
+    if (!saved?.childId) return null;
+    if (saved.at && Date.now() - saved.at > RESUME_MAX_AGE_MS) {
+      window.localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+    return saved;
   } catch {
     return null;
   }
@@ -45,16 +60,40 @@ function readSaved(): Saved | null {
 function writeSaved(saved: Saved | null): void {
   if (typeof window === "undefined") return;
   if (saved === null) window.localStorage.removeItem(STORAGE_KEY);
-  else window.localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+  else
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ ...saved, at: Date.now() })
+    );
 }
 
-/** Vrai s'il reste un parcours à reprendre pour l'un des enfants existants. */
+/** Oublie définitivement le parcours en cours (« Ne plus proposer »). */
+export function dismissOnboarding(): void {
+  writeSaved(null);
+}
+
+/** L'enfant d'un parcours interrompu qu'on peut encore reprendre, s'il y en a un. */
 export function resumableOnboarding(
   children: ChildResponse[]
 ): ChildResponse | null {
   const saved = readSaved();
   if (!saved) return null;
   return children.find((c) => c.id === saved.childId) ?? null;
+}
+
+/**
+ * Message d'échec de l'enregistrement du code parent.
+ *
+ * « Il doit contenir 4 chiffres » était impossible — le bouton reste désactivé
+ * tant que le champ n'a pas quatre chiffres — et cachait la vraie cause (réseau
+ * coupé, serveur en erreur) derrière un reproche adressé au parent.
+ */
+function pinFailureMessage(failure: unknown): string {
+  const detail = (
+    failure as { response?: { data?: { detail?: unknown } } } | undefined
+  )?.response?.data?.detail;
+  if (typeof detail === "string" && detail) return detail;
+  return "Le code n'a pas pu être enregistré. Vérifiez votre connexion, ou réessayez plus tard depuis le tableau de bord.";
 }
 
 function StepDots({ current }: { current: Step }) {
@@ -121,7 +160,16 @@ export function OnboardingFlow({
   const [name, setName] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [level, setLevel] = useState<LevelEnum | "">("");
-  const { levels } = useAvailableLevels();
+  // Chargement, échec et « aucune classe n'a de contenu » sont trois situations
+  // différentes : les confondre dans une liste vide donnait un « Continuer »
+  // grisé sans explication, et l'étape obligatoire devenait infranchissable.
+  const {
+    levels,
+    isLoading: levelsLoading,
+    isError: levelsError,
+    isEmpty: levelsEmpty,
+    refetch: refetchLevels,
+  } = useAvailableLevels();
   const effectiveLevel = level || levels[0]?.value || "";
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -182,10 +230,8 @@ export function OnboardingFlow({
     try {
       await setPin(pin);
       goTo("launch", child);
-    } catch {
-      setError(
-        "Le code n'a pas pu être enregistré. Il doit contenir 4 chiffres."
-      );
+    } catch (err) {
+      setError(pinFailureMessage(err));
     } finally {
       setBusy(false);
     }
@@ -245,25 +291,61 @@ export function OnboardingFlow({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="onb-level">Sa classe</Label>
-              <select
-                id="onb-level"
-                value={effectiveLevel}
-                onChange={(e) => setLevel(e.target.value as LevelEnum)}
-                className="h-12 w-full rounded-xl border-2 border-fun-border bg-white px-3 text-fun-text outline-none focus:border-fun-sky"
+              <Label
+                htmlFor={
+                  levelsLoading || levelsError || levelsEmpty
+                    ? undefined
+                    : "onb-level"
+                }
               >
-                {levels.map((l) => (
-                  <option key={l.value} value={l.value}>
-                    {l.label}
-                  </option>
-                ))}
-              </select>
+                Sa classe
+              </Label>
+              {levelsLoading ? (
+                <p className="flex min-h-12 items-center gap-3 rounded-xl bg-fun-sky-light px-3 text-sm text-fun-text">
+                  <span className="inline-block h-5 w-5 animate-[candy-spin-slow_1s_linear_infinite] rounded-full border-2 border-fun-green-light border-t-fun-green" />
+                  Chargement des classes disponibles…
+                </p>
+              ) : levelsError ? (
+                <div className="space-y-2 rounded-xl border-2 border-fun-red/20 bg-fun-red-light p-3">
+                  <p className="text-sm text-fun-red">
+                    La liste des classes n&apos;a pas pu être chargée. Vérifiez
+                    votre connexion.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => refetchLevels()}
+                  >
+                    Réessayer
+                  </Button>
+                </div>
+              ) : levelsEmpty ? (
+                <p className="rounded-xl bg-fun-sun-light p-3 text-sm text-fun-text">
+                  Aucune classe n&apos;a encore de leçon publiée. Créez quand
+                  même {name || "votre enfant"} : vous choisirez sa classe
+                  depuis sa fiche dès qu&apos;il y aura du contenu.
+                </p>
+              ) : (
+                <select
+                  id="onb-level"
+                  value={effectiveLevel}
+                  onChange={(e) => setLevel(e.target.value as LevelEnum)}
+                  className="h-12 w-full rounded-xl border-2 border-fun-border bg-white px-3 text-fun-text outline-none focus:border-fun-sky"
+                >
+                  {levels.map((l) => (
+                    <option key={l.value} value={l.value}>
+                      {l.label}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
             <Button
               type="submit"
               className="w-full"
-              disabled={busy || !name || levels.length === 0}
+              disabled={busy || !name || levelsLoading || levelsError}
             >
               {busy ? "Création…" : "Continuer"}
             </Button>
@@ -363,7 +445,8 @@ export function OnboardingFlow({
               Tout est prêt&nbsp;!
             </h2>
             <p className="text-sm text-fun-text-muted">
-              {child.name} arrive directement sur sa première leçon.
+              {child.name} arrive sur ses matières : une matière, puis sa
+              première leçon, et c&apos;est parti.
               {!user?.has_pin &&
                 " Vous pourrez définir votre code parent plus tard depuis le tableau de bord."}
             </p>
@@ -387,7 +470,7 @@ export function OnboardingFlow({
           <button
             type="button"
             onClick={quit}
-            className="w-full text-xs text-fun-text-muted underline"
+            className="min-h-12 w-full rounded-xl text-sm text-fun-text-muted underline"
           >
             Quitter — vous retrouverez cette étape plus tard
           </button>

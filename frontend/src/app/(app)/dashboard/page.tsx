@@ -56,6 +56,7 @@ import {
 import { EditChildDialog } from "@/components/profile/EditChildDialog";
 import { levelsFor, useAvailableLevels } from "@/lib/levels";
 import {
+  dismissOnboarding,
   OnboardingFlow,
   resumableOnboarding,
 } from "./_components/OnboardingFlow";
@@ -72,16 +73,22 @@ export default function DashboardPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
   const [birthDate, setBirthDate] = useState("");
-  const [level, setLevel] = useState<LevelEnum>("cp");
+  const [level, setLevel] = useState<LevelEnum | "">("");
   // Niveaux dérivés du contenu publié : ne jamais proposer un niveau vide.
-  const { levels: creatableLevels, available: availableLevels } =
-    useAvailableLevels();
-  // « cp » n'est qu'un défaut d'initialisation : si le CP n'a pas de contenu,
-  // le formulaire retomberait sur un niveau vide. On retient donc le premier
-  // niveau réellement proposé plutôt que la valeur figée du state.
-  const effectiveLevel = creatableLevels.some((l) => l.value === level)
+  const {
+    levels: creatableLevels,
+    available: availableLevels,
+    isLoading: levelsLoading,
+    isError: levelsError,
+    isEmpty: levelsEmpty,
+    refetch: refetchLevels,
+  } = useAvailableLevels();
+  // Le niveau envoyé est celui que le parent a réellement choisi dans la liste
+  // affichée, jamais un défaut invisible : une valeur figée (« cp ») créait
+  // l'enfant dans une classe que personne n'avait vue, et vide (issue #23).
+  const chosenLevel = creatableLevels.some((l) => l.value === level)
     ? level
-    : (creatableLevels[0]?.value ?? level);
+    : "";
   // Lancement du mode enfant : protégé par le code PIN parent. S'il n'existe pas
   // encore, on invite à le définir avant de basculer.
   const [pinOpen, setPinOpen] = useState(false);
@@ -93,13 +100,21 @@ export default function DashboardPage() {
     childName?: string;
   } | null>(null);
   const [manageChild, setManageChild] = useState<ChildResponse | null>(null);
-  // Parcours d'accueil (issue #24) : il remplace l'état vide, et se reprend
-  // tant que l'enfant créé n'a pas franchi la dernière étape. « Quitter »
-  // rend la main pour la session en cours sans effacer la reprise.
+  // Parcours d'accueil (issue #24) : il ne remplace le tableau de bord que
+  // lorsqu'il n'y a rien à remplacer. Une famille qui a déjà des enfants garde
+  // ses cartes, et la reprise lui est proposée au-dessus plutôt qu'imposée —
+  // une entrée oubliée dans le navigateur ne doit jamais masquer ses enfants.
   const [onboardingDismissed, setOnboardingDismissed] = useState(false);
+  const [resuming, setResuming] = useState(false);
   const resumeChild = resumableOnboarding(children);
   const showOnboarding =
-    !onboardingDismissed && (children.length === 0 || resumeChild !== null);
+    (!onboardingDismissed && children.length === 0) ||
+    (resuming && resumeChild !== null);
+  const offerResume =
+    !resuming &&
+    !onboardingDismissed &&
+    children.length > 0 &&
+    resumeChild !== null;
 
   const launchChild = (child: ChildResponse) => {
     if (user?.has_pin) {
@@ -178,20 +193,32 @@ export default function DashboardPage() {
     e.preventDefault();
     setError("");
 
+    // Dernier verrou : sans classe choisie parmi celles qui ont du contenu, on
+    // n'envoie rien. Créer l'enfant ici l'enverrait dans une classe vide.
+    if (!chosenLevel) {
+      setError("Choisissez la classe de votre enfant.");
+      return;
+    }
+
     try {
       await createChildApiV1ChildrenPost({
         name,
         birth_date: birthDate || undefined,
-        level: effectiveLevel,
+        level: chosenLevel,
       });
       setDialogOpen(false);
       setName("");
       setBirthDate("");
-      setLevel("cp");
+      setLevel("");
       loadChildren();
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const detail = (
+        err as { response?: { data?: { detail?: unknown } } } | undefined
+      )?.response?.data?.detail;
       setError(
-        err.response?.data?.detail || "Failed to add child. Please try again."
+        typeof detail === "string" && detail
+          ? detail
+          : "L'enfant n'a pas pu être ajouté. Réessayez dans un instant."
       );
     }
   };
@@ -316,23 +343,62 @@ export default function DashboardPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="level">Niveau scolaire</Label>
-                    <select
-                      id="level"
-                      value={effectiveLevel}
-                      onChange={(e) => setLevel(e.target.value as LevelEnum)}
-                      className="h-11 w-full rounded-xl border-2 border-fun-border bg-white px-3 text-fun-text outline-none focus:border-fun-sky"
+                    <Label
+                      htmlFor={
+                        levelsLoading || levelsError || levelsEmpty
+                          ? undefined
+                          : "level"
+                      }
                     >
-                      {creatableLevels.map((l) => (
-                        <option key={l.value} value={l.value}>
-                          {l.label}
-                        </option>
-                      ))}
-                    </select>
+                      Niveau scolaire
+                    </Label>
+                    {levelsLoading ? (
+                      <p className="flex min-h-11 items-center gap-3 rounded-xl bg-fun-sky-light px-3 text-sm text-fun-text">
+                        <span className="inline-block h-5 w-5 animate-[candy-spin-slow_1s_linear_infinite] rounded-full border-2 border-fun-green-light border-t-fun-green" />
+                        Chargement des classes disponibles…
+                      </p>
+                    ) : levelsError ? (
+                      <div className="space-y-2 rounded-xl border-2 border-fun-red/20 bg-fun-red-light p-3">
+                        <p className="text-sm text-fun-red">
+                          La liste des classes n&apos;a pas pu être chargée.
+                          Vérifiez votre connexion.
+                        </p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => refetchLevels()}
+                        >
+                          Réessayer
+                        </Button>
+                      </div>
+                    ) : levelsEmpty ? (
+                      <p className="rounded-xl bg-fun-sun-light p-3 text-sm text-fun-text">
+                        Aucune classe n&apos;a encore de leçon publiée. Vous
+                        pourrez ajouter un enfant dès qu&apos;une classe aura du
+                        contenu.
+                      </p>
+                    ) : (
+                      <select
+                        id="level"
+                        value={chosenLevel}
+                        onChange={(e) => setLevel(e.target.value as LevelEnum)}
+                        className="h-11 w-full rounded-xl border-2 border-fun-border bg-white px-3 text-fun-text outline-none focus:border-fun-sky"
+                      >
+                        <option value="">Choisir sa classe…</option>
+                        {creatableLevels.map((l) => (
+                          <option key={l.value} value={l.value}>
+                            {l.label}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button type="submit">Add Child</Button>
+                  <Button type="submit" disabled={!name || !chosenLevel}>
+                    Ajouter
+                  </Button>
                 </DialogFooter>
               </form>
             </DialogContent>
@@ -378,201 +444,265 @@ export default function DashboardPage() {
         <OnboardingFlow
           resumeChild={resumeChild}
           onChildCreated={loadChildren}
-          onFinished={() => setOnboardingDismissed(true)}
+          onFinished={() => {
+            setResuming(false);
+            setOnboardingDismissed(true);
+          }}
         />
+      ) : children.length === 0 ? (
+        <Card className="mx-auto max-w-xl rounded-3xl candy-shadow text-center">
+          <CardContent className="space-y-4 p-8">
+            <UserPlus className="mx-auto h-12 w-12 text-fun-green" />
+            <h2 className="text-2xl font-extrabold text-fun-text">
+              Aucun enfant pour l&apos;instant
+            </h2>
+            <p className="text-sm text-fun-text-muted">
+              Ajoutez votre enfant pour lui ouvrir ses premières leçons. Il
+              n&apos;a pas de compte à lui&nbsp;: c&apos;est vous qui lancez
+              l&apos;application pour lui.
+            </p>
+            <Button
+              size="lg"
+              className="w-full"
+              onClick={() => {
+                setResuming(false);
+                setOnboardingDismissed(false);
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Ajouter mon enfant
+            </Button>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {children.map((child) => {
-            const stats = childrenStats[child.id];
-            return (
-              <Card key={child.id} className="overflow-hidden candy-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setAvatarChildId(child.id)}
-                        title="Changer l'avatar"
-                        className="rounded-full ring-fun-green transition-all hover:ring-2 active:scale-95"
-                      >
-                        <UserAvatar
-                          avatar={child.avatar_url}
-                          name={child.name}
-                          className="h-12 w-12"
-                          textClassName="text-2xl"
-                        />
-                      </button>
-                      <div className="flex flex-col">
-                        <CardTitle className="text-xl">{child.name}</CardTitle>
-                        {!child.is_owner && (
-                          <span className="text-xs font-semibold text-fun-sky">
-                            Partagé avec vous
-                          </span>
-                        )}
+        <>
+          {offerResume && resumeChild && (
+            <Card className="rounded-2xl border-2 border-fun-sun candy-shadow">
+              <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-fun-text">
+                  La configuration de{" "}
+                  <span className="font-bold">{resumeChild.name}</span> n&apos;a
+                  pas été terminée.
+                </p>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Button
+                    className="min-h-12"
+                    onClick={() => setResuming(true)}
+                  >
+                    Reprendre
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="min-h-12"
+                    onClick={() => {
+                      dismissOnboarding();
+                      setOnboardingDismissed(true);
+                    }}
+                  >
+                    Ne plus proposer
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {children.map((child) => {
+              const stats = childrenStats[child.id];
+              return (
+                <Card key={child.id} className="overflow-hidden candy-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setAvatarChildId(child.id)}
+                          title="Changer l'avatar"
+                          className="rounded-full ring-fun-green transition-all hover:ring-2 active:scale-95"
+                        >
+                          <UserAvatar
+                            avatar={child.avatar_url}
+                            name={child.name}
+                            className="h-12 w-12"
+                            textClassName="text-2xl"
+                          />
+                        </button>
+                        <div className="flex flex-col">
+                          <CardTitle className="text-xl">
+                            {child.name}
+                          </CardTitle>
+                          {!child.is_owner && (
+                            <span className="text-xs font-semibold text-fun-sky">
+                              Partagé avec vous
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setEditChild(child)}
-                        title="Modifier"
-                      >
-                        <Pencil className="h-4 w-4 text-fun-text-muted" />
-                      </Button>
-                      {child.is_owner && (
+                      <div className="flex items-center">
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleDeleteChild(child.id)}
+                          onClick={() => setEditChild(child)}
+                          title="Modifier"
                         >
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                          <Pencil className="h-4 w-4 text-fun-text-muted" />
+                        </Button>
+                        {child.is_owner && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteChild(child.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    <AvatarPicker
+                      open={avatarChildId === child.id}
+                      onOpenChange={(o) => !o && setAvatarChildId(null)}
+                      current={child.avatar_url}
+                      onSelect={(a) => handleChangeAvatar(child.id, a)}
+                      uploader={(f) => handleUploadChildAvatar(child.id, f)}
+                      title={`Avatar de ${child.name}`}
+                    />
+                    <CardDescription>
+                      {child.birth_date
+                        ? `Âge : ${calculateAge(child.birth_date)}`
+                        : "Âge non renseigné"}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {/* Niveau scolaire (modifiable par le parent) */}
+                    <div className="flex items-center justify-between gap-2 rounded-xl bg-fun-sky-light px-3 py-2">
+                      <span className="text-sm font-semibold text-fun-text">
+                        Niveau
+                      </span>
+                      <select
+                        value={child.level ?? ""}
+                        onChange={(e) =>
+                          handleChangeLevel(
+                            child.id,
+                            e.target.value as LevelEnum
+                          )
+                        }
+                        className="h-9 rounded-lg border-2 border-fun-border bg-white px-2 text-sm font-semibold text-fun-text outline-none focus:border-fun-sky"
+                      >
+                        {!child.level && <option value="">Choisir…</option>}
+                        {levelsFor(availableLevels, child.level).map((l) => (
+                          <option key={l.value} value={l.value}>
+                            {l.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Stats Display */}
+                    {stats && (
+                      <div className="grid grid-cols-2 gap-2 py-3 px-2 bg-muted rounded-lg">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-fun-sun">
+                            ⚡ {stats.total_xp}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            XP Total
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-fun-sun">
+                            🔥 {stats.current_streak}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Jours
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Progress bar */}
+                    {stats && (
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>Niveau {stats.level}</span>
+                          <span>
+                            {stats.current_level_xp} / {stats.next_level_xp} XP
+                          </span>
+                        </div>
+                        <div className="w-full bg-fun-green-light rounded-full h-2">
+                          <div
+                            className="bg-gradient-to-r from-fun-green to-fun-sky h-2 rounded-full transition-all"
+                            style={{
+                              width: `${(stats.current_level_xp / stats.next_level_xp) * 100}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Action buttons */}
+                    <div className="space-y-2 pt-2">
+                      <Button
+                        className="w-full"
+                        onClick={() => launchChild(child)}
+                      >
+                        <Play className="mr-2 h-4 w-4" />
+                        Jouer comme {child.name}
+                      </Button>
+                      <Button
+                        className="w-full"
+                        variant="outline"
+                        onClick={() => router.push(`/progress/${child.id}`)}
+                      >
+                        <TrendingUp className="mr-2 h-4 w-4" />
+                        Voir les progrès
+                      </Button>
+                      <Button
+                        className="w-full"
+                        variant="outline"
+                        onClick={() => setAwardChild(child)}
+                      >
+                        🎁 Attribuer des points
+                      </Button>
+                      {child.is_owner ? (
+                        <div className="flex gap-2">
+                          <Button
+                            className="flex-1"
+                            variant="outline"
+                            onClick={() =>
+                              setShareTarget({
+                                childId: child.id,
+                                childName: child.name,
+                              })
+                            }
+                          >
+                            <Share2 className="mr-1 h-4 w-4" />
+                            Partager
+                          </Button>
+                          <Button
+                            className="flex-1"
+                            variant="outline"
+                            onClick={() => setManageChild(child)}
+                          >
+                            <Users className="mr-1 h-4 w-4" />
+                            Accès
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          className="w-full"
+                          variant="ghost"
+                          onClick={() => handleLeave(child)}
+                        >
+                          <LogOut className="mr-2 h-4 w-4" />
+                          Ne plus suivre
                         </Button>
                       )}
                     </div>
-                  </div>
-                  <AvatarPicker
-                    open={avatarChildId === child.id}
-                    onOpenChange={(o) => !o && setAvatarChildId(null)}
-                    current={child.avatar_url}
-                    onSelect={(a) => handleChangeAvatar(child.id, a)}
-                    uploader={(f) => handleUploadChildAvatar(child.id, f)}
-                    title={`Avatar de ${child.name}`}
-                  />
-                  <CardDescription>
-                    {child.birth_date
-                      ? `Âge : ${calculateAge(child.birth_date)}`
-                      : "Âge non renseigné"}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {/* Niveau scolaire (modifiable par le parent) */}
-                  <div className="flex items-center justify-between gap-2 rounded-xl bg-fun-sky-light px-3 py-2">
-                    <span className="text-sm font-semibold text-fun-text">
-                      Niveau
-                    </span>
-                    <select
-                      value={child.level ?? ""}
-                      onChange={(e) =>
-                        handleChangeLevel(child.id, e.target.value as LevelEnum)
-                      }
-                      className="h-9 rounded-lg border-2 border-fun-border bg-white px-2 text-sm font-semibold text-fun-text outline-none focus:border-fun-sky"
-                    >
-                      {!child.level && <option value="">Choisir…</option>}
-                      {levelsFor(availableLevels, child.level).map((l) => (
-                        <option key={l.value} value={l.value}>
-                          {l.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Stats Display */}
-                  {stats && (
-                    <div className="grid grid-cols-2 gap-2 py-3 px-2 bg-muted rounded-lg">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-fun-sun">
-                          ⚡ {stats.total_xp}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          XP Total
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-fun-sun">
-                          🔥 {stats.current_streak}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Jours
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Progress bar */}
-                  {stats && (
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Niveau {stats.level}</span>
-                        <span>
-                          {stats.current_level_xp} / {stats.next_level_xp} XP
-                        </span>
-                      </div>
-                      <div className="w-full bg-fun-green-light rounded-full h-2">
-                        <div
-                          className="bg-gradient-to-r from-fun-green to-fun-sky h-2 rounded-full transition-all"
-                          style={{
-                            width: `${(stats.current_level_xp / stats.next_level_xp) * 100}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Action buttons */}
-                  <div className="space-y-2 pt-2">
-                    <Button
-                      className="w-full"
-                      onClick={() => launchChild(child)}
-                    >
-                      <Play className="mr-2 h-4 w-4" />
-                      Jouer comme {child.name}
-                    </Button>
-                    <Button
-                      className="w-full"
-                      variant="outline"
-                      onClick={() => router.push(`/progress/${child.id}`)}
-                    >
-                      <TrendingUp className="mr-2 h-4 w-4" />
-                      Voir les progrès
-                    </Button>
-                    <Button
-                      className="w-full"
-                      variant="outline"
-                      onClick={() => setAwardChild(child)}
-                    >
-                      🎁 Attribuer des points
-                    </Button>
-                    {child.is_owner ? (
-                      <div className="flex gap-2">
-                        <Button
-                          className="flex-1"
-                          variant="outline"
-                          onClick={() =>
-                            setShareTarget({
-                              childId: child.id,
-                              childName: child.name,
-                            })
-                          }
-                        >
-                          <Share2 className="mr-1 h-4 w-4" />
-                          Partager
-                        </Button>
-                        <Button
-                          className="flex-1"
-                          variant="outline"
-                          onClick={() => setManageChild(child)}
-                        >
-                          <Users className="mr-1 h-4 w-4" />
-                          Accès
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button
-                        className="w-full"
-                        variant="ghost"
-                        onClick={() => handleLeave(child)}
-                      >
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Ne plus suivre
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </>
       )}
 
       <PinDialog
