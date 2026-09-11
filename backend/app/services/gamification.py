@@ -12,6 +12,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.config import settings
+from app.core.daytime import local_day_bounds_utc
 from app.models.content import Exercise, Lesson
 from app.models.gamification import Achievement, DailyGoal, Streak, UserAchievement
 from app.models.pack import Pack
@@ -314,16 +315,18 @@ def update_daily_goal_lesson_count(user_id: UUID, db: Session) -> None:
         user_id: ID de l'utilisateur
         db: Session de base de données
     """
-    today = date.today()
     daily_goal = get_or_create_daily_goal(user_id, db)
 
-    # Compter les leçons complétées aujourd'hui
+    # Leçons complétées pendant la journée civile locale (bornes UTC : la colonne
+    # est stockée en UTC, le jour doit basculer à minuit chez la famille).
+    day_start, day_end = local_day_bounds_utc()
     lessons_today = (
         db.query(func.count(UserProgress.id))
         .filter(
             UserProgress.user_id == user_id,
             UserProgress.status == ProgressStatus.COMPLETED,
-            func.date(UserProgress.completed_at) == today,
+            UserProgress.completed_at >= day_start,
+            UserProgress.completed_at < day_end,
         )
         .scalar()
         or 0

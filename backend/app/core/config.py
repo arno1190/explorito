@@ -20,6 +20,11 @@ class Settings(BaseSettings):
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = True
     API_PREFIX: str = "/api/v1"
+    # Fuseau de référence des journées civiles : les compteurs quotidiens
+    # (plafond anti-farm, leçons du jour, objectif) se réinitialisent à minuit
+    # dans ce fuseau, indépendamment du fuseau du processus et de celui de la
+    # base. Les horodatages restent stockés en UTC.
+    APP_TIMEZONE: str = "Europe/Paris"
 
     # Security
     SECRET_KEY: str = INSECURE_DEFAULT_SECRET_KEY

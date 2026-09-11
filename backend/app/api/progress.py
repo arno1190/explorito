@@ -2,7 +2,6 @@
 Endpoints de suivi de progression
 """
 
-from datetime import date
 from typing import Annotated
 from uuid import UUID
 
@@ -13,6 +12,7 @@ from sqlalchemy.orm import Session
 from app.api.auth import get_current_active_user
 from app.api.subjects import acting_child, child_content_level
 from app.core.database import get_db
+from app.core.daytime import local_day_bounds_utc
 from app.models.content import Exercise, LearningPath, Lesson, Subject
 from app.models.gamification import Streak
 from app.models.progress import ExerciseResult, ProgressStatus, SubjectProgress, UserProgress
@@ -54,14 +54,16 @@ async def get_user_progress(
     streak = db.query(Streak).filter(Streak.user_id == acting.id).first()
     current_streak = streak.current_streak if streak else 0
 
-    # Compter les leçons complétées aujourd'hui
-    today = date.today()
+    # Leçons complétées pendant la journée civile locale (bornes UTC : la colonne
+    # est stockée en UTC, le jour doit basculer à minuit chez la famille).
+    day_start, day_end = local_day_bounds_utc()
     lessons_today = (
         db.query(func.count(UserProgress.id))
         .filter(
             UserProgress.user_id == acting.id,
             UserProgress.status == ProgressStatus.COMPLETED,
-            func.date(UserProgress.completed_at) == today,
+            UserProgress.completed_at >= day_start,
+            UserProgress.completed_at < day_end,
         )
         .scalar()
         or 0

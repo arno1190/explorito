@@ -12,7 +12,6 @@ L'XP est attribué via :func:`app.services.gamification.award_xp` sur une matiè
 « Défis » dédiée, afin d'alimenter le porte-monnaie dépensable du Pokédex.
 """
 
-from datetime import date
 from typing import Any
 from uuid import UUID
 
@@ -20,6 +19,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.daytime import local_day_bounds_utc
 from app.models.challenge import PythagoreSession
 from app.models.content import Subject
 from app.schemas.pythagore import (
@@ -100,12 +100,19 @@ def grade_items(
 
 
 def _xp_earned_today(user_id: UUID, db: Session) -> int:
-    """Somme de l'XP Pythagore déjà attribué à l'utilisateur aujourd'hui."""
+    """Somme de l'XP Pythagore déjà attribué à l'utilisateur aujourd'hui.
+
+    « Aujourd'hui » est la journée civile du fuseau applicatif, traduite en
+    intervalle UTC : les horodatages sont stockés en UTC et le plafond doit se
+    réinitialiser à minuit chez la famille, pas à minuit UTC.
+    """
+    day_start, day_end = local_day_bounds_utc()
     total = (
         db.query(func.sum(PythagoreSession.xp_earned))
         .filter(
             PythagoreSession.user_id == user_id,
-            func.date(PythagoreSession.created_at) == date.today(),
+            PythagoreSession.created_at >= day_start,
+            PythagoreSession.created_at < day_end,
         )
         .scalar()
     )

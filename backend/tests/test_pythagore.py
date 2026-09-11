@@ -6,11 +6,15 @@ série, pénalité d'erreur, plafond quotidien anti-farm. L'XP alimente le
 porte-monnaie dépensable (Pokédex).
 """
 
+from datetime import UTC, datetime
+from zoneinfo import ZoneInfo
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.models.challenge import PythagoreSession
 from app.models.content import LevelEnum
 from app.models.user import User
 from tests.helpers import child_headers, make_child
@@ -87,3 +91,35 @@ def test_daily_cap_limits_farming(client: TestClient, db_session: Session, monke
     assert second["xp_earned"] == 0
     assert second["capped"] is True
     assert second["balance"] == 5
+
+
+def test_the_daily_cap_counts_a_session_from_just_after_local_midnight(
+    client: TestClient, db_session: Session, monkeypatch: pytest.MonkeyPatch
+):
+    """Une session de 00h30 compte bien dans la journée en cours.
+
+    Le plafond comparait la date UTC de ``created_at`` à ``date.today()``, locale.
+    Entre minuit et le décalage du fuseau, les deux diffèrent : la session du
+    petit matin n'était comptée nulle part et le plafond cessait de s'appliquer.
+    """
+    monkeypatch.setattr(settings, "PYTHAGORE_DAILY_XP_CAP", 5)
+    child = _make_child(db_session, "e@x.fr")
+    h = _auth(client, "e@x.fr")
+
+    tz = ZoneInfo(settings.APP_TIMEZONE)
+    just_after_midnight = datetime.now(tz).replace(hour=0, minute=30, second=0, microsecond=0)
+    db_session.add(
+        PythagoreSession(
+            user_id=child.id,
+            correct=3,
+            total=3,
+            longest_streak=3,
+            xp_earned=5,  # plafond du jour déjà atteint
+            created_at=just_after_midnight.astimezone(UTC).replace(tzinfo=None),
+        )
+    )
+    db_session.commit()
+
+    body = _session(client, h, "moyen", [(2, 3, 6), (4, 5, 20), (6, 7, 42)])
+    assert body["xp_earned"] == 0
+    assert body["capped"] is True
