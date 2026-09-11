@@ -10,6 +10,7 @@ import secrets
 from datetime import datetime, timedelta
 from uuid import UUID
 
+from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 from app.models.guardianship import (
@@ -112,9 +113,16 @@ def create_invitation(inviter_id: UUID, kind: str, child_id: UUID | None, role: 
     return inv
 
 
-def get_usable_invitation(token: str, db: Session) -> Invitation | None:
-    """Invitation encore acceptable pour ce jeton, ou ``None``."""
-    inv = db.query(Invitation).filter(Invitation.token == token).first()
+def get_usable_invitation(token: str | None, db: Session) -> Invitation | None:
+    """Invitation encore acceptable pour ce jeton, ou ``None``.
+
+    Le jeton est nettoyé de ses espaces : un code recopié à la main ou collé
+    avec un retour à la ligne par un client non-navigateur reste valide.
+    """
+    cleaned = (token or "").strip()
+    if not cleaned:
+        return None
+    inv = db.query(Invitation).filter(Invitation.token == cleaned).first()
     if inv is None or not inv.is_usable:
         return None
     return inv
@@ -153,26 +161,29 @@ def create_signup_invitation(inviter_id: UUID, db: Session, *, ttl_days: int = S
     return inv
 
 
-def get_usable_signup_invitation(token: str | None, db: Session) -> Invitation | None:
-    """Code d'inscription encore consommable, ou ``None``.
+def consume_signup_invitation(inv: Invitation, new_user_id: UUID, db: Session) -> bool:
+    """Marque un code d'inscription comme utilisé (un code = une famille).
 
-    Refuse explicitement les jetons d'un autre ``kind`` : une invitation de
-    partage de garde n'est pas un droit d'inscription, et l'accepter ici
-    laisserait n'importe quel lien de partage ouvrir la porte.
+    L'``UPDATE`` est conditionné sur ``accepted_at IS NULL`` : deux inscriptions
+    simultanées présentant le même code ne peuvent pas aboutir toutes les deux,
+    la perdante repartant avec ``False``. Un simple ``SELECT`` puis ``UPDATE``
+    par clé primaire laissait au contraire les deux passer.
+
+    Args:
+        inv: Le code d'inscription à consommer.
+        new_user_id: Compte créé grâce à ce code.
+        db: Session de base de données.
+
+    Returns:
+        ``True`` si ce compte a bien remporté le code, ``False`` s'il avait déjà servi.
     """
-    if not token:
-        return None
-    inv = db.query(Invitation).filter(Invitation.token == token).first()
-    if inv is None or inv.kind != INVITE_SIGNUP or not inv.is_usable:
-        return None
-    return inv
-
-
-def consume_signup_invitation(inv: Invitation, new_user_id: UUID, db: Session) -> None:
-    """Marque un code d'inscription comme utilisé (un code = une famille)."""
-    inv.accepted_at = datetime.utcnow()
-    inv.accepted_by = new_user_id
-    db.flush()
+    result = db.execute(
+        update(Invitation)
+        .where(Invitation.id == inv.id, Invitation.accepted_at.is_(None))
+        .values(accepted_at=datetime.utcnow(), accepted_by=new_user_id)
+        .execution_options(synchronize_session="fetch")
+    )
+    return bool(result.rowcount)
 
 
 def accept_invitation(token: str, accepting_user_id: UUID, db: Session) -> list[UUID]:

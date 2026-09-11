@@ -35,6 +35,7 @@ Edit `.env` and set **all** of:
 | `NEXT_PUBLIC_API_URL` | `https://api.explorito.pascalfamily.fr` (baked into the frontend at build time) |
 | `PUBLIC_APP_URL` | `https://explorito.pascalfamily.fr` — **not optional**: the backend builds pack-preview links and email unsubscribe links from it. Left unset, it falls back to `http://localhost:3005` and those URLs ship broken. |
 | `MODERATION_TOKEN` | `openssl rand -hex 32`, or empty to disable the token door (an admin session still reaches `/moderation/*`) |
+| `SIGNUP_INVITE_REQUIRED` | `true` (the compose file defaults to `true` when the var is missing, so the door is closed unless you deliberately open it). With it on, no account is created without a valid invitation code — mint codes from `/admin`, or send a co-parent/grandparent sharing link, which also authorises the invitee's account. Set it to `false` only to reopen public signup. |
 | `SMTP_HOST` / `SMTP_USER` / `SMTP_PASSWORD` | your mail relay, or empty — announcement sending then fails cleanly with a 503 instead of silently |
 
 ## 4. Build & start

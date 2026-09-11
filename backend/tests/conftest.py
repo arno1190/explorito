@@ -16,8 +16,24 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 import app.models  # noqa: F401  (enregistre tous les modèles sur Base.metadata)
+from app.core.config import settings
 from app.core.database import Base, get_db
 from app.main import app
+
+
+@pytest.fixture(autouse=True, scope="session")
+def signup_gate_open() -> Iterator[None]:
+    """Ouvre la porte d'inscription pour toute la session de test.
+
+    ``Settings`` lit ``backend/.env``, d'où pytest est lancé : un développeur
+    qui y met ``SIGNUP_INVITE_REQUIRED=true`` pour essayer la fonctionnalité
+    ferait sinon répondre 403 à presque chaque test. Les tests qui décrivent la
+    porte la referment eux-mêmes (``monkeypatch``).
+    """
+    previous = settings.SIGNUP_INVITE_REQUIRED
+    settings.SIGNUP_INVITE_REQUIRED = False
+    yield
+    settings.SIGNUP_INVITE_REQUIRED = previous
 
 
 @pytest.fixture

@@ -11,10 +11,12 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.api import auth as auth_module
 from app.core.config import settings
-from app.models.guardianship import INVITE_ALL, INVITE_SIGNUP, Invitation
+from app.models.guardianship import INVITE_ALL, INVITE_SIGNUP, Guardianship, Invitation
 from app.models.user import User
-from tests.helpers import dev_login, ensure_parent
+from app.services.guardianship import consume_signup_invitation, create_signup_invitation
+from tests.helpers import dev_login, ensure_parent, make_child
 
 NEWCOMER = "famille.amie@exemple.fr"
 
@@ -30,6 +32,33 @@ def _signup(client: TestClient, email: str, invite: str | None = None):
     if invite is not None:
         body["invite"] = invite
     return client.post("/api/v1/auth/dev-login", json=body)
+
+
+def _google_signin(
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+    email: str,
+    invite: str | None = None,
+):
+    """Vraie route de production : ``POST /auth/google``, vérification Google neutralisée.
+
+    ``/dev-login`` n'est monté que sous ``DEBUG`` et n'existe donc pas sur le
+    serveur : seule cette route-ci décide qui obtient un compte en vrai.
+    """
+    monkeypatch.setattr(
+        auth_module,
+        "verify_google_id_token",
+        lambda credential: {
+            "email": email,
+            "email_verified": True,
+            "name": "Famille Test",
+            "sub": f"google-sub-{email}",
+        },
+    )
+    body: dict[str, str] = {"credential": "id-token-factice"}
+    if invite is not None:
+        body["invite"] = invite
+    return client.post("/api/v1/auth/google", json=body)
 
 
 ADMIN_EMAIL = "admin@qa.fr"
@@ -54,8 +83,6 @@ def _make_code(client: TestClient, admin_headers: dict[str, str]) -> str:
 # --------------------------------------------------------------------------- #
 def test_signup_stays_open_while_the_setting_is_off(client: TestClient):
     """Défaut `False` : l'inscription libre, comportement historique, est intacte."""
-    assert settings.SIGNUP_INVITE_REQUIRED is False
-
     assert _signup(client, NEWCOMER).status_code == 200
 
 
@@ -140,18 +167,10 @@ def test_an_unknown_code_is_refused(client: TestClient, invite_required: None):
     assert _signup(client, NEWCOMER, "ce-code-nexiste-pas").status_code == 403
 
 
-def test_a_guardianship_invitation_is_not_a_signup_code(
-    client: TestClient,
-    db_session: Session,
-    invite_required: None,
-):
-    """Un lien de partage de garde ne doit pas ouvrir la porte d'inscription.
-
-    Les deux jetons vivent dans la même table : confondre les `kind` laisserait
-    n'importe quel lien de partage — qui circule bien plus largement — servir
-    d'inscription.
-    """
-    inviter = ensure_parent(db_session, "hote@exemple.fr")
+def _sharing_invitation(db: Session, inviter_email: str = "hote@exemple.fr") -> Invitation:
+    """Invitation de co-parentalité (kind ``all``) émise par un parent avec un enfant."""
+    make_child(db, parent_email=inviter_email, name="Lila")
+    inviter = ensure_parent(db, inviter_email)
     sharing = Invitation(
         token="jeton-de-partage",
         inviter_id=inviter.id,
@@ -160,10 +179,56 @@ def test_a_guardianship_invitation_is_not_a_signup_code(
         role="parent",
         expires_at=datetime.utcnow() + timedelta(days=7),
     )
-    db_session.add(sharing)
+    db.add(sharing)
+    db.commit()
+    return sharing
+
+
+def test_an_invited_coparent_gets_an_account_without_burning_the_sharing_link(
+    client: TestClient,
+    db_session: Session,
+    monkeypatch: pytest.MonkeyPatch,
+    invite_required: None,
+):
+    """Être invité à co-parenter vaut droit d'avoir un compte — et le lien survit.
+
+    Sans cela, refermer la porte d'entrée condamnait tout le parcours de partage :
+    le grand-parent invité arrivait sur son lien et se prenait un 403. Le jeton
+    ne doit pas non plus être consommé à l'inscription, sinon il n'accorderait
+    plus aucune garde ensuite.
+    """
+    _sharing_invitation(db_session)
+
+    created = _google_signin(client, monkeypatch, NEWCOMER, "jeton-de-partage")
+
+    assert created.status_code == 200, created.text
+    invitation = db_session.query(Invitation).filter(Invitation.token == "jeton-de-partage").one()
+    assert invitation.accepted_at is None, "le partage ne se consomme pas à l'inscription"
+
+    accepted = client.post(
+        "/api/v1/invitations/jeton-de-partage/accept",
+        headers={"Authorization": f"Bearer {created.json()['access_token']}"},
+    )
+
+    assert accepted.status_code == 200, accepted.text
+    assert accepted.json()["granted"] == 1
+    newcomer = db_session.query(User).filter(User.email == NEWCOMER).one()
+    assert db_session.query(Guardianship).filter(Guardianship.guardian_id == newcomer.id).count() == 1
+
+
+def test_a_revoked_sharing_link_opens_nothing(
+    client: TestClient,
+    db_session: Session,
+    monkeypatch: pytest.MonkeyPatch,
+    invite_required: None,
+):
+    """Un partage révoqué n'est plus un droit d'inscription non plus."""
+    sharing = _sharing_invitation(db_session)
+    sharing.revoked_at = datetime.utcnow()
     db_session.commit()
 
-    assert _signup(client, NEWCOMER, "jeton-de-partage").status_code == 403
+    assert _google_signin(client, monkeypatch, NEWCOMER, "jeton-de-partage").status_code == 403
+    assert db_session.query(User).filter(User.email == NEWCOMER).first() is None
 
 
 # --------------------------------------------------------------------------- #
@@ -252,3 +317,108 @@ def test_signup_codes_are_admin_only(client: TestClient, db_session: Session):
     )
 
     assert response.status_code == 403, response.text
+
+
+# --------------------------------------------------------------------------- #
+# La vraie porte de production : POST /auth/google
+# --------------------------------------------------------------------------- #
+# `/dev-login` n'est monté que sous DEBUG : en production, `/auth/google` est le
+# seul chemin d'inscription. Ces tests-là sont ceux qui tombent si le câblage
+# `invite_token=payload.invite` disparaît du handler.
+def test_google_refuses_a_stranger_without_a_code(
+    client: TestClient,
+    db_session: Session,
+    monkeypatch: pytest.MonkeyPatch,
+    invite_required: None,
+):
+    """Un inconnu qui se connecte avec Google n'obtient pas de compte."""
+    response = _google_signin(client, monkeypatch, NEWCOMER)
+
+    assert response.status_code == 403, response.text
+    assert db_session.query(User).filter(User.email == NEWCOMER).first() is None
+
+
+def test_google_with_a_valid_code_creates_the_account_and_burns_the_code(
+    client: TestClient,
+    db_session: Session,
+    admin_headers: dict[str, str],
+    monkeypatch: pytest.MonkeyPatch,
+    invite_required: None,
+):
+    """Chemin heureux de production : le code ouvre le compte, puis il est consommé."""
+    token = _make_code(client, admin_headers)
+
+    response = _google_signin(client, monkeypatch, NEWCOMER, token)
+
+    assert response.status_code == 200, response.text
+    created = db_session.query(User).filter(User.email == NEWCOMER).one()
+    invitation = db_session.query(Invitation).filter(Invitation.token == token).one()
+    assert invitation.accepted_at is not None
+    assert invitation.accepted_by == created.id
+
+
+def test_google_refuses_a_code_that_already_served(
+    client: TestClient,
+    db_session: Session,
+    admin_headers: dict[str, str],
+    monkeypatch: pytest.MonkeyPatch,
+    invite_required: None,
+):
+    """« Un code = une famille » vaut aussi sur la route Google."""
+    token = _make_code(client, admin_headers)
+    assert _google_signin(client, monkeypatch, NEWCOMER, token).status_code == 200
+
+    second = _google_signin(client, monkeypatch, "autre.famille@exemple.fr", token)
+
+    assert second.status_code == 403, second.text
+    assert db_session.query(User).filter(User.email == "autre.famille@exemple.fr").first() is None
+
+
+def test_google_lets_an_existing_family_back_in_without_a_code(
+    client: TestClient,
+    db_session: Session,
+    monkeypatch: pytest.MonkeyPatch,
+    invite_required: None,
+):
+    """Régression de verrouillage : une famille déjà installée se reconnecte sans code."""
+    ensure_parent(db_session, "deja.la@exemple.fr")
+
+    again = _google_signin(client, monkeypatch, "deja.la@exemple.fr")
+
+    assert again.status_code == 200, again.text
+
+
+def test_google_tolerates_a_code_pasted_with_whitespace(
+    client: TestClient,
+    db_session: Session,
+    admin_headers: dict[str, str],
+    monkeypatch: pytest.MonkeyPatch,
+    invite_required: None,
+):
+    """Un code collé avec un retour à la ligne reste un code valide."""
+    token = _make_code(client, admin_headers)
+
+    response = _google_signin(client, monkeypatch, NEWCOMER, f"  {token}\n")
+
+    assert response.status_code == 200, response.text
+    assert db_session.query(User).filter(User.email == NEWCOMER).first() is not None
+
+
+def test_a_code_cannot_be_consumed_twice_even_by_a_concurrent_signup(db_session: Session):
+    """Deux inscriptions simultanées sur le même code : une seule l'emporte.
+
+    La lecture ``is_usable`` ne protège de rien si deux requêtes la passent
+    avant que l'une écrive. La consommation est donc conditionnée en base
+    (``WHERE accepted_at IS NULL``) et la perdante repart bredouille.
+    """
+    admin = ensure_parent(db_session, "hote.code@exemple.fr")
+    invitation = create_signup_invitation(admin.id, db_session)
+    first = ensure_parent(db_session, "premiere@exemple.fr")
+    second = ensure_parent(db_session, "seconde@exemple.fr")
+
+    assert consume_signup_invitation(invitation, first.id, db_session) is True
+    assert consume_signup_invitation(invitation, second.id, db_session) is False
+
+    db_session.commit()
+    stored = db_session.query(Invitation).filter(Invitation.id == invitation.id).one()
+    assert stored.accepted_by == first.id

@@ -65,10 +65,22 @@ export default function InvitePage() {
 
     const handleCredential = async (resp: { credential: string }) => {
       localStorage.setItem(PENDING_KEY, token);
+      setError("");
       try {
-        await googleLogin(resp.credential);
-      } catch {
-        setError("Connexion Google échouée. Réessaie.");
+        // Le jeton de partage sert aussi de droit d'inscription : sans lui, un
+        // co-parent invité se heurterait à la porte d'entrée (403) alors même
+        // qu'il tient une invitation. Il n'est pas consommé ici — le tableau de
+        // bord l'accepte ensuite pour accorder la garde.
+        await googleLogin(resp.credential, token);
+      } catch (failure) {
+        const detail = (
+          failure as { response?: { data?: { detail?: unknown } } } | undefined
+        )?.response?.data?.detail;
+        setError(
+          typeof detail === "string" && detail
+            ? detail
+            : "Connexion Google échouée. Réessaie."
+        );
       }
     };
     const render = () => {
@@ -164,7 +176,7 @@ export default function InvitePage() {
             className="w-full"
             onClick={async () => {
               localStorage.setItem(PENDING_KEY, token);
-              await devLogin("parent@qa.fr");
+              await devLogin("parent@qa.fr", token);
             }}
           >
             Accepter (dev)
