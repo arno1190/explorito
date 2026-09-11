@@ -29,6 +29,7 @@ import type {
   ChildUpdate,
   GuardianResponse,
   HTTPValidationError,
+  LevelEnum,
 } from "../../model";
 
 import { axiosInstance } from "../../axios-instance";
@@ -268,6 +269,168 @@ export const useCreateChildApiV1ChildrenPost = <
     queryClient
   );
 };
+/**
+ * Niveaux scolaires réellement proposables à un enfant, du plus petit au plus grand.
+
+Déclaré **avant** ``/{child_id}`` : « levels » serait sinon capturé comme un
+identifiant d'enfant.
+
+Dérivé du contenu publié, jamais codé en dur côté frontend (issue #23). Un
+niveau annoncé mais non semé ouvre sur une application vide, ce qui est le
+pire premier contact possible et reste invisible depuis l'intérieur.
+
+Ne filtre pas le niveau **actuel** d'un enfant déjà enregistré : c'est au
+formulaire d'y ajouter le niveau existant pour ne pas le changer en silence.
+ * @summary Get Available Levels
+ */
+export const getAvailableLevelsApiV1ChildrenLevelsGet = (
+  signal?: AbortSignal
+) => {
+  return axiosInstance<LevelEnum[]>({
+    url: `/api/v1/children/levels`,
+    method: "GET",
+    signal,
+  });
+};
+
+export const getGetAvailableLevelsApiV1ChildrenLevelsGetQueryKey = () => {
+  return [`/api/v1/children/levels`] as const;
+};
+
+export const getGetAvailableLevelsApiV1ChildrenLevelsGetQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAvailableLevelsApiV1ChildrenLevelsGet>>,
+  TError = HTTPValidationError,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getAvailableLevelsApiV1ChildrenLevelsGet>>,
+      TError,
+      TData
+    >
+  >;
+}) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetAvailableLevelsApiV1ChildrenLevelsGetQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getAvailableLevelsApiV1ChildrenLevelsGet>>
+  > = ({ signal }) => getAvailableLevelsApiV1ChildrenLevelsGet(signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAvailableLevelsApiV1ChildrenLevelsGet>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetAvailableLevelsApiV1ChildrenLevelsGetQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAvailableLevelsApiV1ChildrenLevelsGet>>
+>;
+export type GetAvailableLevelsApiV1ChildrenLevelsGetQueryError =
+  HTTPValidationError;
+
+export function useGetAvailableLevelsApiV1ChildrenLevelsGet<
+  TData = Awaited<ReturnType<typeof getAvailableLevelsApiV1ChildrenLevelsGet>>,
+  TError = HTTPValidationError,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAvailableLevelsApiV1ChildrenLevelsGet>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAvailableLevelsApiV1ChildrenLevelsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getAvailableLevelsApiV1ChildrenLevelsGet>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetAvailableLevelsApiV1ChildrenLevelsGet<
+  TData = Awaited<ReturnType<typeof getAvailableLevelsApiV1ChildrenLevelsGet>>,
+  TError = HTTPValidationError,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAvailableLevelsApiV1ChildrenLevelsGet>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAvailableLevelsApiV1ChildrenLevelsGet>>,
+          TError,
+          Awaited<ReturnType<typeof getAvailableLevelsApiV1ChildrenLevelsGet>>
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetAvailableLevelsApiV1ChildrenLevelsGet<
+  TData = Awaited<ReturnType<typeof getAvailableLevelsApiV1ChildrenLevelsGet>>,
+  TError = HTTPValidationError,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAvailableLevelsApiV1ChildrenLevelsGet>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get Available Levels
+ */
+
+export function useGetAvailableLevelsApiV1ChildrenLevelsGet<
+  TData = Awaited<ReturnType<typeof getAvailableLevelsApiV1ChildrenLevelsGet>>,
+  TError = HTTPValidationError,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAvailableLevelsApiV1ChildrenLevelsGet>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions =
+    getGetAvailableLevelsApiV1ChildrenLevelsGetQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
 /**
  * Détails d'un enfant dont l'appelant est responsable.
  * @summary Get Child

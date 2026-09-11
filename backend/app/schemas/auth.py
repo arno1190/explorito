@@ -14,6 +14,10 @@ class GoogleAuthRequest(BaseModel):
     """Connexion via Google Identity Services (flux id_token)."""
 
     credential: str = Field(..., description="ID token (JWT) renvoyé par Google Identity Services")
+    invite: str | None = Field(
+        None,
+        description="Code d'invitation, requis pour créer un compte si SIGNUP_INVITE_REQUIRED est actif",
+    )
 
 
 class DevLoginRequest(BaseModel):
@@ -21,6 +25,7 @@ class DevLoginRequest(BaseModel):
 
     email: EmailStr = Field(..., description="Email du parent (créé si absent)")
     display_name: str | None = Field(None, max_length=100, description="Nom d'affichage à la création")
+    invite: str | None = Field(None, description="Code d'invitation (mêmes règles que la connexion Google)")
 
 
 class PinRequest(BaseModel):
@@ -101,6 +106,7 @@ class UserResponse(BaseModel):
     role: UserRole
     is_active: bool
     has_pin: bool = False
+    privacy_accepted: bool = False
     created_at: datetime
     profile: ProfileResponse | None = None
 

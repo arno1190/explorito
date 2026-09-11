@@ -32,6 +32,10 @@ services:
       DEBUG: "false"
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       ADMIN_EMAILS: ${ADMIN_EMAILS}
+      # Porte d'entrée : sans code d'invitation valide, aucun compte ne se crée.
+      # Défaut `true` — un `.env` qui oublie la variable reste fermé, jamais
+      # ouvert par accident. Les codes se fabriquent depuis /admin.
+      SIGNUP_INVITE_REQUIRED: ${SIGNUP_INVITE_REQUIRED:-true}
       # URL publique du frontend. **Doit** être définie : elle fabrique les
       # liens d'aperçu rendus aux contributeurs et les liens de désinscription
       # des emails d'annonce. Sans elle, le défaut de développement

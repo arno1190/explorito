@@ -32,6 +32,11 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str = ""
     # Emails (séparés par des virgules) promus au rôle admin à la connexion.
     ADMIN_EMAILS: str = ""
+    # Porte d'entrée : exiger un code d'invitation pour **créer** un compte
+    # parent. Défaut False = inscription libre, comportement historique
+    # inchangé tant que le réglage n'est pas activé. Un compte déjà existant se
+    # connecte toujours sans code, quel que soit ce réglage (issue #22).
+    SIGNUP_INVITE_REQUIRED: bool = False
 
     @property
     def admin_emails_set(self) -> set[str]:
@@ -110,6 +115,20 @@ class Settings(BaseSettings):
     # Jeton de modération : porte d'entrée *uniquement* sur /moderation/*, jamais
     # sur la suppression d'utilisateur ni l'incarnation. Vide = surface désactivée.
     MODERATION_TOKEN: str = ""
+
+    # ----------------------------------------------------------------- #
+    # Confidentialité des familles (issue #21)
+    # ----------------------------------------------------------------- #
+    # Version de la politique de confidentialité présentée aux parents. La
+    # changer redemande l'acceptation à tout le monde à la prochaine visite :
+    # ne la bouger que si le texte change sur un point qui engage la famille.
+    PRIVACY_POLICY_VERSION: str = "2026-09-10"
+    # Mentions légales minimales, injectées dans le texte de la politique.
+    # Réglables pour qu'un autre hébergeur du projet publie ses propres
+    # mentions sans réécrire le texte.
+    PRIVACY_PUBLISHER: str = "Arnaud Pascal, particulier (Explorito, projet familial sans but lucratif)"
+    PRIVACY_CONTACT_EMAIL: str = "arnaud@pascalfamily.fr"
+    PRIVACY_HOST: str = "Scaleway SAS, 8 rue de la Ville l'Évêque, 75008 Paris, France — serveur situé en France"
 
     # ----------------------------------------------------------------- #
     # Email (annonces produit)

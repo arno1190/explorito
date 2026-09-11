@@ -12,6 +12,7 @@ from sqlalchemy.orm import relationship
 
 from app.core.database import Base
 from app.models.content import LevelEnum  # noqa: F401  (utilisé par Profile.level)
+from app.services.family_privacy import current_policy_version
 
 
 class UserRole(str, enum.Enum):
@@ -53,6 +54,11 @@ class User(Base):
     # Désinscription des annonces produit (emails « nouveautés »). Les emails
     # transactionnels ne passent pas par ce drapeau.
     email_opt_out = Column(Boolean, nullable=False, default=False)
+    # Politique de confidentialité acceptée par l'adulte responsable : version
+    # et horodatage. NULL tant qu'elle n'a jamais été acceptée (comptes créés
+    # avant la mise en place, et enfants — qui n'acceptent rien).
+    privacy_version = Column(String, nullable=True)
+    privacy_accepted_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -78,6 +84,23 @@ class User(Base):
     def has_pin(self) -> bool:
         """Vrai si un code PIN parent est défini."""
         return bool(self.pin_hash)
+
+    @property
+    def privacy_accepted(self) -> bool:
+        """Vrai si la **version en vigueur** de la politique a été acceptée.
+
+        Une version périmée vaut refus : le texte a changé, et l'ancien
+        consentement ne couvre pas le nouveau. Le parent revoit alors la case à
+        cocher à sa prochaine visite.
+
+        Défini ici plutôt que dans ``services/family_privacy`` pour rester
+        lisible depuis ``UserResponse`` (comme ``has_pin``) ; la version, elle,
+        est lue par ``current_policy_version()`` — la même et unique lecture du
+        réglage que celle qui sert le texte et qui refuse une acceptation
+        périmée. Deux lectures indépendantes pourraient diverger et rendre la
+        case insatisfaisable (accepter n'aurait alors aucun effet visible).
+        """
+        return bool(self.privacy_accepted_at) and self.privacy_version == current_policy_version()
 
     def __repr__(self):
         return f"<User {self.email} ({self.role})>"

@@ -77,6 +77,14 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-fun-border bg-white/60 py-4">
+        <p className="container mx-auto px-4 text-center text-xs text-fun-text-muted mb-2">
+          <Link
+            href="/confidentialite"
+            className="underline hover:text-fun-text"
+          >
+            Confidentialité
+          </Link>
+        </p>
         <p className="container mx-auto px-4 text-center text-xs text-fun-text-muted">
           Pictogrammes :{" "}
           <a

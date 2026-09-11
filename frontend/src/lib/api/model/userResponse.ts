@@ -16,6 +16,7 @@ export interface UserResponse {
   role: UserRole;
   is_active: boolean;
   has_pin?: boolean;
+  privacy_accepted?: boolean;
   created_at: string;
   profile?: ProfileResponse | null;
 }

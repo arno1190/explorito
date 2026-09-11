@@ -11,4 +11,6 @@
 export interface GoogleAuthRequest {
   /** ID token (JWT) renvoyé par Google Identity Services */
   credential: string;
+  /** Code d'invitation, requis pour créer un compte si SIGNUP_INVITE_REQUIRED est actif */
+  invite?: string | null;
 }

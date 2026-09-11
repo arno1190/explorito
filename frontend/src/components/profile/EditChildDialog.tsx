@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LEVELS } from "@/lib/levels";
+import { useAvailableLevels } from "@/lib/levels";
 import { updateChildApiV1ChildrenChildIdPut } from "@/lib/api/generated/children/children";
 import { listCatalogsApiV1CollectionCatalogsGet } from "@/lib/api/generated/collection/collection";
 import type { CatalogMeta, ChildResponse, LevelEnum } from "@/lib/api/model";
@@ -37,6 +37,16 @@ export function EditChildDialog({
   const [name, setName] = useState(child.name);
   const [birthDate, setBirthDate] = useState(child.birth_date ?? "");
   const [level, setLevel] = useState<LevelEnum | "">(child.level ?? "");
+  // Le niveau actuel de l'enfant reste proposé même s'il n'a plus de contenu :
+  // sinon l'enregistrement le changerait en silence (issue #23). Reste à dire
+  // pourquoi la liste est courte : chargement, échec, ou catalogue vide.
+  const {
+    levels,
+    isLoading: levelsLoading,
+    isError: levelsError,
+    isEmpty: levelsEmpty,
+    refetch: refetchLevels,
+  } = useAvailableLevels(child.level);
   const [catalogs, setCatalogs] = useState<CatalogMeta[]>([]);
   const [disabled, setDisabled] = useState<Set<string>>(
     new Set(child.disabled_collections ?? [])
@@ -120,12 +130,36 @@ export function EditChildDialog({
               className="h-11 w-full rounded-xl border-2 border-fun-border bg-white px-3 text-fun-text outline-none focus:border-fun-sky"
             >
               <option value="">Choisir…</option>
-              {LEVELS.map((l) => (
+              {levels.map((l) => (
                 <option key={l.value} value={l.value}>
                   {l.label}
                 </option>
               ))}
             </select>
+            {levelsLoading && (
+              <p className="text-xs text-fun-text-muted">
+                Chargement des classes disponibles…
+              </p>
+            )}
+            {levelsError && (
+              <div className="flex items-center justify-between gap-2 rounded-xl bg-fun-red-light p-2">
+                <p className="text-xs text-fun-red">
+                  La liste des classes n&apos;a pas pu être chargée.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => refetchLevels()}
+                >
+                  Réessayer
+                </Button>
+              </div>
+            )}
+            {levelsEmpty && (
+              <p className="text-xs text-fun-text-muted">
+                Aucune classe n&apos;a encore de leçon publiée.
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">

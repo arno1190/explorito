@@ -10,11 +10,13 @@ import secrets
 from datetime import datetime, timedelta
 from uuid import UUID
 
+from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 from app.models.guardianship import (
     INVITE_ALL,
     INVITE_CHILD,
+    INVITE_SIGNUP,
     ROLE_OWNER,
     ROLE_PARENT,
     CoParentLink,
@@ -111,12 +113,77 @@ def create_invitation(inviter_id: UUID, kind: str, child_id: UUID | None, role: 
     return inv
 
 
-def get_usable_invitation(token: str, db: Session) -> Invitation | None:
-    """Invitation encore acceptable pour ce jeton, ou ``None``."""
-    inv = db.query(Invitation).filter(Invitation.token == token).first()
+def get_usable_invitation(token: str | None, db: Session) -> Invitation | None:
+    """Invitation encore acceptable pour ce jeton, ou ``None``.
+
+    Le jeton est nettoyé de ses espaces : un code recopié à la main ou collé
+    avec un retour à la ligne par un client non-navigateur reste valide.
+    """
+    cleaned = (token or "").strip()
+    if not cleaned:
+        return None
+    inv = db.query(Invitation).filter(Invitation.token == cleaned).first()
     if inv is None or not inv.is_usable:
         return None
     return inv
+
+
+SIGNUP_INVITE_TTL_DAYS = 30
+
+
+def create_signup_invitation(inviter_id: UUID, db: Session, *, ttl_days: int = SIGNUP_INVITE_TTL_DAYS) -> Invitation:
+    """Crée un code d'inscription (kind ``signup``), sans garde attachée.
+
+    Durée de vie plus longue qu'un partage de garde : un code d'inscription est
+    remis de la main à la main à une famille qui s'inscrira quand elle en aura
+    le temps, pas dans la minute.
+
+    Args:
+        inviter_id: Admin qui ouvre la porte.
+        db: Session de base de données.
+        ttl_days: Durée de validité, en jours.
+
+    Returns:
+        L'invitation créée (non commitée) ; ``token`` sert à construire le lien.
+    """
+    inv = Invitation(
+        token=secrets.token_urlsafe(24),
+        inviter_id=inviter_id,
+        kind=INVITE_SIGNUP,
+        child_id=None,
+        # ``role`` est sans objet pour un code d'inscription : la colonne est
+        # NOT NULL, on y met le rôle par défaut et personne ne le lit.
+        role=ROLE_PARENT,
+        expires_at=datetime.utcnow() + timedelta(days=ttl_days),
+    )
+    db.add(inv)
+    db.flush()
+    return inv
+
+
+def consume_signup_invitation(inv: Invitation, new_user_id: UUID, db: Session) -> bool:
+    """Marque un code d'inscription comme utilisé (un code = une famille).
+
+    L'``UPDATE`` est conditionné sur ``accepted_at IS NULL`` : deux inscriptions
+    simultanées présentant le même code ne peuvent pas aboutir toutes les deux,
+    la perdante repartant avec ``False``. Un simple ``SELECT`` puis ``UPDATE``
+    par clé primaire laissait au contraire les deux passer.
+
+    Args:
+        inv: Le code d'inscription à consommer.
+        new_user_id: Compte créé grâce à ce code.
+        db: Session de base de données.
+
+    Returns:
+        ``True`` si ce compte a bien remporté le code, ``False`` s'il avait déjà servi.
+    """
+    result = db.execute(
+        update(Invitation)
+        .where(Invitation.id == inv.id, Invitation.accepted_at.is_(None))
+        .values(accepted_at=datetime.utcnow(), accepted_by=new_user_id)
+        .execution_options(synchronize_session="fetch")
+    )
+    return bool(result.rowcount)
 
 
 def accept_invitation(token: str, accepting_user_id: UUID, db: Session) -> list[UUID]:
@@ -132,6 +199,10 @@ def accept_invitation(token: str, accepting_user_id: UUID, db: Session) -> list[
     inv = get_usable_invitation(token, db)
     if inv is None:
         raise ValueError("invitation invalide ou expirée")
+    if inv.kind == INVITE_SIGNUP:
+        # Un code d'inscription se consomme à la création du compte, pas ici :
+        # cette route n'accorderait aucune garde tout en brûlant le code.
+        raise ValueError("ce code est un code d'inscription, pas un partage")
     if inv.inviter_id == accepting_user_id:
         raise ValueError("on ne peut pas accepter sa propre invitation")
 

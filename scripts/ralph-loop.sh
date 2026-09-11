@@ -78,7 +78,16 @@ run_iteration() {
 
     # Run Claude with fresh context
     local exit_code=0
-    claude -p "$(cat $PROMPT_FILE)" --dangerously-skip-permissions || exit_code=$?
+    # Garde-fou ajouté le 2026-09-09 : sans borne, une itération qui pend bloque
+    # la nuit entière. ITERATION_TIMEOUT en secondes, 0 pour désactiver.
+    local runner=()
+    if [ "${ITERATION_TIMEOUT:-3600}" != "0" ] && command -v timeout >/dev/null 2>&1; then
+        runner=(timeout "${ITERATION_TIMEOUT:-3600}")
+    fi
+    "${runner[@]}" claude -p "$(cat $PROMPT_FILE)" --dangerously-skip-permissions || exit_code=$?
+    if [ "$exit_code" -eq 124 ]; then
+        log_warn "itération $iteration coupée par le timeout (${ITERATION_TIMEOUT:-3600}s)"
+    fi
 
     if [ $exit_code -ne 0 ]; then
         log_warn "Claude exited with code $exit_code"

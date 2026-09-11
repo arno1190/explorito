@@ -91,6 +91,7 @@ from app.api import (  # noqa: E402
     exercises,
     gamification,
     invitations,
+    legal,
     lessons,
     library,
     moderation,
@@ -103,6 +104,7 @@ from app.api import (  # noqa: E402
 
 # Enregistrer les routers
 app.include_router(auth.router, prefix=f"{settings.API_PREFIX}/auth", tags=["auth"])
+app.include_router(legal.router, prefix=f"{settings.API_PREFIX}/legal", tags=["legal"])
 app.include_router(agent.router, prefix=f"{settings.API_PREFIX}/agent", tags=["agent"])
 app.include_router(admin.router, prefix=f"{settings.API_PREFIX}/admin", tags=["admin"])
 app.include_router(children.router, prefix=f"{settings.API_PREFIX}/children", tags=["children"])

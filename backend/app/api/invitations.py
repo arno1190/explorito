@@ -16,6 +16,7 @@ from app.core.database import get_db
 from app.models.guardianship import (
     INVITE_ALL,
     INVITE_CHILD,
+    INVITE_SIGNUP,
     ROLE_GRANDPARENT,
     ROLE_GUARDIAN,
     ROLE_PARENT,
@@ -78,6 +79,12 @@ async def preview(token: str, db: Annotated[Session, Depends(get_db)]) -> Invita
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invitation introuvable")
     if not inv.is_usable:
         return InvitationPreview(valid=False, kind=inv.kind)
+
+    if inv.kind == INVITE_SIGNUP:
+        # Un code d'inscription circule hors de l'application : n'en dire que
+        # la validité. Le faire tomber dans la branche `all` publierait les
+        # prénoms des enfants de l'admin à quiconque détient le lien.
+        return InvitationPreview(valid=True, kind=inv.kind)
 
     inviter_name = _display_name(inv.inviter_id, db)
     if inv.kind == INVITE_CHILD and inv.child_id is not None:

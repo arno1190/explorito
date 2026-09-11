@@ -17,10 +17,16 @@ interface AuthContextType {
   user: UserResponse | null;
   loading: boolean;
   isAuthenticated: boolean;
-  /** Connexion via Google (id_token renvoyé par Google Identity Services). */
-  googleLogin: (credential: string) => Promise<void>;
+  /**
+   * Connexion via Google (id_token renvoyé par Google Identity Services).
+   *
+   * `invite` n'est lu que si le compte n'existe pas encore et que
+   * `SIGNUP_INVITE_REQUIRED` est actif côté serveur ; une famille déjà
+   * installée se connecte toujours sans code.
+   */
+  googleLogin: (credential: string, invite?: string) => Promise<void>;
   /** Connexion de développement (email), active uniquement hors production. */
-  devLogin: (email: string) => Promise<void>;
+  devLogin: (email: string, invite?: string) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
   /** Définit ou remplace le code PIN parent (4 chiffres). */
@@ -74,13 +80,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push(role ? actingRoleHome(role) : "/dashboard");
   };
 
-  const googleLogin = async (credential: string) => {
-    const token = await googleLoginApiV1AuthGooglePost({ credential });
+  const googleLogin = async (credential: string, invite?: string) => {
+    const token = await googleLoginApiV1AuthGooglePost({
+      credential,
+      invite: invite || undefined,
+    });
     await finishLogin(token.access_token);
   };
 
-  const devLogin = async (email: string) => {
-    const token = await devLoginApiV1AuthDevLoginPost({ email });
+  const devLogin = async (email: string, invite?: string) => {
+    const token = await devLoginApiV1AuthDevLoginPost({
+      email,
+      invite: invite || undefined,
+    });
     await finishLogin(token.access_token);
   };
 
