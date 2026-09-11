@@ -10,9 +10,9 @@ from sqlalchemy import JSON, Boolean, Column, Date, DateTime, Enum, ForeignKey, 
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from app.core.config import settings
 from app.core.database import Base
 from app.models.content import LevelEnum  # noqa: F401  (utilisé par Profile.level)
+from app.services.family_privacy import current_policy_version
 
 
 class UserRole(str, enum.Enum):
@@ -94,10 +94,13 @@ class User(Base):
         cocher à sa prochaine visite.
 
         Défini ici plutôt que dans ``services/family_privacy`` pour rester
-        lisible depuis ``UserResponse`` (comme ``has_pin``) sans cycle
-        d'imports ; le texte et la version, eux, vivent dans le service.
+        lisible depuis ``UserResponse`` (comme ``has_pin``) ; la version, elle,
+        est lue par ``current_policy_version()`` — la même et unique lecture du
+        réglage que celle qui sert le texte et qui refuse une acceptation
+        périmée. Deux lectures indépendantes pourraient diverger et rendre la
+        case insatisfaisable (accepter n'aurait alors aucun effet visible).
         """
-        return bool(self.privacy_accepted_at) and self.privacy_version == settings.PRIVACY_POLICY_VERSION
+        return bool(self.privacy_accepted_at) and self.privacy_version == current_policy_version()
 
     def __repr__(self):
         return f"<User {self.email} ({self.role})>"

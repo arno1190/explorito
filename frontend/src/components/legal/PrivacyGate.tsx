@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { isAxiosError } from "axios";
 import { ShieldCheck } from "lucide-react";
 
 import { useAuth } from "@/lib/auth";
@@ -28,27 +29,60 @@ import {
  * recueilli ici, à la première visite qui suit — c'est le premier moment où on
  * peut réellement montrer le texte au parent.
  *
- * N'est jamais montrée en mode enfant : un enfant ne consent à rien.
+ * Un enfant ne consent à rien : la case ne lui est jamais montrée. Mais le mode
+ * enfant est restauré depuis `localStorage` à chaque chargement, donc s'en
+ * tenir là laisserait une famille restée en mode enfant enregistrer
+ * indéfiniment le travail d'un enfant sans qu'aucun adulte n'ait jamais
+ * consenti. Au chargement de l'application, un consentement manquant fait donc
+ * sortir du mode enfant (voir l'effet ci-dessous) : le parent reprend l'écran,
+ * et c'est lui qu'on interroge. Le choix du chargement — et pas d'un moment
+ * quelconque — est ce qui évite de dresser un mur juridique devant un enfant au
+ * milieu d'un exercice.
  */
 export function PrivacyGate() {
-  const { user, impersonatedChild, refreshUser } = useAuth();
+  const { user, impersonatedChild, exitChildMode, refreshUser } = useAuth();
   const [checked, setChecked] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const alreadyAccepted = user?.privacy_accepted ?? true;
-  const shouldAsk = Boolean(user) && !alreadyAccepted && !impersonatedChild;
+  const consentMissing = Boolean(user) && !alreadyAccepted;
+  const shouldAsk = consentMissing && !impersonatedChild;
 
-  const { data: policy } = usePrivacyPolicy({
+  // Sortie du mode enfant, une seule fois par chargement : sans le garde-fou,
+  // un `exitChildMode` sans effet relancerait l'effet en boucle.
+  const leftChildMode = useRef(false);
+  useEffect(() => {
+    if (!consentMissing || !impersonatedChild || leftChildMode.current) return;
+    leftChildMode.current = true;
+    exitChildMode();
+  }, [consentMissing, impersonatedChild, exitChildMode]);
+
+  const { data: policy, refetch: refetchPolicy } = usePrivacyPolicy({
     query: { enabled: shouldAsk },
   });
 
-  const accept = useAcceptPrivacy({
+  const accept = useAcceptPrivacy<unknown>({
     mutation: {
       onSuccess: async () => {
         setError(null);
         await refreshUser();
       },
-      onError: () => {
+      onError: async (mutationError) => {
+        // 409 : le texte a changé entre l'affichage et le clic. Ce n'est pas
+        // une panne de réseau — il faut relire, pas réessayer. On recharge donc
+        // le texte affiché et on décoche : la case doit porter sur ce que le
+        // parent a effectivement sous les yeux.
+        if (
+          isAxiosError(mutationError) &&
+          mutationError.response?.status === 409
+        ) {
+          setChecked(false);
+          await refetchPolicy();
+          setError(
+            "La politique a changé pendant que cette fenêtre était ouverte. Rechargez la page pour lire la nouvelle version, puis acceptez-la."
+          );
+          return;
+        }
         setError(
           "L'enregistrement a échoué. Vérifiez votre connexion et réessayez."
         );
@@ -61,9 +95,11 @@ export function PrivacyGate() {
   return (
     <Dialog open>
       <DialogContent
-        className="rounded-2xl max-w-lg"
-        // Ni croix ni clic extérieur : la case doit être cochée ou refusée
-        // explicitement, pas écartée par accident.
+        // Ni croix, ni échappement, ni clic extérieur : la case doit être
+        // cochée, pas écartée. `DialogContent` rend toujours un bouton de
+        // fermeture en dernier enfant ; sans `onOpenChange` il ne ferait rien,
+        // et un bouton visible qui n'agit pas est pire que pas de bouton.
+        className="rounded-2xl max-w-lg [&>button]:hidden"
         onEscapeKeyDown={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
@@ -89,14 +125,16 @@ export function PrivacyGate() {
             </li>
             <li>
               Sur eux : un prénom d&apos;affichage, une date de naissance, un
-              niveau scolaire, et leur progression.
+              niveau scolaire, leur progression, et l&apos;avatar que vous leur
+              choisissez éventuellement.
             </li>
             <li>
               Hébergement en France, aucune publicité, aucune revente de
               données.
             </li>
             <li>
-              Supprimer un enfant efface immédiatement toute sa progression.
+              Supprimer un enfant efface immédiatement toute sa progression et
+              son avatar.
             </li>
           </ul>
 

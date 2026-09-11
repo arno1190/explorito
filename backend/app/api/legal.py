@@ -19,8 +19,8 @@ from app.core.security import decode_access_token
 from app.models.user import User
 from app.schemas.legal import PrivacyAccept, PrivacyPolicy
 from app.services.family_privacy import (
-    PRIVACY_POLICY,
-    PRIVACY_POLICY_VERSION,
+    current_policy_version,
+    privacy_policy_text,
     record_privacy_acceptance,
 )
 
@@ -46,8 +46,8 @@ async def get_privacy_policy(
     if email:
         user = get_user_by_email(db, email=email)
     return PrivacyPolicy(
-        version=PRIVACY_POLICY_VERSION,
-        text=PRIVACY_POLICY,
+        version=current_policy_version(),
+        text=privacy_policy_text(),
         accepted=user.privacy_accepted if user is not None else False,
         accepted_at=user.privacy_accepted_at if user is not None else None,
     )
@@ -66,7 +66,7 @@ async def accept_privacy_policy(
             le parent a coché une case portant sur un texte périmé (onglet resté
             ouvert pendant une mise à jour), il doit relire le nouveau.
     """
-    if body.version != PRIVACY_POLICY_VERSION:
+    if body.version != current_policy_version():
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="La politique de confidentialité a changé depuis l'affichage. Merci de relire la nouvelle version.",
@@ -75,8 +75,8 @@ async def accept_privacy_policy(
     db.commit()
     db.refresh(current_user)
     return PrivacyPolicy(
-        version=PRIVACY_POLICY_VERSION,
-        text=PRIVACY_POLICY,
+        version=current_policy_version(),
+        text=privacy_policy_text(),
         accepted=True,
         accepted_at=current_user.privacy_accepted_at,
     )

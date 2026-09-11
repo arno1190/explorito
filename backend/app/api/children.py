@@ -23,6 +23,7 @@ from app.models.user import Profile, User, UserRole
 from app.schemas.children import ChildCreate, ChildResponse, ChildUpdate
 from app.schemas.collection import AwardCreate, AwardResponse
 from app.schemas.guardianship import GuardianResponse
+from app.services.admin import delete_child_account
 from app.services.collection import award_points, list_awards
 from app.services.guardianship import (
     guarded_child_ids,
@@ -124,8 +125,10 @@ async def get_available_levels(
     identifiant d'enfant.
 
     Dérivé du contenu publié, jamais codé en dur côté frontend (issue #23). Un
-    niveau annoncé mais non semé ouvre sur une application vide, ce qui est le
-    pire premier contact possible et reste invisible depuis l'intérieur.
+    niveau n'est annoncé que si un enfant qu'on y placerait recevrait vraiment
+    une leçon publiée de ce niveau sans geste du parent : un niveau annoncé mais
+    creux ouvre sur une application vide, ce qui est le pire premier contact
+    possible et reste invisible depuis l'intérieur.
 
     Ne filtre pas le niveau **actuel** d'un enfant déjà enregistré : c'est au
     formulaire d'y ajouter le niveau existant pour ne pas le changer en silence.
@@ -227,11 +230,16 @@ async def delete_child(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],
 ):
-    """Supprime définitivement un enfant (propriétaire uniquement)."""
+    """Supprime définitivement un enfant (propriétaire uniquement).
+
+    Passe par :func:`app.services.admin.delete_child_account`, chemin unique de
+    suppression : les liens de garde, les invitations et l'avatar sur disque ne
+    cascadent pas côté ORM, et la politique de confidentialité promet qu'ils
+    partent aussi.
+    """
     _require_owner(child_id, current_user, db)
     child_user = db.query(User).filter(User.id == child_id).first()
-    db.delete(child_user)  # cascade : profil, progression, gardes
-    db.commit()
+    delete_child_account(db, child_user)
     return None
 
 
