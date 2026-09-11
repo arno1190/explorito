@@ -5,6 +5,46 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useGetPrivacyPolicyApiV1LegalPrivacyGet as usePrivacyPolicy } from "@/lib/api/generated/legal/legal";
 
+type PolicyBlock =
+  | { kind: "heading"; text: string }
+  | { kind: "paragraph"; lines: string[] };
+
+/**
+ * Découpe le texte servi par l'API en blocs affichables.
+ *
+ * Le texte est habillé à 80 colonnes côté serveur : juste pour un terminal,
+ * faux pour un téléphone. Dans la colonne d'environ 343 px d'un écran de
+ * 375 px, 70 des 90 lignes se replient une seconde fois, en plein milieu des
+ * phrases. On recoud donc les retours à la ligne internes d'un paragraphe et on
+ * laisse le navigateur replier à la largeur réelle.
+ *
+ * Exception : un bloc dont chaque ligne est une phrase complète — les mentions
+ * légales, éditeur puis contact puis hébergeur — garde ses retours, qui portent
+ * là du sens.
+ */
+function parsePolicy(text: string): PolicyBlock[] {
+  return text
+    .split(/\n\s*\n/)
+    .map((block) =>
+      block
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean)
+    )
+    .filter((lines) => lines.length > 0)
+    .map<PolicyBlock>((lines) => {
+      if (lines.length === 1 && /^\d+\.\s/.test(lines[0])) {
+        return { kind: "heading", text: lines[0] };
+      }
+      const oneSentencePerLine =
+        lines.length > 1 && lines.every((line) => line.endsWith("."));
+      return {
+        kind: "paragraph",
+        lines: oneSentencePerLine ? lines : [lines.join(" ")],
+      };
+    });
+}
+
 /**
  * Politique de confidentialité, lisible **sans compte**.
  *
@@ -59,9 +99,24 @@ export default function ConfidentialitePage() {
             <p className="text-xs text-fun-text-muted mb-4">
               Version {data.version}
             </p>
-            <pre className="whitespace-pre-wrap font-sans text-sm md:text-base leading-relaxed text-fun-text">
-              {data.text}
-            </pre>
+            <div className="space-y-4 text-sm md:text-base leading-relaxed text-fun-text">
+              {parsePolicy(data.text).map((block, i) =>
+                block.kind === "heading" ? (
+                  <h2
+                    key={i}
+                    className="text-base md:text-lg font-extrabold text-fun-text pt-2"
+                  >
+                    {block.text}
+                  </h2>
+                ) : (
+                  <div key={i} className="space-y-1">
+                    {block.lines.map((line, j) => (
+                      <p key={j}>{line}</p>
+                    ))}
+                  </div>
+                )
+              )}
+            </div>
           </article>
         )}
       </main>
