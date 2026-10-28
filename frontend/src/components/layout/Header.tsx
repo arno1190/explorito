@@ -63,7 +63,10 @@ export function Header() {
 
   // Retour à la vue parent : protégé par le code PIN (porte douce).
   const openExitToParent = () => {
-    setPinMode("verify");
+    // Sans code défini, il n'y a rien à vérifier : le serveur répondrait 400
+    // et le parent lirait « Code PIN incorrect » en boucle, bloqué en mode
+    // enfant. On lui fait définir son code, ce qui le fait aussi sortir.
+    setPinMode(user?.has_pin ? "verify" : "set");
     setPinOpen(true);
   };
   const openChangePin = () => {
@@ -221,7 +224,7 @@ export function Header() {
                   onOpenChange={setPinOpen}
                   mode={pinMode}
                   onSuccess={() => {
-                    if (pinMode === "verify") exitChildMode();
+                    if (impersonatedChild) exitChildMode();
                   }}
                 />
               </>

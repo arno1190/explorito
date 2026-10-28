@@ -112,7 +112,7 @@ def contribution_actor(
 
     if token:
         payload = decode_access_token(token)
-        email = payload.get("sub") if payload else None
+        email = payload.get("sub") if payload and payload.get("type") != "refresh" else None
         user = get_user_by_email(db, email=email) if email else None
         if user is None:
             raise HTTPException(

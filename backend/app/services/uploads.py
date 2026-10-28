@@ -78,7 +78,7 @@ def delete_upload(relative_url: str | None) -> bool:
 
     Args:
         relative_url: Valeur de ``avatar_url``, telle que stockée. Seuls les
-            chemins servis par ce module (``/uploads/...``) sont traités.
+            avatars téléversés (``/uploads/avatars/...``) sont traités.
 
     Returns:
         ``True`` si un fichier a bien été supprimé du disque.
@@ -86,10 +86,12 @@ def delete_upload(relative_url: str | None) -> bool:
     if not relative_url or not relative_url.startswith(UPLOAD_URL_PREFIX):
         return False
 
-    root = Path(settings.UPLOAD_DIR).resolve()
-    target = (root / relative_url[len(UPLOAD_URL_PREFIX) :]).resolve()
-    # Garde-fou : une valeur forgée (``/uploads/../../etc/passwd``) ne doit pas
-    # faire sortir la suppression du répertoire d'uploads.
+    uploads_root = Path(settings.UPLOAD_DIR).resolve()
+    root = uploads_root / "avatars"
+    target = (uploads_root / relative_url[len(UPLOAD_URL_PREFIX) :]).resolve()
+    # Garde-fou : seuls les avatars téléversés sont supprimables. ``avatar_url``
+    # est saisi par le parent : sans cette borne, ``/uploads/audio/<consigne>.mp3``
+    # ou une image de collection partagée par tous disparaîtrait avec un enfant.
     if not target.is_relative_to(root):
         logger.warning("Chemin d'upload hors du répertoire, suppression ignorée: %s", relative_url)
         return False

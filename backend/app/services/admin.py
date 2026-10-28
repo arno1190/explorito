@@ -171,8 +171,11 @@ def delete_child_account(db: Session, child: User) -> None:
     db.commit()
 
     # Après le commit seulement : un fichier effacé alors que la transaction
-    # échoue laisserait une ligne sans image, l'inverse est rattrapable.
-    if delete_upload(avatar_url):
+    # échoue laisserait une ligne sans image, l'inverse est rattrapable. Et
+    # jamais une image qu'un autre profil affiche encore : ``avatar_url`` est
+    # libre, un parent pourrait y recopier l'avatar d'une autre famille.
+    still_used = avatar_url is not None and db.query(Profile.id).filter(Profile.avatar_url == avatar_url).first()
+    if not still_used and delete_upload(avatar_url):
         logger.info("Avatar supprimé du disque pour l'enfant %s", child.id)
 
 

@@ -41,7 +41,7 @@ from app.models.user import Profile, User
 from app.schemas.library import AccessEntry, DiscoverPack, PackRequestResponse
 from app.schemas.pack import PackSummary
 from app.services.contributor_legal import ReportReason
-from app.services.packs import accessible_pack_ids, log_pack_action
+from app.services.packs import accessible_pack_ids, author_family_pack_ids, log_pack_action
 
 
 def _catalogue_visible() -> Any:
@@ -365,7 +365,16 @@ def set_access(
         HTTPException: 404 si le pack n'existe pas.
     """
     pack = db.query(Pack).filter(Pack.id == pack_id).first()
-    if pack is None:
+    # Activer n'a de sens que pour un pack du catalogue (officiel, ou
+    # communautaire approuvé) ou écrit par la famille : sinon un identifiant
+    # glané suffisait à ouvrir à son enfant le brouillon jamais relu d'autrui.
+    # Désactiver reste toujours permis.
+    readable = pack is not None and (
+        not enabled
+        or db.query(Pack.id).filter(Pack.id == pack_id, _catalogue_visible()).first() is not None
+        or pack_id in author_family_pack_ids(child_id, db)
+    )
+    if not readable:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pack non trouvé.")
 
     row = (

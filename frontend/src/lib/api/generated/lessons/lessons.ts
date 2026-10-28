@@ -204,7 +204,8 @@ export function useRecentLessonsApiV1LessonsRecentGet<
 }
 
 /**
- * Liste les leçons avec filtres optionnels
+ * Liste les leçons avec filtres optionnels (admin uniquement : la liste
+brute ignore la visibilité des packs).
 
 Args:
     db: Session de base de données

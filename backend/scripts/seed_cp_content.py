@@ -20,10 +20,12 @@ Usage:
 
 import argparse
 import json
+import os
 import re
 import sys
 from pathlib import Path
 
+from app.core.config import settings
 from app.core.database import SessionLocal
 from app.models.content import (
     DifficultyEnum,
@@ -219,6 +221,11 @@ def main() -> int:
             if not args.reset:
                 print("Du contenu existe déjà. Utilisez --reset pour purger et reseed (DESTRUCTIF).")
                 return 0
+            if not settings.DEBUG and os.environ.get("EXPLORITO_ALLOW_RESET") != "oui":
+                # La purge emporte aussi les packs communautaires et toute la
+                # progression des enfants, par cascade : jamais en prod par mégarde.
+                print("--reset refusé hors DEBUG. Relancez avec EXPLORITO_ALLOW_RESET=oui si c'est voulu.")
+                return 1
             print("--reset : purge du contenu existant…")
             purge_content(db)
 

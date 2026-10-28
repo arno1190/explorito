@@ -11,7 +11,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.auth import get_current_user
+from app.api.auth import get_current_active_user
 from app.core.database import get_db
 from app.models.guardianship import (
     INVITE_ALL,
@@ -45,7 +45,7 @@ def _display_name(user_id, db: Session) -> str | None:
 @router.post("", response_model=InvitationResponse, status_code=status.HTTP_201_CREATED)
 async def create(
     body: InvitationCreate,
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
 ) -> InvitationResponse:
     """Crée une invitation. Réservé au propriétaire (créateur) de l'enfant."""
@@ -105,7 +105,7 @@ async def preview(token: str, db: Annotated[Session, Depends(get_db)]) -> Invita
 @router.post("/{token}/accept", response_model=AcceptResponse)
 async def accept(
     token: str,
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
 ) -> AcceptResponse:
     """Accepte une invitation : crée les gardes pour l'utilisateur connecté."""
@@ -121,7 +121,7 @@ async def accept(
 @router.delete("/{token}", status_code=status.HTTP_204_NO_CONTENT)
 async def revoke(
     token: str,
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
 ) -> None:
     """Annule une invitation en attente (invitant uniquement)."""

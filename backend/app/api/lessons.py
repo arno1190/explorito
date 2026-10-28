@@ -24,7 +24,7 @@ from app.schemas.lesson import (
     LessonWithExercises,
     RecentLessonResponse,
 )
-from app.services.packs import accessible_pack_ids, ensure_official_pack
+from app.services.packs import accessible_pack_ids, ensure_official_pack, pack_readable_by
 from app.services.progression import lesson_locked
 
 router = APIRouter()
@@ -77,6 +77,7 @@ async def recent_lessons(
 @router.get("", response_model=list[LessonResponse])
 async def list_lessons(
     db: Annotated[Session, Depends(get_db)],
+    _admin: Annotated[User, Depends(require_admin)],
     skip: int = Query(0, ge=0, description="Nombre d'éléments à ignorer"),
     limit: int = Query(100, ge=1, le=100, description="Nombre maximum d'éléments à retourner"),
     subject_id: UUID | None = Query(None, description="Filtrer par matière"),
@@ -84,7 +85,8 @@ async def list_lessons(
     is_published: bool | None = Query(None, description="Filtrer par statut de publication"),
 ) -> list[Lesson]:
     """
-    Liste les leçons avec filtres optionnels
+    Liste les leçons avec filtres optionnels (admin uniquement : la liste
+    brute ignore la visibilité des packs).
 
     Args:
         db: Session de base de données
@@ -170,7 +172,12 @@ async def create_lesson(
 
 
 @router.get("/{lesson_id}", response_model=LessonWithExercises)
-async def get_lesson(lesson_id: UUID, db: Annotated[Session, Depends(get_db)]) -> dict:
+async def get_lesson(
+    lesson_id: UUID,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    acting: Annotated[User, Depends(acting_child)],
+) -> dict:
     """
     Récupère les détails d'une leçon avec ses exercices
 
@@ -191,7 +198,7 @@ async def get_lesson(lesson_id: UUID, db: Annotated[Session, Depends(get_db)]) -
         .first()
     )
 
-    if not lesson:
+    if not lesson or not pack_readable_by(lesson.pack_id, current_user, acting, db):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée")
 
     # Build response with subject_id from path (learning_path)
@@ -350,7 +357,12 @@ async def start_lesson(
 
 
 @router.get("/{lesson_id}/exercises", response_model=list[ExerciseResponse])
-async def get_lesson_exercises(lesson_id: UUID, db: Annotated[Session, Depends(get_db)]) -> list[Exercise]:
+async def get_lesson_exercises(
+    lesson_id: UUID,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    acting: Annotated[User, Depends(acting_child)],
+) -> list[Exercise]:
     """
     Récupère tous les exercices d'une leçon
 
@@ -366,7 +378,7 @@ async def get_lesson_exercises(lesson_id: UUID, db: Annotated[Session, Depends(g
     """
     # Vérifier que la leçon existe
     lesson = db.query(Lesson).filter(Lesson.id == lesson_id).first()
-    if not lesson:
+    if not lesson or not pack_readable_by(lesson.pack_id, current_user, acting, db):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Leçon non trouvée")
 
     # Récupérer tous les exercices de cette leçon

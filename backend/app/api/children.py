@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.attributes import flag_modified
 
-from app.api.auth import get_current_user
+from app.api.auth import get_current_active_user
 from app.core.database import get_db
 from app.models.collection import WALLET_POINTS, WALLETS
 from app.models.content import LevelEnum
@@ -102,7 +102,7 @@ def _child_response(profile: Profile, current_user: User, db: Session) -> ChildR
 
 @router.get("", response_model=list[ChildResponse])
 async def get_children(
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
 ):
     """Liste des enfants dont l'appelant est responsable (union propriétaire + partagés)."""
@@ -116,7 +116,7 @@ async def get_children(
 
 @router.get("/levels", response_model=list[LevelEnum])
 async def get_available_levels(
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
 ) -> list[LevelEnum]:
     """Niveaux scolaires réellement proposables à un enfant, du plus petit au plus grand.
@@ -140,7 +140,7 @@ async def get_available_levels(
 @router.get("/{child_id}", response_model=ChildResponse)
 async def get_child(
     child_id: UUID,
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
 ):
     """Détails d'un enfant dont l'appelant est responsable."""
@@ -151,7 +151,7 @@ async def get_child(
 @router.post("", response_model=ChildResponse, status_code=status.HTTP_201_CREATED)
 async def create_child(
     child_data: ChildCreate,
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
 ):
     """Crée un enfant (compte sans connexion). L'appelant en devient le propriétaire ;
@@ -183,7 +183,7 @@ async def create_child(
 async def update_child(
     child_id: UUID,
     child_data: ChildUpdate,
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
 ) -> ChildResponse:
     """Met à jour le profil d'un enfant (tout responsable)."""
@@ -213,7 +213,7 @@ async def update_child(
 async def upload_child_avatar(
     child_id: UUID,
     file: Annotated[UploadFile, File(description="Image d'avatar (PNG, JPEG, WebP, GIF)")],
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
 ) -> ChildResponse:
     """Téléverse l'avatar d'un enfant (tout responsable)."""
@@ -227,7 +227,7 @@ async def upload_child_avatar(
 @router.delete("/{child_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_child(
     child_id: UUID,
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
 ):
     """Supprime définitivement un enfant (propriétaire uniquement).
@@ -247,7 +247,7 @@ async def delete_child(
 async def create_award(
     child_id: UUID,
     body: AwardCreate,
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
 ) -> AwardResponse:
     """Attribue (ou retire) des points à un enfant (tout responsable)."""
@@ -268,7 +268,7 @@ async def create_award(
 @router.get("/{child_id}/awards", response_model=list[AwardResponse])
 async def get_awards(
     child_id: UUID,
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
 ) -> list[AwardResponse]:
     """Historique des points attribués à un enfant (tout responsable)."""
@@ -279,7 +279,7 @@ async def get_awards(
 @router.get("/{child_id}/guardians", response_model=list[GuardianResponse])
 async def get_guardians(
     child_id: UUID,
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
 ) -> list[GuardianResponse]:
     """Liste des responsables d'un enfant (propriétaire uniquement)."""
@@ -305,7 +305,7 @@ async def get_guardians(
 async def remove_child_guardian(
     child_id: UUID,
     guardian_id: UUID,
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
 ):
     """Retire un responsable.

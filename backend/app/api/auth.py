@@ -215,7 +215,9 @@ async def get_current_user(
     )
 
     payload = decode_access_token(token)
-    if payload is None:
+    # Un refresh token ne sert qu'à /refresh : accepté ici, il donnerait sept
+    # jours d'accès complet, sans que la déconnexion puisse y mettre fin.
+    if payload is None or payload.get("type") == "refresh":
         raise credentials_exception
 
     email: str | None = payload.get("sub")

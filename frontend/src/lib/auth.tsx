@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 import {
   devLoginApiV1AuthDevLoginPost,
@@ -47,6 +48,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [impersonatedChild, setImpersonatedChild] =
     useState<ChildResponse | null>(null);
   const router = useRouter();
+  // Les clés de requête générées sont des URL nues, sans l'enfant joué : sans
+  // vidage, l'enfant B héritait pendant une minute du solde et des leçons
+  // récentes de l'enfant A, et un compte déconnecté de ceux du précédent.
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const loadUser = async () => {
@@ -72,10 +77,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const finishLogin = async (accessToken: string) => {
     localStorage.setItem("access_token", accessToken);
-    localStorage.removeItem("impersonated_child");
-    setImpersonatedChild(null);
+    queryClient.clear();
     const currentUser = await getCurrentUserInfoApiV1AuthMeGet();
     setUser(currentUser);
+    // Une reconnexion ne fait pas sortir du mode enfant : seul le code parent
+    // le fait. Sinon un enfant tapait /login, touchait « Continuer en tant
+    // que Papa » (session Google encore ouverte) et arrivait sur le tableau de
+    // bord sans code — et c'est aussi là qu'atterrit un jeton expiré.
+    const stayInChildMode = localStorage.getItem("impersonated_child");
+    if (stayInChildMode && currentUser.role !== "child") {
+      setImpersonatedChild(JSON.parse(stayInChildMode));
+      router.push("/play");
+      return;
+    }
+    localStorage.removeItem("impersonated_child");
+    setImpersonatedChild(null);
     const role = resolveActingRole(currentUser.role, false);
     router.push(role ? actingRoleHome(role) : "/dashboard");
   };
@@ -108,6 +124,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("impersonated_child");
+    localStorage.removeItem("impersonate_user");
+    queryClient.clear();
     setUser(null);
     setImpersonatedChild(null);
     router.push("/login");
@@ -129,12 +147,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const impersonateChild = (child: ChildResponse) => {
     localStorage.setItem("impersonated_child", JSON.stringify(child));
+    queryClient.clear();
     setImpersonatedChild(child);
     router.push("/play");
   };
 
   const exitChildMode = () => {
     localStorage.removeItem("impersonated_child");
+    queryClient.clear();
     setImpersonatedChild(null);
     router.push("/dashboard");
   };

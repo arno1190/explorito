@@ -189,6 +189,40 @@ def author_family_pack_ids(child_id: UUID, db: Session) -> set[UUID]:
     return {row[0] for row in rows}
 
 
+def pack_readable_by(pack_id: UUID | None, viewer: Any, acting: Any, db: Session) -> bool:
+    """Le contenu de ce pack peut-il être lu par ce visiteur ?
+
+    Lisible : tout contenu hors pack, les packs d'un catalogue d'adulte
+    (officiels non bloqués, communautaires approuvés), et les packs rédigés par
+    la famille de l'enfant joué — ou par le visiteur lui-même. Les brouillons
+    et les packs refusés d'une autre famille restent invisibles : ils peuvent
+    porter le prénom d'un enfant et n'ont été relus par personne.
+
+    Args:
+        pack_id: Pack de la leçon (``None`` pour un contenu hors pack).
+        viewer: Utilisateur authentifié.
+        acting: Enfant joué (ou le visiteur lui-même), cf. ``acting_child``.
+        db: Session.
+
+    Returns:
+        ``True`` si la lecture est permise.
+    """
+    from app.models.user import UserRole
+
+    if pack_id is None or viewer.role == UserRole.ADMIN:
+        return True
+    pack = db.get(Pack, pack_id)
+    if pack is None:
+        return True
+    if pack.community_status == CommunityStatus.BLOCKED.value:
+        return False
+    if pack.origin == PackOrigin.OFFICIAL.value or pack.community_status == CommunityStatus.APPROVED.value:
+        return True
+    if pack.author_id is not None and pack.author_id in (viewer.id, acting.id):
+        return True
+    return acting.role == UserRole.CHILD and pack_id in author_family_pack_ids(acting.id, db)
+
+
 def log_pack_action(
     db: Session,
     *,

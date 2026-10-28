@@ -6,13 +6,16 @@
  */
 import type { DifficultyEnum } from "./difficultyEnum";
 import type { ExerciseResponseContent } from "./exerciseResponseContent";
-import type { ExerciseResponseCorrectAnswer } from "./exerciseResponseCorrectAnswer";
 import type { ExerciseResponseHintsItem } from "./exerciseResponseHintsItem";
 import type { ExerciseResponseMediaUrls } from "./exerciseResponseMediaUrls";
 import type { ExerciseType } from "./exerciseType";
 
 /**
  * Schéma de réponse pour un exercice.
+
+``correct_answer`` n'est jamais sérialisé : ces réponses alimentent le
+lecteur d'exercices, et un enfant qui ouvre l'onglet réseau ne doit pas y
+lire la solution. La correction se fait côté serveur à la soumission.
  */
 export interface ExerciseResponse {
   /** Type d'exercice (jeu canonique) */
@@ -24,8 +27,6 @@ export interface ExerciseResponse {
   question: string;
   /** Contenu de l'exercice (forme dépend du type) */
   content: ExerciseResponseContent;
-  /** Réponse correcte (vide pour reveal/pythagore) */
-  correct_answer?: ExerciseResponseCorrectAnswer;
   /** Indices progressifs */
   hints?: ExerciseResponseHintsItem[];
   /** Explication de la réponse */

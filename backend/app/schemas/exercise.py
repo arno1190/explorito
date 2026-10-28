@@ -341,8 +341,14 @@ class ExerciseUpdate(BaseModel):
 
 
 class ExerciseResponse(ExerciseBase):
-    """Schéma de réponse pour un exercice."""
+    """Schéma de réponse pour un exercice.
 
+    ``correct_answer`` n'est jamais sérialisé : ces réponses alimentent le
+    lecteur d'exercices, et un enfant qui ouvre l'onglet réseau ne doit pas y
+    lire la solution. La correction se fait côté serveur à la soumission.
+    """
+
+    correct_answer: dict[str, Any] = Field(default_factory=dict, exclude=True)
     id: UUID
     lesson_id: UUID
     difficulty_level: int | None = Field(default=None, description="Difficulté fine évaluée (1-5)")

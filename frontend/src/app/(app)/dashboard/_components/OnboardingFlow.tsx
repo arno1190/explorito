@@ -133,7 +133,7 @@ export function OnboardingFlow({
   /** Appelé quand le parcours est terminé ou abandonné. */
   onFinished: () => void;
 }) {
-  const { user, impersonateChild, setPin } = useAuth();
+  const { impersonateChild, setPin } = useAuth();
   const [step, setStep] = useState<Step>("child");
   const [child, setChild] = useState<ChildResponse | null>(resumeChild ?? null);
   const [error, setError] = useState("");
@@ -427,14 +427,9 @@ export function OnboardingFlow({
             >
               {busy ? "Enregistrement…" : "Enregistrer le code"}
             </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full"
-              onClick={() => goTo("launch", child)}
-            >
-              Plus tard
-            </Button>
+            {/* Pas de « Plus tard » qui lance l'enfant : sans code, rien ne
+                protège le retour au tableau de bord. On peut quitter, en
+                revanche — le tableau de bord redemandera le code au lancement. */}
           </form>
         )}
 
@@ -447,8 +442,6 @@ export function OnboardingFlow({
             <p className="text-sm text-fun-text-muted">
               {child.name} arrive sur ses matières : une matière, puis sa
               première leçon, et c&apos;est parti.
-              {!user?.has_pin &&
-                " Vous pourrez définir votre code parent plus tard depuis le tableau de bord."}
             </p>
             <Button
               size="lg"

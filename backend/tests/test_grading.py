@@ -10,9 +10,9 @@ import pytest
 from app.api.exercises import check_answer_correctness
 
 
-def _exercise(exercise_type: str, correct_answer: dict) -> SimpleNamespace:
-    """Fabrique un exercice minimal pour la correction (type + correct_answer)."""
-    return SimpleNamespace(type=exercise_type, correct_answer=correct_answer)
+def _exercise(exercise_type: str, correct_answer: dict, content: dict | None = None) -> SimpleNamespace:
+    """Fabrique un exercice minimal pour la correction (type + correct_answer + content)."""
+    return SimpleNamespace(type=exercise_type, correct_answer=correct_answer, content=content or {})
 
 
 # --- multiple_choice ---------------------------------------------------------
@@ -67,25 +67,44 @@ def test_reveal_always_correct():
 
 
 # --- pythagore ---------------------------------------------------------------
+PYTHAGORE = {"tables": [2, 3], "blanks": 2}
+
+
 def test_pythagore_all_cells_correct():
-    ex = _exercise("pythagore", {})
+    ex = _exercise("pythagore", {}, PYTHAGORE)
     assert check_answer_correctness(ex, {"cells": {"3x4": 12, "2x5": 10}}) is True
 
 
 def test_pythagore_one_cell_wrong():
-    ex = _exercise("pythagore", {})
+    ex = _exercise("pythagore", {}, PYTHAGORE)
     assert check_answer_correctness(ex, {"cells": {"3x4": 12, "2x5": 11}}) is False
 
 
 def test_pythagore_empty():
-    ex = _exercise("pythagore", {})
+    ex = _exercise("pythagore", {}, PYTHAGORE)
     assert check_answer_correctness(ex, {"cells": {}}) is False
     assert check_answer_correctness(ex, {}) is False
 
 
 def test_pythagore_malformed_key():
-    ex = _exercise("pythagore", {})
-    assert check_answer_correctness(ex, {"cells": {"bad": 12}}) is False
+    ex = _exercise("pythagore", {}, PYTHAGORE)
+    assert check_answer_correctness(ex, {"cells": {"bad": 12, "2x5": 10}}) is False
+
+
+def test_pythagore_rejects_a_single_easy_cell():
+    # Les cases sont tirées côté client : « 1x1 = 1 » seul ne gagne pas une grille de 5.
+    ex = _exercise("pythagore", {}, {"tables": [7, 8], "blanks": 5})
+    assert check_answer_correctness(ex, {"cells": {"7x1": 7}}) is False
+
+
+def test_pythagore_rejects_cells_outside_the_tables():
+    ex = _exercise("pythagore", {}, PYTHAGORE)
+    assert check_answer_correctness(ex, {"cells": {"1x1": 1, "1x2": 2}}) is False
+
+
+def test_pythagore_rejects_the_same_cell_twice():
+    ex = _exercise("pythagore", {}, PYTHAGORE)
+    assert check_answer_correctness(ex, {"cells": {"2x3": 6, "2X3": 6}}) is False
 
 
 # --- math_problem ------------------------------------------------------------

@@ -26,6 +26,7 @@ from app.schemas.exercise import (
     normalize_note_name,
 )
 from app.services.gamification import process_exercise_result
+from app.services.packs import pack_readable_by
 from app.services.progression import lesson_locked
 
 router = APIRouter()
@@ -105,18 +106,27 @@ def check_answer_correctness(exercise: Exercise, user_answer: dict[str, Any]) ->
 
     if exercise.type == ExerciseType.PYTHAGORE.value:
         # Mini-jeu : chaque case "AxB" doit valoir A*B ; toutes correctes -> gagné
+        # Les cases sont tirées côté client : on exige donc le bon nombre de
+        # cases, toutes distinctes et prises dans les tables de l'exercice —
+        # sinon « 1x1 = 1 » seul suffisait à gagner n'importe quelle grille.
         cells = user_answer.get("cells")
-        if not isinstance(cells, dict) or not cells:
+        content = cast("dict[str, Any]", exercise.content) or {}
+        tables = {int(t) for t in content.get("tables", [])}
+        possible = len(tables) * 10
+        required = min(int(content.get("blanks", 5)), possible)
+        if not isinstance(cells, dict) or required == 0 or len(cells) != required:
             return False
+        seen: set[tuple[int, int]] = set()
         for key, value in cells.items():
             try:
                 a_str, b_str = str(key).lower().split("x")
-                expected = int(a_str) * int(b_str)
-                if int(value) != expected:
+                a, b = int(a_str), int(b_str)
+                if a not in tables or not 1 <= b <= 10 or int(value) != a * b:
                     return False
-            except (ValueError, AttributeError):
+            except (ValueError, AttributeError, TypeError):
                 return False
-        return True
+            seen.add((a, b))
+        return len(seen) == required
 
     # Type inconnu : refus explicite plutôt que faux positif
     return False
@@ -125,12 +135,14 @@ def check_answer_correctness(exercise: Exercise, user_answer: dict[str, Any]) ->
 @router.get("", response_model=list[ExerciseResponse])
 async def list_exercises(
     db: Annotated[Session, Depends(get_db)],
+    _admin: Annotated[User, Depends(require_admin)],
     skip: int = Query(0, ge=0, description="Nombre d'éléments à ignorer"),
     limit: int = Query(100, ge=1, le=100, description="Nombre maximum d'éléments à retourner"),
     lesson_id: UUID | None = Query(None, description="Filtrer par leçon"),
 ) -> list[Exercise]:
     """
-    Liste les exercices avec filtres optionnels
+    Liste les exercices avec filtres optionnels (admin uniquement : la liste
+    brute ignore la visibilité des packs).
 
     Args:
         db: Session de base de données
@@ -187,7 +199,12 @@ async def create_exercise(
 
 
 @router.get("/{exercise_id}", response_model=ExerciseResponse)
-async def get_exercise(exercise_id: UUID, db: Annotated[Session, Depends(get_db)]) -> Exercise:
+async def get_exercise(
+    exercise_id: UUID,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    acting: Annotated[User, Depends(acting_child)],
+) -> Exercise:
     """
     Récupère les détails d'un exercice
 
@@ -202,7 +219,8 @@ async def get_exercise(exercise_id: UUID, db: Annotated[Session, Depends(get_db)
         HTTPException: Si l'exercice n'existe pas
     """
     exercise = db.query(Exercise).filter(Exercise.id == exercise_id).first()
-    if not exercise:
+    lesson = db.get(Lesson, exercise.lesson_id) if exercise else None
+    if not exercise or not pack_readable_by(lesson.pack_id if lesson else None, current_user, acting, db):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Exercice non trouvé")
 
     return exercise

@@ -16,12 +16,14 @@ recréer — utile quand on modifie le contenu (les leçons existantes seraient
 sinon ignorées par l'idempotence).
 """
 
+import os
 import sys
 from typing import Any
 
 from media_gen import picto
 from seed_curriculum import _seed_one, shuffle_options, theme
 
+from app.core.config import settings
 from app.core.database import SessionLocal
 from app.models.content import LearningPath, Lesson, LevelEnum, Subject
 
@@ -506,6 +508,11 @@ def main(dry_run: bool = False, reset: bool = False) -> int:
     created = skipped = 0
     try:
         if reset and not dry_run:
+            if not settings.DEBUG and os.environ.get("EXPLORITO_ALLOW_RESET") != "oui":
+                # Supprime par nom : une leçon communautaire homonyme partirait
+                # avec, et la progression des enfants par cascade.
+                print("--reset refusé hors DEBUG. Relancez avec EXPLORITO_ALLOW_RESET=oui si c'est voulu.")
+                return 1
             print(f"reset : {_reset(themes, db)} leçons supprimées.")
         for data in themes:
             status = _seed_one(data, db, dry_run=dry_run)

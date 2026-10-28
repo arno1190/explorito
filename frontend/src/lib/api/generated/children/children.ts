@@ -276,8 +276,10 @@ Déclaré **avant** ``/{child_id}`` : « levels » serait sinon capturé comme u
 identifiant d'enfant.
 
 Dérivé du contenu publié, jamais codé en dur côté frontend (issue #23). Un
-niveau annoncé mais non semé ouvre sur une application vide, ce qui est le
-pire premier contact possible et reste invisible depuis l'intérieur.
+niveau n'est annoncé que si un enfant qu'on y placerait recevrait vraiment
+une leçon publiée de ce niveau sans geste du parent : un niveau annoncé mais
+creux ouvre sur une application vide, ce qui est le pire premier contact
+possible et reste invisible depuis l'intérieur.
 
 Ne filtre pas le niveau **actuel** d'un enfant déjà enregistré : c'est au
 formulaire d'y ajouter le niveau existant pour ne pas le changer en silence.
@@ -688,6 +690,11 @@ export const useUpdateChildApiV1ChildrenChildIdPut = <
 };
 /**
  * Supprime définitivement un enfant (propriétaire uniquement).
+
+Passe par :func:`app.services.admin.delete_child_account`, chemin unique de
+suppression : les liens de garde, les invitations et l'avatar sur disque ne
+cascadent pas côté ORM, et la politique de confidentialité promet qu'ils
+partent aussi.
  * @summary Delete Child
  */
 export const deleteChildApiV1ChildrenChildIdDelete = (

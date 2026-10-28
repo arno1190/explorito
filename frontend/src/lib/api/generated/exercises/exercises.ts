@@ -35,7 +35,8 @@ import type {
 import { axiosInstance } from "../../axios-instance";
 
 /**
- * Liste les exercices avec filtres optionnels
+ * Liste les exercices avec filtres optionnels (admin uniquement : la liste
+brute ignore la visibilité des packs).
 
 Args:
     db: Session de base de données
