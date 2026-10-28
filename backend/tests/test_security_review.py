@@ -150,3 +150,21 @@ def test_a_foreign_unreviewed_pack_cannot_be_enabled(client: TestClient, db_sess
 
     assert enable(draft.id).status_code == 404
     assert enable(approved.id).status_code == 200
+
+
+def test_a_disguised_path_to_another_avatar_is_spared(client: TestClient, db_session: Session, tmp_path: Path):
+    name = "0123456789abcdef0123456789abcdef.png"
+    victim = tmp_path / "avatars" / name
+    victim.parent.mkdir(parents=True)
+    victim.write_bytes(b"avatar d'une autre famille")
+    original = settings.UPLOAD_DIR
+    settings.UPLOAD_DIR = str(tmp_path)
+    try:
+        h = dev_login(client)
+        child = make_child(db_session)
+        disguised = f"/uploads/avatars/./{name}"
+        assert client.put(f"/api/v1/children/{child.id}", json={"avatar_url": disguised}, headers=h).status_code == 200
+        assert client.delete(f"/api/v1/children/{child.id}", headers=h).status_code == 204
+    finally:
+        settings.UPLOAD_DIR = original
+    assert victim.exists()

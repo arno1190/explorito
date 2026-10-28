@@ -12,6 +12,7 @@ chemin de suppression d'un compte.
 """
 
 import logging
+import re
 import uuid
 from pathlib import Path
 
@@ -23,6 +24,11 @@ logger = logging.getLogger("explorito.uploads")
 
 # Préfixe des chemins relatifs servis par le montage statique.
 UPLOAD_URL_PREFIX = "/uploads/"
+
+# Seule forme qu'écrit :func:`save_avatar`. Toute autre écriture d'un même
+# fichier (``./``, ``//``, majuscules) contournerait la vérification « encore
+# utilisé par un autre profil », faite par égalité de chaînes.
+CANONICAL_AVATAR_URL = re.compile(r"^/uploads/avatars/[0-9a-f]{32}\.(png|jpg|webp|gif)$")
 
 # Types MIME image autorisés -> extension de fichier.
 ALLOWED_IMAGE_TYPES: dict[str, str] = {
@@ -83,7 +89,7 @@ def delete_upload(relative_url: str | None) -> bool:
     Returns:
         ``True`` si un fichier a bien été supprimé du disque.
     """
-    if not relative_url or not relative_url.startswith(UPLOAD_URL_PREFIX):
+    if not relative_url or not CANONICAL_AVATAR_URL.fullmatch(relative_url):
         return False
 
     uploads_root = Path(settings.UPLOAD_DIR).resolve()
