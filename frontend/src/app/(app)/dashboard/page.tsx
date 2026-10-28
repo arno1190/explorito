@@ -52,6 +52,7 @@ import {
   Pencil,
   Library,
   PenLine,
+  Compass,
 } from "lucide-react";
 import { EditChildDialog } from "@/components/profile/EditChildDialog";
 import { levelsFor, useAvailableLevels } from "@/lib/levels";
@@ -60,6 +61,7 @@ import {
   OnboardingFlow,
   resumableOnboarding,
 } from "./_components/OnboardingFlow";
+import { FeatureTour, shouldAutoOpenTour } from "./_components/FeatureTour";
 import type { ChildResponse, ChildStatsResponse } from "@/lib/api/model";
 
 export default function DashboardPage() {
@@ -115,6 +117,22 @@ export default function DashboardPage() {
     !onboardingDismissed &&
     children.length > 0 &&
     resumeChild !== null;
+
+  // Visite guidée : ouverte d'elle-même une seule fois pour un compte récent,
+  // une fois le premier enfant installé (avant, il n'y a rien à montrer), et
+  // jamais pour un admin qui « regarde en tant que » cette famille.
+  const [tourOpen, setTourOpen] = useState(false);
+  useEffect(() => {
+    if (loading || showOnboarding || children.length === 0) return;
+    let adminViewing = false;
+    try {
+      adminViewing = !!localStorage.getItem("impersonate_user");
+    } catch {
+      // stockage indisponible : on considère que c'est bien le parent
+    }
+    if (!adminViewing && shouldAutoOpenTour(user?.created_at))
+      setTourOpen(true);
+  }, [loading, showOnboarding, children.length, user?.created_at]);
 
   const launchChild = (child: ChildResponse) => {
     if (user?.has_pin) {
@@ -276,23 +294,28 @@ export default function DashboardPage() {
     const remainingMonths = months % 12;
 
     if (years === 0) {
-      return `${months} months`;
+      return `${months} mois`;
     }
-    return `${years} year${years > 1 ? "s" : ""} ${remainingMonths} month${remainingMonths !== 1 ? "s" : ""}`;
+    return `${years} an${years > 1 ? "s" : ""} et ${remainingMonths} mois`;
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <FeatureTour open={tourOpen} onClose={() => setTourOpen(false)} />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold">
-            Welcome, {user?.profile?.display_name || "User"}!
+            Bonjour {user?.profile?.display_name || ""}&nbsp;!
           </h1>
           <p className="text-muted-foreground mt-2">
-            Manage your children and discover age-appropriate activities
+            Gérez vos enfants et suivez leurs progrès.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => setTourOpen(true)}>
+            <Compass className="mr-2 h-4 w-4" />
+            Visite guidée
+          </Button>
           <Button
             variant="outline"
             onClick={() => setShareTarget({ childId: null })}
@@ -304,16 +327,15 @@ export default function DashboardPage() {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Child
+                Ajouter un enfant
               </Button>
             </DialogTrigger>
             <DialogContent>
               <form onSubmit={handleAddChild}>
                 <DialogHeader>
-                  <DialogTitle>Add a new child</DialogTitle>
+                  <DialogTitle>Ajouter un enfant</DialogTitle>
                   <DialogDescription>
-                    Add your child's information to get personalized activity
-                    recommendations
+                    Sa classe détermine les leçons qu&apos;il verra.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
@@ -323,7 +345,7 @@ export default function DashboardPage() {
                     </div>
                   )}
                   <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
+                    <Label htmlFor="name">Prénom</Label>
                     <Input
                       id="name"
                       value={name}
