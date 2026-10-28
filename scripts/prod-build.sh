@@ -26,6 +26,13 @@ docker builder prune -af >/dev/null 2>&1 || true
 
 echo "[3/4] up (migrations run on backend start)"
 $COMPOSE up -d
+# rsync remplace le Caddyfile par un nouveau fichier : le montage du conteneur
+# garde l'ancien tant qu'il n'est pas redémarré. On ne redémarre (≈1 s de
+# coupure) que si le contenu a vraiment changé.
+if ! $COMPOSE exec -T caddy cat /etc/caddy/Caddyfile | cmp -s - Caddyfile; then
+  echo "Caddyfile changed: restarting caddy"
+  $COMPOSE restart caddy
+fi
 docker image prune -af >/dev/null 2>&1 || true
 
 echo "[4/4] status"

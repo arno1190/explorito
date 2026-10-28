@@ -1,7 +1,24 @@
+(security_headers) {
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+}
+
 {$DOMAIN:localhost} {
+	import security_headers
 	reverse_proxy frontend:3000
 }
 
 api.{$DOMAIN:localhost} {
+	import security_headers
+	# Le backend lit un envoi en mémoire avant d'en vérifier la taille (512 Mo
+	# par conteneur) : on coupe ici, juste au-dessus de MAX_UPLOAD_SIZE (10 Mo).
+	request_body {
+		max_size 12MB
+	}
 	reverse_proxy backend:8000
 }
