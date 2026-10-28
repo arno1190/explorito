@@ -33,7 +33,7 @@ from app.models.content import (
     LevelEnum,
     Subject,
 )
-from app.schemas.exercise import validate_exercise_payload
+from app.schemas.exercise import note_name, validate_exercise_payload
 from app.services.packs import derive_lesson_xp, ensure_official_pack
 
 TIER_DIFFICULTY = {1: DifficultyEnum.EASY, 2: DifficultyEnum.MEDIUM, 3: DifficultyEnum.HARD}
@@ -48,6 +48,7 @@ SUBJECTS: dict[str, dict[str, str]] = {
     "monde": {"name": "Questionner le monde", "icon": "🚀"},
     "arts": {"name": "Arts", "icon": "🎨"},
     "logique": {"name": "Logique", "icon": "🧩"},
+    "musique": {"name": "Musique", "icon": "🎵"},
 }
 
 
@@ -159,6 +160,33 @@ def soroban(
         "question": question,
         "content": content,
         "correct_answer": {"value": value},
+    }
+    if explanation:
+        ex["explanation"] = explanation
+    if level is not None:
+        ex["level"] = level
+    return ex
+
+
+def music_note(
+    question: str,
+    pitch: str,
+    *,
+    clef: str = "sol",
+    mode: str = "name",
+    choices: list[str] | None = None,
+    explanation: str | None = None,
+    level: int | None = None,
+) -> dict[str, Any]:
+    """Lecture de notes : nommer (``name``) ou placer (``place``) ``pitch`` (ex. ``"G4"``) dans ``clef``."""
+    content: dict[str, Any] = {"clef": clef, "mode": mode, "pitch": pitch}
+    if choices is not None:
+        content["choices"] = choices
+    ex: dict[str, Any] = {
+        "type": "music_note",
+        "question": question,
+        "content": content,
+        "correct_answer": {"name": note_name(pitch)},
     }
     if explanation:
         ex["explanation"] = explanation

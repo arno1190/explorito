@@ -64,6 +64,7 @@ export const EXERCISE_TYPE_LABELS: Record<string, string> = {
   math_problem: "Problème de maths",
   reading: "Lecture",
   soroban: "Soroban",
+  music_note: "Lecture de notes",
 };
 
 export function levelRange(min?: string | null, max?: string | null): string {

@@ -207,6 +207,7 @@ Un exercice = `type`, `question` (la consigne lue par l'enfant), `content`,
 | `reveal` | `{"prompt": "Pourquoi…", "reveal": "Parce que…"}` | `{}` |
 | `soroban` | `{"mode": "read", "value": 42, "columns": 3}` | `{"value": 42}` — doit égaler `content.value` |
 | `pythagore` | `{"tables": [3], "blanks": 5}` | `{}` |
+| `music_note` | `{"clef": "sol", "mode": "name", "pitch": "G4", "choices": ["fa", "sol", "la"]}` — `clef` `sol` ou `ut3` (clé d'ut 3e ligne, celle de l'alto), `mode` `name` (nommer la note) ou `place` (la poser), `pitch` de `A3` à `C6` en clé de sol, de `B2` à `D5` en clé d'ut 3 (deux lignes supplémentaires au plus) ; `choices` facultatif | `{"name": "sol"}` — nom de `pitch` (`do ré mi fa sol la si`) |
 
 `color` sur une option sert aux non-lecteurs (maternelle) : une pastille de
 couleur au lieu d'un mot.

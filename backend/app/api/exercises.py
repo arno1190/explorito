@@ -23,6 +23,7 @@ from app.schemas.exercise import (
     ExerciseSubmitResponse,
     ExerciseUpdate,
     UnlockedAchievement,
+    normalize_note_name,
 )
 from app.services.gamification import process_exercise_result
 from app.services.progression import lesson_locked
@@ -95,6 +96,12 @@ def check_answer_correctness(exercise: Exercise, user_answer: dict[str, Any]) ->
             return False
         correct_value = correct_answer.get("value")
         return correct_value is not None and user_value == int(correct_value)
+
+    if exercise.type == ExerciseType.MUSIC_NOTE.value:
+        # Portée : seul le nom compte (poser un sol sur n'importe quel sol est juste).
+        expected = correct_answer.get("name")
+        given = user_answer.get("name")
+        return expected is not None and given is not None and normalize_note_name(given) == expected
 
     if exercise.type == ExerciseType.PYTHAGORE.value:
         # Mini-jeu : chaque case "AxB" doit valoir A*B ; toutes correctes -> gagné

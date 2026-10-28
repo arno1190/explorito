@@ -69,6 +69,7 @@ CANONICAL_SUBJECTS: dict[str, tuple[str, str]] = {
     "monde": ("Questionner le monde", "🚀"),
     "arts": ("Arts", "🎨"),
     "logique": ("Logique", "🧩"),
+    "musique": ("Musique", "🎵"),
 }
 
 CANONICAL_SUBJECT_SLUGS: frozenset[str] = frozenset(CANONICAL_SUBJECTS)

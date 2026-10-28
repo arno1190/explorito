@@ -87,6 +87,7 @@ class ExerciseType(str, enum.Enum):
     MATH_PROBLEM = "math_problem"  # problème à résoudre, réponse numérique
     READING = "reading"  # texte à lire (compréhension / leçon), sans bonne réponse
     SOROBAN = "soroban"  # boulier japonais : lire ou construire un nombre
+    MUSIC_NOTE = "music_note"  # portée musicale : nommer ou placer une note (clé de sol / d'ut 3)
 
 
 class Subject(Base):

@@ -267,6 +267,7 @@ const EXERCISE_TYPE_LABELS: Record<string, string> = {
   math_problem: "Problème",
   reading: "Lecture",
   soroban: "Boulier",
+  music_note: "Lecture de notes",
 };
 
 /** Nom français d'un type d'exercice (le type brut sinon : un pack peut en porter un inconnu). */

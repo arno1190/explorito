@@ -5,6 +5,7 @@ import { FillBlanks } from "./FillBlanks";
 import { InstructionAudio } from "./InstructionAudio";
 import { MathProblem } from "./MathProblem";
 import { MultipleChoice } from "./MultipleChoice";
+import { MusicNote } from "./MusicNote";
 import { Pythagore } from "./Pythagore";
 import { Reading } from "./Reading";
 import { Reveal } from "./Reveal";
@@ -14,6 +15,7 @@ import type {
   FillBlanksContent,
   MathProblemContent,
   MultipleChoiceContent,
+  MusicNoteContent,
   PythagoreContent,
   ReadingContent,
   RevealContent,
@@ -81,6 +83,8 @@ export function ExerciseRenderer({
         return <Reading {...shared} content={content as ReadingContent} />;
       case "soroban":
         return <Soroban {...shared} content={content as SorobanContent} />;
+      case "music_note":
+        return <MusicNote {...shared} content={content as MusicNoteContent} />;
       default:
         return (
           <div className="rounded-xl bg-fun-sun-light p-4 text-fun-text">

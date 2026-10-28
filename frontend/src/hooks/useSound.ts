@@ -80,10 +80,17 @@ const sounds: Record<SoundName, (ctx: AudioContext) => void> = {
   },
 };
 
+/** Son de « carillon » pour une note jouée : fondamentale + une harmonique douce. */
+function chime(ctx: AudioContext, frequency: number) {
+  const t = ctx.currentTime;
+  playNote(ctx, frequency, t, 1.2, "sine", 0.3);
+  playNote(ctx, frequency * 2, t, 0.6, "triangle", 0.06);
+}
+
 export function useSound() {
   const ctxRef = useRef<AudioContext | null>(null);
 
-  const play = useCallback((name: SoundName) => {
+  const withContext = useCallback((render: (ctx: AudioContext) => void) => {
     try {
       if (!ctxRef.current || ctxRef.current.state === "closed") {
         ctxRef.current = getAudioContext();
@@ -95,11 +102,22 @@ export function useSound() {
         ctx.resume();
       }
 
-      sounds[name](ctx);
+      render(ctx);
     } catch {
       // Audio not available - fail silently
     }
   }, []);
 
-  return { play };
+  const play = useCallback(
+    (name: SoundName) => withContext(sounds[name]),
+    [withContext]
+  );
+
+  /** Joue une hauteur précise (en Hz), pour les exercices de musique. */
+  const playFrequency = useCallback(
+    (frequency: number) => withContext((ctx) => chime(ctx, frequency)),
+    [withContext]
+  );
+
+  return { play, playFrequency };
 }

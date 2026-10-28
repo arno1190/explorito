@@ -153,6 +153,17 @@ function ExerciseBody({ exercise }: { exercise: PackExercisePreview }) {
         </p>
       );
     }
+    case "music_note": {
+      return (
+        <p className="text-sm text-fun-text">
+          <span className="font-bold">
+            {content.clef === "ut3" ? "Clé d'ut 3" : "Clé de sol"} ·{" "}
+            {content.mode === "place" ? "À poser" : "À nommer"}&nbsp;:{" "}
+          </span>
+          {String(answer.name ?? "—")} ({String(content.pitch ?? "—")})
+        </p>
+      );
+    }
     default: {
       return (
         <pre className="overflow-x-auto rounded-xl border-2 border-fun-border bg-white p-3 font-mono text-xs text-fun-text">

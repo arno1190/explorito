@@ -48,6 +48,19 @@ export interface SorobanContent {
   columns?: number | null;
 }
 
+export type NoteName = "do" | "ré" | "mi" | "fa" | "sol" | "la" | "si";
+
+export interface MusicNoteContent {
+  /** "sol" : clé de sol 2e ligne ; "ut3" : clé d'ut 3e ligne (alto). */
+  clef: "sol" | "ut3";
+  /** "name" : nommer la note affichée ; "place" : poser la note nommée. */
+  mode: "name" | "place";
+  /** Hauteur en notation anglo-saxonne, ex. "C4" (do du milieu). */
+  pitch: string;
+  /** Noms proposés (par défaut, les 7 notes). */
+  choices?: NoteName[] | null;
+}
+
 /** Réponse prête pour l'API `POST /exercises/{id}/submit` (champ `answer`). */
 export type AnswerPayload = Record<string, unknown> | null;
 

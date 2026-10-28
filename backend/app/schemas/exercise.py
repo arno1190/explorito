@@ -20,6 +20,9 @@ Types canoniques (voir :class:`app.models.content.ExerciseType`) :
 - ``pythagore`` — mini-jeu de table de multiplication
     content        : {"tables": [2, 3, 4], "blanks": 5}
     correct_answer : {}
+- ``music_note`` — lire (``name``) ou placer (``place``) une note sur la portée
+    content        : {"clef": "sol" | "ut3", "mode": "name", "pitch": "G4", "choices?": ["sol", "la"]}
+    correct_answer : {"name": "sol"}
 """
 
 from datetime import datetime
@@ -124,6 +127,67 @@ class SorobanAnswer(BaseModel):
     value: int = Field(..., ge=0)
 
 
+# Noms de notes en solfège français, dans l'ordre des lettres C D E F G A B.
+NOTE_NAMES = ("do", "ré", "mi", "fa", "sol", "la", "si")
+_LETTERS = "CDEFGAB"
+# Note posée sur la 1re ligne (en bas) de la portée, pour chaque clé.
+_CLEF_BOTTOM_LINE = {"sol": "E4", "ut3": "F3"}
+# Marge de la portée : deux lignes supplémentaires en dessous et au-dessus.
+STAFF_MIN_STEP, STAFF_MAX_STEP = -4, 12
+
+
+def _diatonic(pitch: str) -> int:
+    return int(pitch[1]) * 7 + _LETTERS.index(pitch[0])
+
+
+def note_name(pitch: str) -> str:
+    """Nom français d'une hauteur en notation anglo-saxonne (``"G4"`` → ``"sol"``)."""
+    return NOTE_NAMES[_LETTERS.index(pitch[0])]
+
+
+def staff_step(clef: str, pitch: str) -> int:
+    """Position sur la portée en demi-interlignes, 0 = 1re ligne du bas (2 = 2e ligne)."""
+    return _diatonic(pitch) - _diatonic(_CLEF_BOTTOM_LINE[clef])
+
+
+def normalize_note_name(raw: object) -> str:
+    """Nom de note comparable : minuscules, sans espaces, ``re`` accepté pour ``ré``."""
+    name = str(raw).strip().lower()
+    return "ré" if name == "re" else name
+
+
+class MusicNoteContent(BaseModel):
+    """
+    Contenu d'un exercice de lecture de notes.
+
+    - ``clef`` : ``sol`` (clé de sol 2e ligne) ou ``ut3`` (clé d'ut 3e ligne, celle de l'alto).
+    - ``mode`` ``name`` : la note est affichée, l'enfant choisit son nom.
+    - ``mode`` ``place`` : l'enfant pose la note nommée sur la portée.
+    - ``pitch`` : hauteur affichée (ou montrée en correction), ex. ``"C4"`` = do du milieu.
+    - ``choices`` : noms proposés (par défaut, les 7 notes).
+    """
+
+    clef: str = Field(..., pattern="^(sol|ut3)$")
+    mode: str = Field(default="name", pattern="^(name|place)$")
+    pitch: str = Field(..., pattern="^[A-G][1-7]$")
+    choices: list[str] | None = Field(default=None, min_length=2, max_length=7)
+
+    @model_validator(mode="after")
+    def _check_on_staff(self) -> "MusicNoteContent":
+        step = staff_step(self.clef, self.pitch)
+        if not STAFF_MIN_STEP <= step <= STAFF_MAX_STEP:
+            raise ValueError(f"{self.pitch} sort de la portée en clé {self.clef} (2 lignes supplémentaires au plus)")
+        if self.choices is not None and any(c not in NOTE_NAMES for c in self.choices):
+            raise ValueError(f"choices doit ne contenir que des noms parmi {NOTE_NAMES}")
+        return self
+
+
+class MusicNoteAnswer(BaseModel):
+    """Réponse d'un exercice de lecture de notes : le nom de la note."""
+
+    name: str = Field(..., pattern="^(do|ré|mi|fa|sol|la|si)$")
+
+
 BLANK_MARKER = "___"
 
 
@@ -186,6 +250,14 @@ def validate_exercise_payload(
         # La réponse attendue doit correspondre au nombre affiché/à construire.
         if soroban_answer.value != soroban_content.value:
             raise ValueError("correct_answer.value doit être égal à content.value pour un exercice soroban")
+
+    elif exercise_type == ExerciseType.MUSIC_NOTE:
+        note_content = MusicNoteContent.model_validate(content)
+        note_answer = MusicNoteAnswer.model_validate(correct_answer)
+        if note_answer.name != note_name(note_content.pitch):
+            raise ValueError("correct_answer.name doit être le nom de content.pitch pour un exercice music_note")
+        if note_content.choices is not None and note_answer.name not in note_content.choices:
+            raise ValueError("choices doit contenir la bonne réponse")
 
 
 # --------------------------------------------------------------------------- #

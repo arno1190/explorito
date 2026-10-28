@@ -25,4 +25,5 @@ export const ExerciseType = {
   math_problem: "math_problem",
   reading: "reading",
   soroban: "soroban",
+  music_note: "music_note",
 } as const;
