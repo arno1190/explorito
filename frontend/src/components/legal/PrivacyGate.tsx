@@ -44,8 +44,25 @@ export function PrivacyGate() {
   const [checked, setChecked] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Un admin qui « regarde en tant que » une famille ne consent pas à sa
+  // place : l'incarnation est en lecture seule (le POST d'acceptation partirait
+  // au nom de l'admin), la case ne pourrait donc jamais se refermer. Lu dès le
+  // premier rendu (et non dans un effet) pour que l'effet ci-dessous ne fasse
+  // pas sortir du mode enfant avant d'avoir su qu'un admin regarde ; `user`
+  // n'étant chargé qu'après l'hydratation, ce rendu-là vaut `null` des deux côtés.
+  const [adminViewing] = useState(() => {
+    try {
+      return (
+        typeof window !== "undefined" &&
+        !!localStorage.getItem("impersonate_user")
+      );
+    } catch {
+      return false;
+    }
+  });
+
   const alreadyAccepted = user?.privacy_accepted ?? true;
-  const consentMissing = Boolean(user) && !alreadyAccepted;
+  const consentMissing = Boolean(user) && !alreadyAccepted && !adminViewing;
   const shouldAsk = consentMissing && !impersonatedChild;
 
   // Sortie du mode enfant, une seule fois par chargement : sans le garde-fou,
