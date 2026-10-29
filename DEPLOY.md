@@ -97,14 +97,11 @@ Then in a browser:
 
 ## 8. Backups (recommended)
 
-A backup script is provided (`scripts/backup.sh`, gzip + 7-day retention). Add a daily cron on the host:
-
-```bash
-# crontab -e
-0 3 * * * cd /opt/explorito && POSTGRES_USER=explorito POSTGRES_DB=explorito \
-  docker compose -f docker-compose.prod.yml exec -T postgres \
-  pg_dump -U explorito explorito | gzip > /opt/explorito/backups/explorito_$(date +\%Y\%m\%d).sql.gz
-```
+`scripts/backup.sh` dumps the database and the uploads volume once a month
+(cron installed by `prod-build.sh`) and ships them to Scaleway Object Storage
+in the GLACIER class. It reads a write-only key from `/etc/explorito/backup.env`
+(`BACKUP_S3_ACCESS_KEY`, `BACKUP_S3_SECRET_KEY`); restore steps are in the
+script header. The last three runs also stay in `/opt/explorito/backups`.
 
 ## 9. Updating the pilot
 

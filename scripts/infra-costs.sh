@@ -40,3 +40,12 @@ echo
 echo "=== Ressources qui facturent ==="
 $SCW instance server list zone=all -o human
 $SCW rdb instance list region=all -o human
+
+echo
+echo "=== Sauvegardes hors serveur (3 objets de plus chaque mois) ==="
+$SCW object bucket get explorito-backups-pascal region=fr-par -o json | python3 -c '
+import json, sys
+b = json.load(sys.stdin)
+count, size = b.get("NbObjects") or 0, int(b.get("Size") or 0) / 1e6
+print(f"  {count} objets, {size:.1f} Mo")
+' 2>/dev/null || echo "  (bucket explorito-backups-pascal introuvable)"

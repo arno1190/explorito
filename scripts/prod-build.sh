@@ -35,5 +35,10 @@ if ! $COMPOSE exec -T caddy cat /etc/caddy/Caddyfile | cmp -s - Caddyfile; then
 fi
 docker image prune -af >/dev/null 2>&1 || true
 
+# Sauvegarde hors serveur le 1er du mois (voir scripts/backup.sh).
+printf '%s\n' 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' \
+  '30 3 1 * * root bash /opt/explorito/scripts/backup.sh >> /var/log/explorito-backup.log 2>&1' \
+  > /etc/cron.d/explorito-backup
+
 echo "[4/4] status"
 $COMPOSE ps --format "{{.Service}}: {{.State}}"
