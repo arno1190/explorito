@@ -20,6 +20,7 @@ import type {
 import type {
   HTTPValidationError,
   ManifestApiV1AgentGet200,
+  SolfegeStarterPackApiV1AgentSolfege1c1ExploritoGet200,
 } from "../../model";
 
 import { axiosInstance } from "../../axios-instance";
@@ -164,6 +165,204 @@ export function useManifestApiV1AgentGet<
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getManifestApiV1AgentGetQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Public starter content; downloading does not publish a pack.
+ * @summary Solfege Starter Pack
+ */
+export const solfegeStarterPackApiV1AgentSolfege1c1ExploritoGet = (
+  signal?: AbortSignal
+) => {
+  return axiosInstance<SolfegeStarterPackApiV1AgentSolfege1c1ExploritoGet200>({
+    url: `/api/v1/agent/solfege-1c1.explorito`,
+    method: "GET",
+    signal,
+  });
+};
+
+export const getSolfegeStarterPackApiV1AgentSolfege1c1ExploritoGetQueryKey =
+  () => {
+    return [`/api/v1/agent/solfege-1c1.explorito`] as const;
+  };
+
+export const getSolfegeStarterPackApiV1AgentSolfege1c1ExploritoGetQueryOptions =
+  <
+    TData = Awaited<
+      ReturnType<typeof solfegeStarterPackApiV1AgentSolfege1c1ExploritoGet>
+    >,
+    TError = unknown,
+  >(options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof solfegeStarterPackApiV1AgentSolfege1c1ExploritoGet>
+        >,
+        TError,
+        TData
+      >
+    >;
+  }) => {
+    const { query: queryOptions } = options ?? {};
+
+    const queryKey =
+      queryOptions?.queryKey ??
+      getSolfegeStarterPackApiV1AgentSolfege1c1ExploritoGetQueryKey();
+
+    const queryFn: QueryFunction<
+      Awaited<
+        ReturnType<typeof solfegeStarterPackApiV1AgentSolfege1c1ExploritoGet>
+      >
+    > = ({ signal }) =>
+      solfegeStarterPackApiV1AgentSolfege1c1ExploritoGet(signal);
+
+    return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+      Awaited<
+        ReturnType<typeof solfegeStarterPackApiV1AgentSolfege1c1ExploritoGet>
+      >,
+      TError,
+      TData
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
+  };
+
+export type SolfegeStarterPackApiV1AgentSolfege1c1ExploritoGetQueryResult =
+  NonNullable<
+    Awaited<
+      ReturnType<typeof solfegeStarterPackApiV1AgentSolfege1c1ExploritoGet>
+    >
+  >;
+export type SolfegeStarterPackApiV1AgentSolfege1c1ExploritoGetQueryError =
+  unknown;
+
+export function useSolfegeStarterPackApiV1AgentSolfege1c1ExploritoGet<
+  TData = Awaited<
+    ReturnType<typeof solfegeStarterPackApiV1AgentSolfege1c1ExploritoGet>
+  >,
+  TError = unknown,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof solfegeStarterPackApiV1AgentSolfege1c1ExploritoGet>
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<
+            ReturnType<
+              typeof solfegeStarterPackApiV1AgentSolfege1c1ExploritoGet
+            >
+          >,
+          TError,
+          Awaited<
+            ReturnType<
+              typeof solfegeStarterPackApiV1AgentSolfege1c1ExploritoGet
+            >
+          >
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useSolfegeStarterPackApiV1AgentSolfege1c1ExploritoGet<
+  TData = Awaited<
+    ReturnType<typeof solfegeStarterPackApiV1AgentSolfege1c1ExploritoGet>
+  >,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof solfegeStarterPackApiV1AgentSolfege1c1ExploritoGet>
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<
+            ReturnType<
+              typeof solfegeStarterPackApiV1AgentSolfege1c1ExploritoGet
+            >
+          >,
+          TError,
+          Awaited<
+            ReturnType<
+              typeof solfegeStarterPackApiV1AgentSolfege1c1ExploritoGet
+            >
+          >
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useSolfegeStarterPackApiV1AgentSolfege1c1ExploritoGet<
+  TData = Awaited<
+    ReturnType<typeof solfegeStarterPackApiV1AgentSolfege1c1ExploritoGet>
+  >,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof solfegeStarterPackApiV1AgentSolfege1c1ExploritoGet>
+        >,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Solfege Starter Pack
+ */
+
+export function useSolfegeStarterPackApiV1AgentSolfege1c1ExploritoGet<
+  TData = Awaited<
+    ReturnType<typeof solfegeStarterPackApiV1AgentSolfege1c1ExploritoGet>
+  >,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof solfegeStarterPackApiV1AgentSolfege1c1ExploritoGet>
+        >,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions =
+    getSolfegeStarterPackApiV1AgentSolfege1c1ExploritoGetQueryOptions(options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

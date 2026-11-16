@@ -7,6 +7,7 @@ from typing import Annotated, Any, cast
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from app.api.auth import get_current_active_user
@@ -25,6 +26,7 @@ from app.schemas.exercise import (
     UnlockedAchievement,
     normalize_note_name,
 )
+from app.schemas.music import MusicRhythmContent, TapAnswer, rhythm_attacks
 from app.services.gamification import process_exercise_result
 from app.services.packs import pack_readable_by
 from app.services.progression import lesson_locked
@@ -97,6 +99,39 @@ def check_answer_correctness(exercise: Exercise, user_answer: dict[str, Any]) ->
             return False
         correct_value = correct_answer.get("value")
         return correct_value is not None and user_value == int(correct_value)
+
+    if exercise.type == ExerciseType.MUSIC_SEQUENCE.value:
+        given = user_answer.get("names")
+        expected_names = correct_answer.get("names")
+        return (
+            isinstance(given, list)
+            and isinstance(expected_names, list)
+            and len(given) == len(expected_names)
+            and [normalize_note_name(name) for name in given] == expected_names
+        )
+
+    if exercise.type == ExerciseType.MUSIC_RHYTHM.value:
+        rhythm = MusicRhythmContent.model_validate(exercise.content)
+        if rhythm.mode == "listen":
+            return user_answer.get("option_id") == correct_answer.get("option_id")
+        if rhythm.mode == "count":
+            value = user_answer.get("beats")
+            return (
+                not isinstance(value, bool) and isinstance(value, (int, float)) and value == correct_answer.get("beats")
+            )
+        try:
+            taps = TapAnswer.model_validate(user_answer).taps
+        except ValidationError:
+            return False
+        expected_attacks = rhythm_attacks(rhythm.events)
+        if len(taps) != len(expected_attacks):
+            return False
+        seconds_per_beat = 60 / rhythm.bpm
+        tolerance = max(0.18, seconds_per_beat * 0.25)
+        return all(
+            abs((tap - taps[0]) - attack * seconds_per_beat) <= tolerance
+            for tap, attack in zip(taps, expected_attacks, strict=True)
+        )
 
     if exercise.type == ExerciseType.MUSIC_NOTE.value:
         # Portée : seul le nom compte (poser un sol sur n'importe quel sol est juste).

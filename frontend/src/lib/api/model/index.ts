@@ -169,6 +169,7 @@ export * from "./reportStatus";
 export * from "./rewardResponse";
 export * from "./sendApiV1AnnouncementsAnnouncementIdSendPostParams";
 export * from "./signupInviteRow";
+export * from "./solfegeStarterPackApiV1AgentSolfege1c1ExploritoGet200";
 export * from "./solveRequest";
 export * from "./solveResponse";
 export * from "./startLessonApiV1LessonsLessonIdStartPost201";

@@ -22,6 +22,7 @@ Les documents servis ne contiennent jamais d'hôte en dur : ``{{API_BASE}}`` et
 configuration, de sorte qu'une instance auto-hébergée renvoie ses propres URLs.
 """
 
+import json
 from functools import lru_cache
 from pathlib import Path
 
@@ -40,6 +41,7 @@ AGENT_DOCS_DIR = Path(__file__).resolve().parent.parent / "agent"
 #: que le parent recopie, donc il ne change pas sans casser des copier-coller.
 AGENT_DOCS: dict[str, str] = {
     "pack-author": "Rédiger et déposer un pack de leçons Explorito (guide complet, autoportant)",
+    "solfege-1c1": "Créer des leçons de solfège CE1 / 1C1 : notes, rythme et écoute",
     "rubric": "Bornes de contenu par niveau scolaire, de la petite section au CM2",
 }
 
@@ -101,7 +103,15 @@ async def manifest(request: Request) -> dict:
             "music": {
                 "subject_slug": "musique",
                 "exercise_type": "music_note",
-                "clefs": ["sol", "ut3"],
+                "clefs": ["sol", "fa", "ut3"],
+                "exercise_types": {
+                    "music_note": ["name", "place"],
+                    "music_sequence": ["read", "listen"],
+                    "music_rhythm": ["count", "listen", "tap"],
+                },
+                "curriculum": {"level": "ce1", "music_year": "1C1"},
+                "guide_url": f"{base}/api/v1/agent/solfege-1c1.md",
+                "starter_pack_url": f"{base}/api/v1/agent/solfege-1c1.explorito",
                 "modes": ["name", "place"],
             },
         },
@@ -124,6 +134,12 @@ async def manifest(request: Request) -> dict:
             "max_file_size": settings.PACK_MAX_FILE_SIZE,
         },
     }
+
+
+@router.get("/solfege-1c1.explorito")
+async def solfege_starter_pack() -> dict:
+    """Public starter content; downloading does not publish a pack."""
+    return json.loads((AGENT_DOCS_DIR / "solfege-1c1.explorito").read_text(encoding="utf-8"))
 
 
 @router.get("/{slug}.md", response_class=PlainTextResponse)

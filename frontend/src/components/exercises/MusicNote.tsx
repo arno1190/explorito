@@ -24,7 +24,7 @@ const NAMES: NoteName[] = ["do", "ré", "mi", "fa", "sol", "la", "si"];
 const LETTERS = "CDEFGAB";
 const SEMITONES = [0, 2, 4, 5, 7, 9, 11];
 // Note de la 1re ligne de chaque clé, en degrés diatoniques (octave*7 + lettre).
-const BOTTOM_LINE = { sol: 4 * 7 + 2, ut3: 3 * 7 + 3 }; // mi4, fa3
+const BOTTOM_LINE = { sol: 4 * 7 + 2, fa: 2 * 7 + 4, ut3: 3 * 7 + 3 }; // mi4, fa3
 // Couleur de chaque note (façon cloches de classe), du do au si.
 const NOTE_COLORS = [
   "#EF4444",
@@ -57,7 +57,7 @@ function frequencyOf(diatonic: number): number {
   return 440 * 2 ** ((midi - 69) / 12);
 }
 
-function TrebleClef() {
+export function TrebleClef() {
   return (
     <g>
       <path
@@ -73,11 +73,22 @@ function TrebleClef() {
   );
 }
 
+export function BassClef() {
+  return (
+    <g fill={NAVY}>
+      <path d="M 28 93 C 28 76, 57 75, 57 95 C 57 113, 40 128, 25 135 C 41 122, 49 106, 49 94 C 49 84, 36 83, 34 92 Z" />
+      <circle cx={31} cy={94} r={5} />
+      <circle cx={65} cy={80} r={3} />
+      <circle cx={65} cy={100} r={3} />
+    </g>
+  );
+}
+
 const C_LOBE =
   "M 3 0 L 8 -9 C 12 -16, 17 -20, 20 -18 C 30 -24, 28 -38, 18 -38 C 12 -38, 10 -34, 12 -31";
 
 /** Clé d'ut : son milieu (pointe) est posé sur la ligne `step`. */
-function CClef({ step }: { step: number }) {
+export function CClef({ step }: { step: number }) {
   const lobe = (
     <>
       <path
@@ -121,7 +132,7 @@ function LedgerLines({ step, x }: { step: number; x: number }) {
   );
 }
 
-function NoteHead({
+export function NoteHead({
   step,
   x,
   color,
@@ -229,7 +240,11 @@ export function MusicNote({
 
       <div className="flex flex-col items-center gap-3">
         <span className="rounded-full bg-fun-violet-light px-4 py-1 text-sm font-bold text-fun-text">
-          {content.clef === "ut3" ? "🎻 Clé d'ut 3e ligne" : "🎼 Clé de sol"}
+          {content.clef === "ut3"
+            ? "🎻 Clé d'ut 3e ligne"
+            : content.clef === "fa"
+              ? "🎼 Clé de fa"
+              : "🎼 Clé de sol"}
         </span>
         <svg
           viewBox={`0 0 ${W} ${H}`}
@@ -252,7 +267,13 @@ export function MusicNote({
               strokeWidth={1.6}
             />
           ))}
-          {content.clef === "ut3" ? <CClef step={4} /> : <TrebleClef />}
+          {content.clef === "ut3" ? (
+            <CClef step={4} />
+          ) : content.clef === "fa" ? (
+            <BassClef />
+          ) : (
+            <TrebleClef />
+          )}
 
           {placing ? (
             <>

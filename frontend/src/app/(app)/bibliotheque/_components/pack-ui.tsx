@@ -65,6 +65,8 @@ export const EXERCISE_TYPE_LABELS: Record<string, string> = {
   reading: "Lecture",
   soroban: "Soroban",
   music_note: "Lecture de notes",
+  music_sequence: "Lecture et écoute de notes",
+  music_rhythm: "Lecture rythmique",
 };
 
 export function levelRange(min?: string | null, max?: string | null): string {

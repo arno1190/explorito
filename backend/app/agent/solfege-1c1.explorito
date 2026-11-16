@@ -1,0 +1,839 @@
+{
+  "format_version": 1,
+  "pack": {
+    "title": "Mes premiers pas en solfège · CE1 / 1C1",
+    "emoji": "🎼",
+    "description": "Un premier parcours pour lire les notes, garder la pulsation et écouter de petites phrases musicales.",
+    "tags": [
+      "musique",
+      "solfege",
+      "1c1",
+      "ce1"
+    ]
+  },
+  "lessons": [
+    {
+      "subject_slug": "musique",
+      "level": "ce1",
+      "tier": 1,
+      "name": "01 · La portée et la pulsation",
+      "description": "Solfège 1C1 : La portée et la pulsation.",
+      "exercises": [
+        {
+          "type": "reading",
+          "question": "Découvre la leçon.",
+          "content": {
+            "text": "Une portée a cinq lignes et quatre interlignes. On lit de gauche à droite. La pulsation est un battement régulier : marche doucement sur place en gardant la même vitesse. La clé de sol indique où lire les notes."
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "explanation": null
+        },
+        {
+          "type": "multiple_choice",
+          "question": "Combien de lignes contient une portée ?",
+          "content": {
+            "options": [
+              {
+                "id": "a",
+                "text": "Cinq lignes"
+              },
+              {
+                "id": "b",
+                "text": "Quatre lignes"
+              }
+            ],
+            "multiple": false
+          },
+          "correct_answer": {
+            "option_ids": [
+              "a"
+            ]
+          },
+          "difficulty_level": 1,
+          "explanation": "La portée contient cinq lignes ; les espaces entre elles sont les interlignes."
+        },
+        {
+          "type": "multiple_choice",
+          "question": "Comment bat une pulsation régulière ?",
+          "content": {
+            "options": [
+              {
+                "id": "a",
+                "text": "À la même vitesse"
+              },
+              {
+                "id": "b",
+                "text": "De plus en plus vite"
+              }
+            ],
+            "multiple": false
+          },
+          "correct_answer": {
+            "option_ids": [
+              "a"
+            ]
+          },
+          "difficulty_level": 1,
+          "explanation": "Une pulsation régulière garde la même vitesse."
+        },
+        {
+          "type": "music_note",
+          "question": "Quel est le nom de cette note ?",
+          "content": {
+            "clef": "sol",
+            "mode": "name",
+            "pitch": "E4"
+          },
+          "correct_answer": {
+            "name": "mi"
+          },
+          "difficulty_level": 1,
+          "explanation": "Cette note est un mi."
+        },
+        {
+          "type": "music_note",
+          "question": "Quel est le nom de cette note ?",
+          "content": {
+            "clef": "sol",
+            "mode": "name",
+            "pitch": "G4"
+          },
+          "correct_answer": {
+            "name": "sol"
+          },
+          "difficulty_level": 1,
+          "explanation": "Cette note est un sol."
+        }
+      ]
+    },
+    {
+      "subject_slug": "musique",
+      "level": "ce1",
+      "tier": 1,
+      "name": "02 · Do, ré, mi en clé de sol",
+      "description": "Solfège 1C1 : Do, ré, mi en clé de sol.",
+      "exercises": [
+        {
+          "type": "reading",
+          "question": "Découvre la leçon.",
+          "content": {
+            "text": "Do est sur la petite ligne sous la portée, ré juste au-dessus, et mi sur la première ligne. Écoute la suite, puis dis les noms. Pour chanter, reprends doucement les notes avec un adulte."
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "explanation": null
+        },
+        {
+          "type": "music_note",
+          "question": "Quel est le nom de cette note ?",
+          "content": {
+            "clef": "sol",
+            "mode": "name",
+            "pitch": "C4"
+          },
+          "correct_answer": {
+            "name": "do"
+          },
+          "difficulty_level": 1,
+          "explanation": "Cette note est un do."
+        },
+        {
+          "type": "music_note",
+          "question": "Quel est le nom de cette note ?",
+          "content": {
+            "clef": "sol",
+            "mode": "name",
+            "pitch": "D4"
+          },
+          "correct_answer": {
+            "name": "ré"
+          },
+          "difficulty_level": 1,
+          "explanation": "Cette note est un ré."
+        },
+        {
+          "type": "music_note",
+          "question": "Place un mi sur la portée.",
+          "content": {
+            "clef": "sol",
+            "mode": "place",
+            "pitch": "E4"
+          },
+          "correct_answer": {
+            "name": "mi"
+          },
+          "difficulty_level": 2,
+          "explanation": "Cette note est un mi."
+        },
+        {
+          "type": "music_sequence",
+          "question": "Lis les notes de gauche à droite.",
+          "content": {
+            "clef": "sol",
+            "mode": "read",
+            "pitches": [
+              "C4",
+              "D4",
+              "E4"
+            ],
+            "bpm": 72
+          },
+          "correct_answer": {
+            "names": [
+              "do",
+              "ré",
+              "mi"
+            ]
+          },
+          "difficulty_level": 2,
+          "explanation": "Les notes sont : do, ré, mi."
+        }
+      ]
+    },
+    {
+      "subject_slug": "musique",
+      "level": "ce1",
+      "tier": 1,
+      "name": "03 · Les durées des notes",
+      "description": "Solfège 1C1 : Les durées des notes.",
+      "exercises": [
+        {
+          "type": "reading",
+          "question": "Découvre la leçon.",
+          "content": {
+            "text": "Avec la noire pour pulsation, une noire dure un temps, une blanche deux temps et une ronde quatre temps. Deux croches se partagent un temps. Écoute les fragments pour sentir les durées."
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "explanation": null
+        },
+        {
+          "type": "music_rhythm",
+          "question": "Combien de temps dure ce fragment, silences compris ?",
+          "content": {
+            "mode": "count",
+            "events": [
+              "noire"
+            ],
+            "beats_per_bar": 4,
+            "bpm": 72
+          },
+          "correct_answer": {
+            "beats": 1
+          },
+          "difficulty_level": 1,
+          "explanation": "Le fragment dure 1 temps, silences compris."
+        },
+        {
+          "type": "music_rhythm",
+          "question": "Combien de temps dure ce fragment, silences compris ?",
+          "content": {
+            "mode": "count",
+            "events": [
+              "blanche"
+            ],
+            "beats_per_bar": 4,
+            "bpm": 72
+          },
+          "correct_answer": {
+            "beats": 2
+          },
+          "difficulty_level": 1,
+          "explanation": "Le fragment dure 2 temps, silences compris."
+        },
+        {
+          "type": "music_rhythm",
+          "question": "Combien de temps dure ce fragment, silences compris ?",
+          "content": {
+            "mode": "count",
+            "events": [
+              "ronde"
+            ],
+            "beats_per_bar": 4,
+            "bpm": 72
+          },
+          "correct_answer": {
+            "beats": 4
+          },
+          "difficulty_level": 2,
+          "explanation": "Le fragment dure 4 temps, silences compris."
+        },
+        {
+          "type": "music_rhythm",
+          "question": "Quelle partition correspond au rythme entendu ?",
+          "content": {
+            "mode": "listen",
+            "events": [
+              "blanche"
+            ],
+            "beats_per_bar": 2,
+            "bpm": 72,
+            "choices": [
+              {
+                "id": "a",
+                "events": [
+                  "noire",
+                  "noire"
+                ]
+              },
+              {
+                "id": "b",
+                "events": [
+                  "blanche"
+                ]
+              }
+            ]
+          },
+          "correct_answer": {
+            "option_id": "b"
+          },
+          "difficulty_level": 2,
+          "explanation": "Réécoute en suivant les figures du deuxième rythme."
+        }
+      ]
+    },
+    {
+      "subject_slug": "musique",
+      "level": "ce1",
+      "tier": 2,
+      "name": "04 · Les silences et la mesure",
+      "description": "Solfège 1C1 : Les silences et la mesure.",
+      "exercises": [
+        {
+          "type": "reading",
+          "question": "Découvre la leçon.",
+          "content": {
+            "text": "Un soupir dure un temps de silence ; une demi-pause en dure deux. Le silence fait partie du rythme. En deux-quatre, on compte deux temps par mesure ; en quatre-quatre, quatre. Une barre sépare les mesures."
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "explanation": null
+        },
+        {
+          "type": "music_rhythm",
+          "question": "Combien de temps dure ce fragment, silences compris ?",
+          "content": {
+            "mode": "count",
+            "events": [
+              "noire",
+              "soupir"
+            ],
+            "beats_per_bar": 2,
+            "bpm": 72
+          },
+          "correct_answer": {
+            "beats": 2
+          },
+          "difficulty_level": 2,
+          "explanation": "Le fragment dure 2 temps, silences compris."
+        },
+        {
+          "type": "music_rhythm",
+          "question": "Combien de temps dure ce fragment, silences compris ?",
+          "content": {
+            "mode": "count",
+            "events": [
+              "blanche",
+              "demi_pause"
+            ],
+            "beats_per_bar": 4,
+            "bpm": 72
+          },
+          "correct_answer": {
+            "beats": 4
+          },
+          "difficulty_level": 2,
+          "explanation": "Le fragment dure 4 temps, silences compris."
+        },
+        {
+          "type": "music_rhythm",
+          "question": "Quelle partition correspond au rythme entendu ?",
+          "content": {
+            "mode": "listen",
+            "events": [
+              "noire",
+              "soupir",
+              "noire",
+              "noire"
+            ],
+            "beats_per_bar": 4,
+            "bpm": 72,
+            "choices": [
+              {
+                "id": "a",
+                "events": [
+                  "noire",
+                  "noire",
+                  "soupir",
+                  "noire"
+                ]
+              },
+              {
+                "id": "b",
+                "events": [
+                  "noire",
+                  "soupir",
+                  "noire",
+                  "noire"
+                ]
+              }
+            ]
+          },
+          "correct_answer": {
+            "option_id": "b"
+          },
+          "difficulty_level": 2,
+          "explanation": "Réécoute en suivant les figures du deuxième rythme."
+        },
+        {
+          "type": "multiple_choice",
+          "question": "En trois-quatre, combien de noires remplissent une mesure ?",
+          "content": {
+            "options": [
+              {
+                "id": "a",
+                "text": "Trois noires"
+              },
+              {
+                "id": "b",
+                "text": "Quatre noires"
+              }
+            ],
+            "multiple": false
+          },
+          "correct_answer": {
+            "option_ids": [
+              "a"
+            ]
+          },
+          "difficulty_level": 2,
+          "explanation": "La noire vaut un temps ; cette mesure contient trois temps."
+        }
+      ]
+    },
+    {
+      "subject_slug": "musique",
+      "level": "ce1",
+      "tier": 2,
+      "name": "05 · Je lis et je frappe les rythmes",
+      "description": "Solfège 1C1 : Je lis et je frappe les rythmes.",
+      "exercises": [
+        {
+          "type": "reading",
+          "question": "Découvre la leçon.",
+          "content": {
+            "text": "Écoute d'abord le modèle. Ensuite, frappe au début de chaque note, à la même vitesse. Une croche dure un demi-temps. Pendant un silence, garde la pulsation dans ta tête. Tu peux recommencer avant de valider."
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "explanation": null
+        },
+        {
+          "type": "music_rhythm",
+          "question": "Écoute, puis frappe le rythme à la même vitesse.",
+          "content": {
+            "mode": "tap",
+            "events": [
+              "noire",
+              "noire"
+            ],
+            "beats_per_bar": 2,
+            "bpm": 72
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "explanation": "Frappe au début de chaque note. Pendant les silences, attends."
+        },
+        {
+          "type": "music_rhythm",
+          "question": "Écoute, puis frappe le rythme à la même vitesse.",
+          "content": {
+            "mode": "tap",
+            "events": [
+              "noire",
+              "soupir",
+              "noire",
+              "noire"
+            ],
+            "beats_per_bar": 4,
+            "bpm": 72
+          },
+          "correct_answer": {},
+          "difficulty_level": 3,
+          "explanation": "Frappe au début de chaque note. Pendant les silences, attends."
+        },
+        {
+          "type": "music_rhythm",
+          "question": "Quelle partition correspond au rythme entendu ?",
+          "content": {
+            "mode": "listen",
+            "events": [
+              "croche",
+              "croche",
+              "noire"
+            ],
+            "beats_per_bar": 2,
+            "bpm": 72,
+            "choices": [
+              {
+                "id": "a",
+                "events": [
+                  "noire",
+                  "croche",
+                  "croche"
+                ]
+              },
+              {
+                "id": "b",
+                "events": [
+                  "croche",
+                  "croche",
+                  "noire"
+                ]
+              }
+            ]
+          },
+          "correct_answer": {
+            "option_id": "b"
+          },
+          "difficulty_level": 3,
+          "explanation": "Réécoute en suivant les figures du deuxième rythme."
+        },
+        {
+          "type": "music_rhythm",
+          "question": "Combien de temps dure ce fragment, silences compris ?",
+          "content": {
+            "mode": "count",
+            "events": [
+              "croche",
+              "croche",
+              "noire"
+            ],
+            "beats_per_bar": 2,
+            "bpm": 72
+          },
+          "correct_answer": {
+            "beats": 2.0
+          },
+          "difficulty_level": 2,
+          "explanation": "Le fragment dure 2,0 temps, silences compris."
+        }
+      ]
+    },
+    {
+      "subject_slug": "musique",
+      "level": "ce1",
+      "tier": 2,
+      "name": "06 · Premiers repères en clé de fa",
+      "description": "Solfège 1C1 : Premiers repères en clé de fa.",
+      "exercises": [
+        {
+          "type": "reading",
+          "question": "Découvre la leçon.",
+          "content": {
+            "text": "En clé de fa, la quatrième ligne indique fa. Les notes graves se lisent aussi de gauche à droite. Commence par retrouver do, ré et mi, puis écoute leur son avant de lire la suite."
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "explanation": null
+        },
+        {
+          "type": "music_note",
+          "question": "Quel est le nom de cette note ?",
+          "content": {
+            "clef": "fa",
+            "mode": "name",
+            "pitch": "F3"
+          },
+          "correct_answer": {
+            "name": "fa"
+          },
+          "difficulty_level": 2,
+          "explanation": "Cette note est un fa."
+        },
+        {
+          "type": "music_note",
+          "question": "Quel est le nom de cette note ?",
+          "content": {
+            "clef": "fa",
+            "mode": "name",
+            "pitch": "C3"
+          },
+          "correct_answer": {
+            "name": "do"
+          },
+          "difficulty_level": 2,
+          "explanation": "Cette note est un do."
+        },
+        {
+          "type": "music_note",
+          "question": "Place un ré sur la portée.",
+          "content": {
+            "clef": "fa",
+            "mode": "place",
+            "pitch": "D3"
+          },
+          "correct_answer": {
+            "name": "ré"
+          },
+          "difficulty_level": 2,
+          "explanation": "Cette note est un ré."
+        },
+        {
+          "type": "music_sequence",
+          "question": "Lis les notes de gauche à droite.",
+          "content": {
+            "clef": "fa",
+            "mode": "read",
+            "pitches": [
+              "C3",
+              "D3",
+              "E3"
+            ],
+            "bpm": 72
+          },
+          "correct_answer": {
+            "names": [
+              "do",
+              "ré",
+              "mi"
+            ]
+          },
+          "difficulty_level": 2,
+          "explanation": "Les notes sont : do, ré, mi."
+        }
+      ]
+    },
+    {
+      "subject_slug": "musique",
+      "level": "ce1",
+      "tier": 3,
+      "name": "07 · J'écoute et je retrouve les notes",
+      "description": "Solfège 1C1 : J'écoute et je retrouve les notes.",
+      "exercises": [
+        {
+          "type": "reading",
+          "question": "Découvre la leçon.",
+          "content": {
+            "text": "Prépare ton oreille : lis puis écoute do, ré, mi. Pour la dictée, le bouton Repère joue un do. Écoute ensuite le modèle et retrouve tous les noms dans l'ordre. Tu peux écouter plusieurs fois."
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "explanation": null
+        },
+        {
+          "type": "music_sequence",
+          "question": "Lis les notes de gauche à droite.",
+          "content": {
+            "clef": "sol",
+            "mode": "read",
+            "pitches": [
+              "C4",
+              "D4",
+              "E4"
+            ],
+            "bpm": 72
+          },
+          "correct_answer": {
+            "names": [
+              "do",
+              "ré",
+              "mi"
+            ]
+          },
+          "difficulty_level": 2,
+          "explanation": "Les notes sont : do, ré, mi."
+        },
+        {
+          "type": "music_sequence",
+          "question": "Écoute puis retrouve les notes dans l'ordre.",
+          "content": {
+            "clef": "sol",
+            "mode": "listen",
+            "pitches": [
+              "E4",
+              "D4",
+              "C4"
+            ],
+            "bpm": 72
+          },
+          "correct_answer": {
+            "names": [
+              "mi",
+              "ré",
+              "do"
+            ]
+          },
+          "difficulty_level": 3,
+          "explanation": "Les notes sont : mi, ré, do."
+        },
+        {
+          "type": "music_sequence",
+          "question": "Écoute puis retrouve les notes dans l'ordre.",
+          "content": {
+            "clef": "sol",
+            "mode": "listen",
+            "pitches": [
+              "C4",
+              "D4",
+              "C4"
+            ],
+            "bpm": 72
+          },
+          "correct_answer": {
+            "names": [
+              "do",
+              "ré",
+              "do"
+            ]
+          },
+          "difficulty_level": 3,
+          "explanation": "Les notes sont : do, ré, do."
+        },
+        {
+          "type": "music_rhythm",
+          "question": "Quelle partition correspond au rythme entendu ?",
+          "content": {
+            "mode": "listen",
+            "events": [
+              "noire",
+              "croche",
+              "croche"
+            ],
+            "beats_per_bar": 2,
+            "bpm": 72,
+            "choices": [
+              {
+                "id": "a",
+                "events": [
+                  "croche",
+                  "croche",
+                  "noire"
+                ]
+              },
+              {
+                "id": "b",
+                "events": [
+                  "noire",
+                  "croche",
+                  "croche"
+                ]
+              }
+            ]
+          },
+          "correct_answer": {
+            "option_id": "b"
+          },
+          "difficulty_level": 3,
+          "explanation": "Réécoute en suivant les figures du deuxième rythme."
+        }
+      ]
+    },
+    {
+      "subject_slug": "musique",
+      "level": "ce1",
+      "tier": 3,
+      "name": "08 · Mon petit bilan musical",
+      "description": "Solfège 1C1 : Mon petit bilan musical.",
+      "exercises": [
+        {
+          "type": "reading",
+          "question": "Découvre la leçon.",
+          "content": {
+            "text": "Une nuance indique comment jouer : piano signifie doucement, forte signifie fort. Avec un adulte, chante une courte phrase connue, puis recommence doucement. Écoute sans forcer ta voix. Termine avec les jeux de notes et de rythme."
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "explanation": null
+        },
+        {
+          "type": "multiple_choice",
+          "question": "Que signifie la nuance piano ?",
+          "content": {
+            "options": [
+              {
+                "id": "a",
+                "text": "Jouer doucement"
+              },
+              {
+                "id": "b",
+                "text": "Jouer plus vite"
+              }
+            ],
+            "multiple": false
+          },
+          "correct_answer": {
+            "option_ids": [
+              "a"
+            ]
+          },
+          "difficulty_level": 2,
+          "explanation": "Piano indique une faible intensité, pas une vitesse."
+        },
+        {
+          "type": "music_note",
+          "question": "Place un fa sur la portée.",
+          "content": {
+            "clef": "sol",
+            "mode": "place",
+            "pitch": "F4"
+          },
+          "correct_answer": {
+            "name": "fa"
+          },
+          "difficulty_level": 3,
+          "explanation": "Cette note est un fa."
+        },
+        {
+          "type": "music_sequence",
+          "question": "Lis les notes de gauche à droite.",
+          "content": {
+            "clef": "sol",
+            "mode": "read",
+            "pitches": [
+              "C4",
+              "E4",
+              "G4",
+              "E4"
+            ],
+            "bpm": 72
+          },
+          "correct_answer": {
+            "names": [
+              "do",
+              "mi",
+              "sol",
+              "mi"
+            ]
+          },
+          "difficulty_level": 3,
+          "explanation": "Les notes sont : do, mi, sol, mi."
+        },
+        {
+          "type": "music_rhythm",
+          "question": "Écoute, puis frappe le rythme à la même vitesse.",
+          "content": {
+            "mode": "tap",
+            "events": [
+              "croche",
+              "croche",
+              "noire",
+              "soupir",
+              "noire"
+            ],
+            "beats_per_bar": 4,
+            "bpm": 72
+          },
+          "correct_answer": {},
+          "difficulty_level": 3,
+          "explanation": "Frappe au début de chaque note. Pendant les silences, attends."
+        }
+      ]
+    }
+  ],
+  "self_check": {
+    "math_verified": true,
+    "notes": "Noms des notes et durées vérifiés. Exercices originaux CE1 / 1C1 ; chant accompagné sans correction automatique."
+  }
+}

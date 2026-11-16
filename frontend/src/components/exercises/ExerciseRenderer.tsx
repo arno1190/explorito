@@ -5,6 +5,8 @@ import { FillBlanks } from "./FillBlanks";
 import { InstructionAudio } from "./InstructionAudio";
 import { MathProblem } from "./MathProblem";
 import { MultipleChoice } from "./MultipleChoice";
+import { MusicRhythm } from "./MusicRhythm";
+import { MusicSequence } from "./MusicSequence";
 import { MusicNote } from "./MusicNote";
 import { Pythagore } from "./Pythagore";
 import { Reading } from "./Reading";
@@ -16,6 +18,8 @@ import type {
   MathProblemContent,
   MultipleChoiceContent,
   MusicNoteContent,
+  MusicRhythmContent,
+  MusicSequenceContent,
   PythagoreContent,
   ReadingContent,
   RevealContent,
@@ -83,6 +87,17 @@ export function ExerciseRenderer({
         return <Reading {...shared} content={content as ReadingContent} />;
       case "soroban":
         return <Soroban {...shared} content={content as SorobanContent} />;
+      case "music_rhythm":
+        return (
+          <MusicRhythm {...shared} content={content as MusicRhythmContent} />
+        );
+      case "music_sequence":
+        return (
+          <MusicSequence
+            {...shared}
+            content={content as MusicSequenceContent}
+          />
+        );
       case "music_note":
         return <MusicNote {...shared} content={content as MusicNoteContent} />;
       default:
@@ -95,7 +110,7 @@ export function ExerciseRenderer({
   })();
 
   return (
-    <div className="space-y-2">
+    <div key={exercise.id} className="space-y-2">
       {audio && <InstructionAudio src={audio} exerciseId={exercise.id} />}
       {body}
     </div>

@@ -268,6 +268,8 @@ const EXERCISE_TYPE_LABELS: Record<string, string> = {
   reading: "Lecture",
   soroban: "Boulier",
   music_note: "Lecture de notes",
+  music_sequence: "Lecture et écoute de notes",
+  music_rhythm: "Lecture rythmique",
 };
 
 /** Nom français d'un type d'exercice (le type brut sinon : un pack peut en porter un inconnu). */

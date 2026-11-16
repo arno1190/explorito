@@ -32,6 +32,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field, computed_field, model_validator
 
 from app.models.content import DifficultyEnum, ExerciseType
+from app.schemas.music import MusicRhythmContent, MusicSequenceContent, rhythm_beats
 
 
 # --------------------------------------------------------------------------- #
@@ -131,7 +132,7 @@ class SorobanAnswer(BaseModel):
 NOTE_NAMES = ("do", "ré", "mi", "fa", "sol", "la", "si")
 _LETTERS = "CDEFGAB"
 # Note posée sur la 1re ligne (en bas) de la portée, pour chaque clé.
-_CLEF_BOTTOM_LINE = {"sol": "E4", "ut3": "F3"}
+_CLEF_BOTTOM_LINE = {"sol": "E4", "fa": "G2", "ut3": "F3"}
 # Marge de la portée : deux lignes supplémentaires en dessous et au-dessus.
 STAFF_MIN_STEP, STAFF_MAX_STEP = -4, 12
 
@@ -160,14 +161,14 @@ class MusicNoteContent(BaseModel):
     """
     Contenu d'un exercice de lecture de notes.
 
-    - ``clef`` : ``sol`` (clé de sol 2e ligne) ou ``ut3`` (clé d'ut 3e ligne, celle de l'alto).
+    - ``clef`` : ``sol``, ``fa`` ou ``ut3`` (alto).
     - ``mode`` ``name`` : la note est affichée, l'enfant choisit son nom.
     - ``mode`` ``place`` : l'enfant pose la note nommée sur la portée.
     - ``pitch`` : hauteur affichée (ou montrée en correction), ex. ``"C4"`` = do du milieu.
     - ``choices`` : noms proposés (par défaut, les 7 notes).
     """
 
-    clef: str = Field(..., pattern="^(sol|ut3)$")
+    clef: str = Field(..., pattern="^(sol|fa|ut3)$")
     mode: str = Field(default="name", pattern="^(name|place)$")
     pitch: str = Field(..., pattern="^[A-G][1-7]$")
     choices: list[str] | None = Field(default=None, min_length=2, max_length=7)
@@ -250,6 +251,29 @@ def validate_exercise_payload(
         # La réponse attendue doit correspondre au nombre affiché/à construire.
         if soroban_answer.value != soroban_content.value:
             raise ValueError("correct_answer.value doit être égal à content.value pour un exercice soroban")
+
+    elif exercise_type == ExerciseType.MUSIC_SEQUENCE:
+        sequence = MusicSequenceContent.model_validate(content)
+        expected = [note_name(pitch) for pitch in sequence.pitches]
+        if correct_answer.get("names") != expected:
+            raise ValueError("correct_answer.names doit correspondre aux noms des pitches dans l'ordre.")
+
+    elif exercise_type == ExerciseType.MUSIC_RHYTHM:
+        rhythm = MusicRhythmContent.model_validate(content)
+        if rhythm.mode == "count":
+            answer = correct_answer.get("beats")
+            if (
+                isinstance(answer, bool)
+                or not isinstance(answer, (int, float))
+                or answer != rhythm_beats(rhythm.events)
+            ):
+                raise ValueError("correct_answer.beats doit être la durée totale, silences compris.")
+        elif rhythm.mode == "listen":
+            matching = [choice.id for choice in rhythm.choices or [] if choice.events == rhythm.events]
+            if len(matching) != 1 or correct_answer.get("option_id") != matching[0]:
+                raise ValueError("Un seul choix doit reproduire events et correspondre à correct_answer.option_id.")
+        elif correct_answer:
+            raise ValueError("Le mode tap exige correct_answer: {} ; le serveur calcule les attaques.")
 
     elif exercise_type == ExerciseType.MUSIC_NOTE:
         note_content = MusicNoteContent.model_validate(content)

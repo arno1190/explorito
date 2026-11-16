@@ -207,7 +207,9 @@ Un exercice = `type`, `question` (la consigne lue par l'enfant), `content`,
 | `reveal` | `{"prompt": "Pourquoi…", "reveal": "Parce que…"}` | `{}` |
 | `soroban` | `{"mode": "read", "value": 42, "columns": 3}` | `{"value": 42}` — doit égaler `content.value` |
 | `pythagore` | `{"tables": [3], "blanks": 5}` | `{}` |
-| `music_note` | `{"clef": "sol", "mode": "name", "pitch": "G4", "choices": ["fa", "sol", "la"]}` — `clef` `sol` ou `ut3` (clé d'ut 3e ligne, celle de l'alto), `mode` `name` (nommer la note) ou `place` (la poser), `pitch` de `A3` à `C6` en clé de sol, de `B2` à `D5` en clé d'ut 3 (deux lignes supplémentaires au plus) ; `choices` facultatif | `{"name": "sol"}` — nom de `pitch` (`do ré mi fa sol la si`) |
+| `music_sequence` | Suites lues ou dictées, 2 à 8 notes naturelles. Voir [solfège 1C1]({{API_BASE}}/api/v1/agent/solfege-1c1.md). | `{"names": ["do", "ré"]}` |
+| `music_rhythm` | Compter, reconnaître ou frapper des rythmes. Voir [solfège 1C1]({{API_BASE}}/api/v1/agent/solfege-1c1.md). | Selon le mode : `{"beats": 4}`, `{"option_id": "a"}` ou `{}` |
+| `music_note` | `{"clef": "sol", "mode": "name", "pitch": "G4", "choices": ["fa", "sol", "la"]}` — `clef` `sol`, `fa` ou `ut3` (clé d'ut 3e ligne, celle de l'alto), `mode` `name` (nommer la note) ou `place` (la poser), `pitch` de `A3` à `C6` en clé de sol, de `B2` à `D5` en clé d'ut 3 (deux lignes supplémentaires au plus) ; `choices` facultatif | `{"name": "sol"}` — nom de `pitch` (`do ré mi fa sol la si`) |
 
 `color` sur une option sert aux non-lecteurs (maternelle) : une pastille de
 couleur au lieu d'un mot.
@@ -248,12 +250,19 @@ la narration automatique. Un échec de synthèse renvoie HTTP 503 avec
 
 ### Créer des leçons musicales
 
+**Pour du solfège, de la lecture rythmique, de la lecture de notes ou une
+dictée musicale CE1 / 1C1 : lis d'abord
+[solfege-1c1.md]({{API_BASE}}/api/v1/agent/solfege-1c1.md).**
+Ce guide définit les modes interactifs, la progression et les réponses ;
+il fournit aussi un pack de départ téléchargeable.
+
+
 Utilise `subject_slug: "musique"` et le type `music_note` pour les exercices
 interactifs de solfège. Le mode `name` demande le nom de la note affichée ;
 le mode `place` demande de la poser sur la portée. Le lecteur prend en charge
-la clé de sol (`sol`) et la clé d'ut troisième ligne (`ut3`, alto).
-Ce format enseigne la lecture et le placement des notes ; il ne synthétise
-pas de chanson ni d'extrait instrumental.
+la clé de sol (`sol`), la clé de fa (`fa`) et la clé d'ut troisième ligne (`ut3`, alto).
+Les types `music_sequence` et `music_rhythm` ajoutent les suites de notes,
+la dictée mélodique et la lecture rythmique avec synthèse sonore locale.
 
 Exemple de leçon à insérer dans `lessons` :
 
@@ -283,7 +292,7 @@ Exemple de leçon à insérer dans `lessons` :
 }
 ```
 
-En clé de sol, `pitch` accepte A3 à C6 ; en clé d'ut 3, B2 à D5,
+En clé de sol, `pitch` accepte A3 à C6 ; en clé de fa, C2 à E4 ; en clé d'ut 3, B2 à D5,
 sans altérations. La réponse doit correspondre au nom français du pitch
 (`do ré mi fa sol la si`). Pour `place`, tout octave du bon nom compte.
 Les consignes des leçons musicales PS–CP reçoivent aussi la narration.

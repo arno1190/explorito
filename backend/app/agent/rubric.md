@@ -131,3 +131,12 @@ Calé sur les leçons `cm2` de maths et de culture générale d'Explorito.
 - **Phrase** : ≤ 25 mots par énoncé.
 - **Bloc `reading`** : **120 à 200 mots**.
 - **`difficulty_level`** : 3 à 5.
+
+
+## Musique CE1 / 1C1
+
+Pour une demande de solfège CE1, de lecture de notes, de lecture rythmique ou
+de dictée musicale, suis [solfege-1c1.md]({{API_BASE}}/api/v1/agent/solfege-1c1.md).
+Cette référence définit le parcours musical débutant, les bornes et les formes
+interactives ; garde le niveau scolaire ce1 et l'année musicale 1C1 pour le
+parcours actuel.

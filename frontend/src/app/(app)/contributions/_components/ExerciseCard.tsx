@@ -153,12 +153,31 @@ function ExerciseBody({ exercise }: { exercise: PackExercisePreview }) {
         </p>
       );
     }
+    case "music_rhythm":
+    case "music_sequence": {
+      return (
+        <div className="space-y-2 text-sm text-fun-text">
+          <p className="font-bold">
+            {exercise.type === "music_rhythm"
+              ? "Lecture rythmique"
+              : "Suite de notes"}{" "}
+            · {String(content.mode ?? "lecture")}
+          </p>
+          <p>{JSON.stringify(content.events ?? content.pitches)}</p>
+          <p>Réponse : {JSON.stringify(answer)}</p>
+        </div>
+      );
+    }
     case "music_note": {
       return (
         <p className="text-sm text-fun-text">
           <span className="font-bold">
-            {content.clef === "ut3" ? "Clé d'ut 3" : "Clé de sol"} ·{" "}
-            {content.mode === "place" ? "À poser" : "À nommer"}&nbsp;:{" "}
+            {content.clef === "ut3"
+              ? "Clé d'ut 3"
+              : content.clef === "fa"
+                ? "Clé de fa"
+                : "Clé de sol"}{" "}
+            · {content.mode === "place" ? "À poser" : "À nommer"}&nbsp;:{" "}
           </span>
           {String(answer.name ?? "—")} ({String(content.pitch ?? "—")})
         </p>
