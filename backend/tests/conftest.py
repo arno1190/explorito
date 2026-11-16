@@ -65,3 +65,15 @@ def client(db_session: Session) -> Iterator[TestClient]:
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(autouse=True)
+def offline_narration(tmp_path, monkeypatch):
+    """Keep uploads deterministic; tests never contact the speech provider."""
+    from pathlib import Path
+
+    async def save(self, path):
+        Path(path).write_bytes(b"test-mp3")
+
+    monkeypatch.setattr(settings, "UPLOAD_DIR", str(tmp_path / "uploads"))
+    monkeypatch.setattr("edge_tts.Communicate.save", save)

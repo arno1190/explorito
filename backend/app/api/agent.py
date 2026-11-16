@@ -96,6 +96,15 @@ async def manifest(request: Request) -> dict:
             "Un parent peut faire rédiger des leçons par son propre assistant IA et les déposer ici."
         ),
         "format_version": settings.PACK_FORMAT_VERSION,
+        "capabilities": {
+            "instruction_audio": {"automatic_levels": ["ps", "ms", "gs", "cp"], "language": "fr-FR"},
+            "music": {
+                "subject_slug": "musique",
+                "exercise_type": "music_note",
+                "clefs": ["sol", "ut3"],
+                "modes": ["name", "place"],
+            },
+        },
         "app_url": settings.PUBLIC_APP_URL.rstrip("/"),
         "docs": [
             {"slug": slug, "title": title, "url": f"{base}/api/v1/agent/{slug}.md"}

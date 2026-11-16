@@ -634,6 +634,22 @@ def _validate_exercise(
         "order_index": exercise_index,
         "difficulty_level": difficulty if isinstance(difficulty, int) and 1 <= difficulty <= 5 else None,
     }
+    media = raw.get("media_urls")
+    if media is not None and (
+        not isinstance(media, dict)
+        or any(not isinstance(value, str) for key, value in media.items() if key in {"audio", "emoji"})
+    ):
+        errors.append(
+            _issue(
+                "error",
+                "media_invalid",
+                f"{where} : media_urls doit être un objet ; audio et emoji sont des chaînes.",
+                lesson_index=lesson_index,
+                exercise_index=exercise_index,
+                field="media_urls",
+            )
+        )
+
     for key in _EXERCISE_KEYS:
         if raw.get(key) is not None:
             normalised[key] = raw[key]

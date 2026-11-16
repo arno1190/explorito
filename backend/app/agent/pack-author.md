@@ -212,6 +212,82 @@ Un exercice = `type`, `question` (la consigne lue par l'enfant), `content`,
 `color` sur une option sert aux non-lecteurs (maternelle) : une pastille de
 couleur au lieu d'un mot.
 
+### Leçons vocales pour PS, MS, GS et CP
+
+Pour les niveaux `ps`, `ms`, `gs` et `cp`, le serveur génère automatiquement
+la consigne audio française à partir de `question` lors de l'envoi. L'enfant
+retrouve le bouton d'écoute des leçons officielles. Aucun fichier sonore ni
+clé de synthèse vocale à fournir. Écris des consignes courtes et naturelles ;
+les emojis ne sont pas prononcés. La voix lit uniquement la question, pas les
+options ni l'explication. Pour un non-lecteur, propose des réponses visuelles
+(emojis, images ou pastilles `color`) et évite les réponses à taper.
+
+Exemple d'exercice à placer dans une leçon `level: "ps"` :
+
+```json
+{
+  "type": "multiple_choice",
+  "question": "Touche la couleur rouge.",
+  "content": {
+    "options": [
+      {"id": "rouge", "text": "", "color": "#EF4444"},
+      {"id": "bleu", "text": "", "color": "#1CAFF6"}
+    ],
+    "multiple": false
+  },
+  "correct_answer": {"option_ids": ["rouge"]},
+  "difficulty_level": 1
+}
+```
+
+Un `media_urls.audio` déjà fourni reste intact ; les autres médias aussi.
+N'invente pas de chemin `/uploads/audio/...` : omets ce champ pour obtenir
+la narration automatique. Un échec de synthèse renvoie HTTP 503 avec
+`code: "audio_generation_failed"` ; réessaie le même envoi après le délai
+`Retry-After`. Le serveur ne crée alors aucun brouillon.
+
+### Créer des leçons musicales
+
+Utilise `subject_slug: "musique"` et le type `music_note` pour les exercices
+interactifs de solfège. Le mode `name` demande le nom de la note affichée ;
+le mode `place` demande de la poser sur la portée. Le lecteur prend en charge
+la clé de sol (`sol`) et la clé d'ut troisième ligne (`ut3`, alto).
+Ce format enseigne la lecture et le placement des notes ; il ne synthétise
+pas de chanson ni d'extrait instrumental.
+
+Exemple de leçon à insérer dans `lessons` :
+
+```json
+{
+  "subject_slug": "musique",
+  "level": "cp",
+  "tier": 1,
+  "name": "Mes premières notes",
+  "description": "Reconnaître puis placer le sol sur la portée.",
+  "exercises": [
+    {
+      "type": "music_note",
+      "question": "Quel est le nom de cette note ?",
+      "content": {"clef": "sol", "mode": "name", "pitch": "G4", "choices": ["fa", "sol", "la"]},
+      "correct_answer": {"name": "sol"},
+      "difficulty_level": 1
+    },
+    {
+      "type": "music_note",
+      "question": "Place un sol sur la portée.",
+      "content": {"clef": "sol", "mode": "place", "pitch": "G4"},
+      "correct_answer": {"name": "sol"},
+      "difficulty_level": 2
+    }
+  ]
+}
+```
+
+En clé de sol, `pitch` accepte A3 à C6 ; en clé d'ut 3, B2 à D5,
+sans altérations. La réponse doit correspondre au nom français du pitch
+(`do ré mi fa sol la si`). Pour `place`, tout octave du bon nom compte.
+Les consignes des leçons musicales PS–CP reçoivent aussi la narration.
+
 ## 4. Relire le pack (passe obligatoire)
 
 Reprends le pack **entier**, de haut en bas, et coche chaque point. Cette passe

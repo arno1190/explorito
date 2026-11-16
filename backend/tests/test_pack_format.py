@@ -333,3 +333,12 @@ def test_known_subject_slugs_can_be_widened_by_the_caller():
 
     payload, _, _ = validate_pack(document, known_subject_slugs={"astronomie"})
     assert payload["lessons"][0]["subject_slug"] == "astronomie"
+
+
+@pytest.mark.parametrize("media", ["audio.mp3", [], {"audio": 42}, {"emoji": []}])
+def test_malformed_media_is_rejected(media):
+    exercise = mcq()
+    exercise["media_urls"] = media
+    with pytest.raises(PackRejected) as excinfo:
+        validate_pack(pack(lessons=[lesson(exercises=[exercise])]))
+    assert "media_invalid" in codes(excinfo.value.issues)

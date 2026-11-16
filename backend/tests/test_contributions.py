@@ -303,3 +303,37 @@ def test_multipart_upload_uses_the_same_endpoint(client: TestClient, db_session:
 
     assert response.status_code == 201, response.text
     assert response.json()["community_status"] == CommunityStatus.DRAFT.value
+
+
+def test_connector_upload_narrates_music_and_stores_audio(client, db_session, monkeypatch):
+    from unittest.mock import AsyncMock
+
+    synthesize = AsyncMock(return_value="/uploads/audio/test.mp3")
+    monkeypatch.setattr("app.services.narration.instruction_audio", synthesize)
+    headers = dev_login(client, AUTHOR)
+    token = client.post("/api/v1/contributions/tokens", headers=headers, json={"label": "Agent"}).json()["token"]
+    exercise = {
+        "type": "music_note",
+        "question": "Quel est le nom de cette note ?",
+        "content": {"clef": "sol", "mode": "name", "pitch": "G4"},
+        "correct_answer": {"name": "sol"},
+        "difficulty_level": 1,
+    }
+    document = pack(lessons=[lesson(level="cp", slug="musique", exercises=[exercise])])
+    body = first_upload(client, {"X-Upload-Token": token}, document)
+    stored = db_session.query(Exercise).join(Lesson).filter(Lesson.pack_id == UUID(body["pack_id"])).one()
+    assert stored.type == "music_note"
+    assert stored.media_urls["audio"] == "/uploads/audio/test.mp3"
+    synthesize.assert_awaited_once()
+
+
+def test_audio_failure_returns_retryable_error_without_creating_pack(client, db_session, monkeypatch):
+    from unittest.mock import AsyncMock
+
+    monkeypatch.setattr("app.services.narration.instruction_audio", AsyncMock(side_effect=RuntimeError("offline")))
+    headers = dev_login(client, AUTHOR)
+    response = upload(client, headers, pack(lessons=[lesson(level="ps")]), accept_terms="true", handle="Toto")
+    assert response.status_code == 503
+    assert response.json()["detail"]["code"] == "audio_generation_failed"
+    assert response.headers["Retry-After"] == "30"
+    assert db_session.query(Pack).count() == 0

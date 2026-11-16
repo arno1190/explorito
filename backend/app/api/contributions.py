@@ -56,6 +56,7 @@ from app.services.contribution import (
     submit_pack,
 )
 from app.services.contributor_legal import CONTRIBUTOR_TERMS, CONTRIBUTOR_TERMS_VERSION
+from app.services.narration import narrate_pack
 from app.services.pack_format import PackRejected, validate_pack
 from app.services.packs import log_pack_action, refresh_lesson_xp
 
@@ -480,6 +481,15 @@ async def upload_pack(
         payload, issues, score = validate_pack(document, known_subject_slugs=known_subject_slugs(db))
     except PackRejected as rejected:
         raise _rejected(rejected.issues) from rejected
+
+    try:
+        await narrate_pack(payload)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"code": "audio_generation_failed", "message": "La génération audio a échoué. Réessayez cet envoi."},
+            headers={"Retry-After": "30"},
+        ) from exc
 
     pack = ingest_pack(db, payload=payload, author=user, issues=issues, quality_score=score)
     duplicates = near_duplicate_flags(db, pack)

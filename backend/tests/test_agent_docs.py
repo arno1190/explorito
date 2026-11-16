@@ -96,3 +96,12 @@ def test_forwarded_proto_is_honoured(client: TestClient):
     guide = client.get("/api/v1/agent/pack-author.md", headers=headers).text
     assert "https://api.exemple.fr/api/v1/contributions" in guide
     assert "http://api.exemple.fr" not in guide
+
+
+def test_connector_advertises_voice_and_music(client: TestClient):
+    capabilities = client.get("/api/v1/agent").json()["capabilities"]
+    assert capabilities["instruction_audio"]["automatic_levels"] == ["ps", "ms", "gs", "cp"]
+    assert capabilities["music"]["exercise_type"] == "music_note"
+    guide = client.get("/api/v1/agent/pack-author.md").text
+    for text in ("audio_generation_failed", '"subject_slug": "musique"', '"mode": "place"', "automatiquement"):
+        assert text in guide

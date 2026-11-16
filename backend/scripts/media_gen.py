@@ -20,30 +20,19 @@ dans l'application.
 from __future__ import annotations
 
 import asyncio
-import hashlib
-import re
 from pathlib import Path
 
-import edge_tts
 import requests
 
 from app.core.config import settings
-
-# Voix par défaut : jeune et enjouée, adaptée aux jeunes enfants.
-DEFAULT_VOICE = "fr-FR-EloiseNeural"
+from app.services.narration import DEFAULT_VOICE, instruction_audio
+from app.services.narration import clean_for_tts as clean_for_tts
 
 _UPLOAD = Path(settings.UPLOAD_DIR)
-_AUDIO_DIR = _UPLOAD / "audio"
 _PICTO_DIR = _UPLOAD / "img" / "arasaac"
 
 _ARASAAC_SEARCH = "https://api.arasaac.org/api/pictograms/fr/search/{word}"
 _ARASAAC_IMG = "https://static.arasaac.org/pictograms/{id}/{id}_500.png"
-
-# Emoji / symboles à retirer avant la synthèse vocale (edge-tts les lirait mal).
-_EMOJI_RE = re.compile(
-    "[\U0001f000-\U0001faff\U00002600-\U000027bf\U0001f1e6-\U0001f1ff⬀-⯿️‍]+",
-    flags=re.UNICODE,
-)
 
 # Mots dont la recherche ARASAAC est ambiguë : on force le bon identifiant.
 _PICTO_OVERRIDES: dict[str, int] = {}
@@ -52,33 +41,9 @@ _PICTO_OVERRIDES: dict[str, int] = {}
 _picto_cache: dict[str, int | None] = {}
 
 
-def clean_for_tts(text: str) -> str:
-    """Nettoie un énoncé pour la synthèse : retire emojis et espaces superflus."""
-    text = _EMOJI_RE.sub(" ", text)
-    text = text.replace("_", " ").replace("…", ".")
-    return re.sub(r"\s+", " ", text).strip()
-
-
-async def _synthesize(text: str, voice: str, out: Path) -> None:
-    await edge_tts.Communicate(text, voice).save(str(out))
-
-
 def tts(text: str, *, voice: str = DEFAULT_VOICE) -> str | None:
-    """Synthétise ``text`` en MP3 (idempotent) et renvoie l'URL ``/uploads/...``.
-
-    Renvoie ``None`` si le texte nettoyé est vide (rien à dire).
-    """
-    spoken = clean_for_tts(text)
-    if not spoken:
-        return None
-    key = hashlib.sha1(f"{voice}:{spoken}".encode()).hexdigest()
-    out = _AUDIO_DIR / f"{key}.mp3"
-    url = f"/uploads/audio/{key}.mp3"
-    if out.exists() and out.stat().st_size > 0:
-        return url
-    _AUDIO_DIR.mkdir(parents=True, exist_ok=True)
-    asyncio.run(_synthesize(spoken, voice, out))
-    return url
+    """Synchronous entry point for curriculum scripts."""
+    return asyncio.run(instruction_audio(text, voice=voice))
 
 
 def _resolve_picto_id(word: str) -> int | None:
