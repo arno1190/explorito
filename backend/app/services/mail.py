@@ -168,6 +168,24 @@ def unsubscribe_url(user_id: UUID) -> str:
 # --------------------------------------------------------------------- #
 
 
+def _email_body(body_markdown: str) -> str:
+    """Inline styles survive email clients and CSS resets in embedded previews."""
+    rendered = render_markdown(body_markdown)
+    styles = {
+        "h1": "margin:0 0 20px;font-size:26px;line-height:1.3;font-weight:800;color:#042C60;",
+        "h2": "margin:24px 0 12px;font-size:21px;line-height:1.35;font-weight:700;color:#042C60;",
+        "p": "margin:0 0 16px;font-size:16px;line-height:1.65;",
+        "ul": "margin:0 0 20px;padding-left:24px;list-style-type:disc;list-style-position:outside;",
+        "li": "margin:0 0 12px;padding-left:4px;display:list-item;font-size:16px;line-height:1.65;",
+        "strong": "font-weight:700;",
+        "em": "font-style:italic;",
+    }
+    # render_markdown emits only these controlled tags; source HTML is escaped.
+    for tag, style in styles.items():
+        rendered = rendered.replace(f"<{tag}>", f'<{tag} style="{style}">')
+    return rendered.replace("<a href=", '<a style="color:#007EA7;text-decoration:underline;" href=')
+
+
 def build_html(subject: str, body_markdown: str, unsubscribe_link: str) -> str:
     """Assemble l'email HTML complet (gabarit + corps rendu + pied de page)."""
     return (
@@ -176,9 +194,9 @@ def build_html(subject: str, body_markdown: str, unsubscribe_link: str) -> str:
         '<meta name="viewport" content="width=device-width, initial-scale=1">'
         f"<title>{html_escaper.escape(subject)}</title></head>"
         '<body style="margin:0;padding:24px;background:#f8fafc;'
-        "font-family:'Nunito',system-ui,sans-serif;color:#042C60;\">"
+        'font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.65;color:#042C60;">'
         '<div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;padding:28px;">'
-        f"{render_markdown(body_markdown)}"
+        f"{_email_body(body_markdown)}"
         '<hr style="border:none;border-top:1px solid #E2E8F0;margin:28px 0 12px;">'
         '<p style="font-size:12px;color:#64748B;">'
         "Vous recevez ce message parce que vous avez un compte Explorito.<br>"

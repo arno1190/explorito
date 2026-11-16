@@ -183,6 +183,11 @@ export default function AnnoncesPage() {
             placeholder={"## Bonjour !\n\nCe mois-ci…"}
             className="w-full rounded-xl border-2 border-fun-border bg-white p-3 font-mono text-sm text-fun-text outline-none focus:border-fun-sky"
           />
+          <p className="text-sm text-fun-text-muted">
+            Utilisez une ligne vide entre les paragraphes, « - » pour les puces
+            et « **texte** » pour le gras. Collez le Markdown source pour
+            conserver la mise en forme.
+          </p>
         </div>
         {create.isError ? (
           <p className="rounded-xl bg-fun-red-light p-3 text-sm font-semibold text-fun-red">
@@ -280,12 +285,15 @@ export default function AnnoncesPage() {
                 {preview.recipient_count > 1 ? "s" : ""} (parents inscrits, non
                 désinscrits).
               </p>
-              {/* L'aperçu est l'email tel qu'il partira : on l'affiche brut,
-                  dans une boîte, pour éviter toute confusion avec l'app. */}
-              <div
-                className="overflow-x-auto rounded-2xl border-2 border-fun-border bg-fun-surface p-4"
-                dangerouslySetInnerHTML={{ __html: preview.html }}
-              />
+              {/* Separate document: app resets must not restyle email content. */}
+              <div className="overflow-hidden rounded-2xl border-2 border-fun-border bg-fun-surface">
+                <iframe
+                  title={`Aperçu de l'email : ${selected.subject}`}
+                  srcDoc={preview.html}
+                  sandbox=""
+                  className="block h-[760px] w-full border-0"
+                />
+              </div>
             </>
           )}
 

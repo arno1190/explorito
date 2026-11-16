@@ -261,7 +261,7 @@ def test_admin_flow_create_preview_send_and_delete(
     assert created.json()["from_email"] == settings.MAIL_FROM
 
     preview = client.get(f"/api/v1/announcements/{announcement_id}/preview", headers=headers).json()
-    assert "<h1>Salut</h1>" in preview["html"]
+    assert "Salut</h1>" in preview["html"] and '<h1 style="' in preview["html"]
     # L'admin connecté est parent lui aussi : il compte parmi les destinataires.
     assert preview["recipient_count"] == 2
 
@@ -322,3 +322,46 @@ def test_admin_routes_are_forbidden_to_parents(client: TestClient, db_session: S
     assert client.get(f"/api/v1/announcements/{aid}/preview", headers=headers).status_code == 403
     assert client.post(f"/api/v1/announcements/{aid}/send", headers=headers).status_code == 403
     assert client.delete(f"/api/v1/announcements/{aid}", headers=headers).status_code == 403
+
+
+def test_email_formatting_does_not_depend_on_browser_default_styles():
+    from html.parser import HTMLParser
+
+    class Elements(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.styles = {}
+
+        def handle_starttag(self, tag, attrs):
+            self.styles.setdefault(tag, []).append(dict(attrs).get("style", ""))
+
+    source = "# Nouveautés\n\nBonjour 👋\n\nVoici les nouveautés.\n\n- **Notes** : lire la musique.\n- **Rythmes** : écouter et frapper.\n\nBonne découverte !"
+    rendered = mail.build_html("Nouveautés", source, "https://example.fr/unsubscribe")
+    elements = Elements()
+    elements.feed(rendered)
+    assert "list-style-type:disc" in elements.styles["ul"][0]
+    assert "padding-left:24px" in elements.styles["ul"][0]
+    assert all("margin:0 0 12px" in style for style in elements.styles["li"])
+    assert "margin:0 0 16px" in elements.styles["p"][0]
+    assert "font-weight:700" in elements.styles["strong"][0]
+    assert "font-size:26px" in elements.styles["h1"][0]
+
+
+def test_preview_and_sent_email_share_formatted_body(client, db_session, monkeypatch, smtp):
+    headers = _admin_headers(client, monkeypatch)
+    source = "Bonjour 👋\n\nVoici les nouveautés.\n\n- **Notes** : lire la musique.\n- **Rythmes** : écouter et frapper.\n\nBonne découverte !"
+    created = client.post(
+        "/api/v1/announcements", headers=headers, json={"subject": "Musique", "body_markdown": source}
+    ).json()
+    preview = client.get(f"/api/v1/announcements/{created['id']}/preview", headers=headers).json()
+    messages = []
+    monkeypatch.setattr(mail, "_transport_send", messages.append)
+    response = client.post(f"/api/v1/announcements/{created['id']}/send", headers=headers)
+    assert response.status_code == 200
+    assert len(messages) == 1
+    sent_html = messages[0].get_body(preferencelist=("html",)).get_content()
+    # Only the recipient-specific footer differs between preview and delivery.
+    assert preview["html"].split("<hr")[0] == sent_html.split("<hr")[0]
+    assert "list-style-type:disc" in sent_html
+    assert "font-weight:700" in sent_html
+    assert source in messages[0].get_body(preferencelist=("plain",)).get_content()
