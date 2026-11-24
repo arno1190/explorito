@@ -209,7 +209,13 @@ Un exercice = `type`, `question` (la consigne lue par l'enfant), `content`,
 | `pythagore` | `{"tables": [3], "blanks": 5}` | `{}` |
 | `music_sequence` | Suites lues ou dictées, 2 à 8 notes naturelles. Voir [solfège 1C1]({{API_BASE}}/api/v1/agent/solfege-1c1.md). | `{"names": ["do", "ré"]}` |
 | `music_rhythm` | Compter, reconnaître ou frapper des rythmes. Voir [solfège 1C1]({{API_BASE}}/api/v1/agent/solfege-1c1.md). | Selon le mode : `{"beats": 4}`, `{"option_id": "a"}` ou `{}` |
+| `tracing` | `{"glyph": "a", "style": "script", "mode": "guided"}` — `style` `capitale` (A–Z), `script` (a–z d'imprimerie), `cursive` (a–z attachées) ou `chiffre` (0–9) ; `mode` `guided` (pointillés avec départ, numéros et flèches), `model` (modèle à côté) ou `free` (sans modèle). Les tracés sont fournis par l'appli : ne donne que le glyphe. De `ps` à `cp` seulement. | `{}` — le serveur corrige l'encre (forme, ordre et sens des traits) |
 | `music_note` | `{"clef": "sol", "mode": "name", "pitch": "G4", "choices": ["fa", "sol", "la"]}` — `clef` `sol`, `fa` ou `ut3` (clé d'ut 3e ligne, celle de l'alto), `mode` `name` (nommer la note) ou `place` (la poser), `pitch` de `A3` à `C6` en clé de sol, de `B2` à `D5` en clé d'ut 3 (deux lignes supplémentaires au plus) ; `choices` facultatif | `{"name": "sol"}` — nom de `pitch` (`do ré mi fa sol la si`) |
+
+Pour un pack d'écriture, enchaîne les modes d'une leçon à l'autre : `guided`
+(Découverte), puis `model` (Entraînement), puis `free` (Défi). Consigne type :
+« Suis les pointillés pour tracer le a. », puis « Écris le a tout seul. ».
+Style par niveau : `capitale` en `ps`/`ms`, `script` en `gs`, `cursive` en `cp`.
 
 `color` sur une option sert aux non-lecteurs (maternelle) : une pastille de
 couleur au lieu d'un mot.

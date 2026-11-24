@@ -27,5 +27,6 @@ export const ExerciseType = {
   soroban: "soroban",
   music_rhythm: "music_rhythm",
   music_sequence: "music_sequence",
+  tracing: "tracing",
   music_note: "music_note",
 } as const;

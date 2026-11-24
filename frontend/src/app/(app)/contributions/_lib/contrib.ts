@@ -267,6 +267,7 @@ const EXERCISE_TYPE_LABELS: Record<string, string> = {
   math_problem: "Problème",
   reading: "Lecture",
   soroban: "Boulier",
+  tracing: "Tracé de lettres",
   music_note: "Lecture de notes",
   music_sequence: "Lecture et écoute de notes",
   music_rhythm: "Lecture rythmique",

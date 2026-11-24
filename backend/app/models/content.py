@@ -89,6 +89,7 @@ class ExerciseType(str, enum.Enum):
     SOROBAN = "soroban"  # boulier japonais : lire ou construire un nombre
     MUSIC_RHYTHM = "music_rhythm"
     MUSIC_SEQUENCE = "music_sequence"
+    TRACING = "tracing"  # tracer une lettre ou un chiffre au stylet (corrigé sur l'encre)
     MUSIC_NOTE = "music_note"  # portée musicale : nommer ou placer une note (clé de sol / d'ut 3)
 
 

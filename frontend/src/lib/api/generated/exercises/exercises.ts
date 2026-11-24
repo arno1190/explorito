@@ -30,9 +30,184 @@ import type {
   GetExerciseResultsApiV1ExercisesExerciseIdResultsGetParams,
   HTTPValidationError,
   ListExercisesApiV1ExercisesGetParams,
+  TracingGlyphsApiV1ExercisesTracingGlyphsGet200,
 } from "../../model";
 
 import { axiosInstance } from "../../axios-instance";
+
+/**
+ * Tracés de référence des exercices ``tracing`` (public, statique).
+
+Pour chaque style : les lignes du cahier, puis chaque glyphe comme une liste
+ordonnée de traits, chaque trait une polyligne parcourue dans le sens enseigné,
+dans une case de 100 × 140.
+ * @summary Tracing Glyphs
+ */
+export const tracingGlyphsApiV1ExercisesTracingGlyphsGet = (
+  signal?: AbortSignal
+) => {
+  return axiosInstance<TracingGlyphsApiV1ExercisesTracingGlyphsGet200>({
+    url: `/api/v1/exercises/tracing/glyphs`,
+    method: "GET",
+    signal,
+  });
+};
+
+export const getTracingGlyphsApiV1ExercisesTracingGlyphsGetQueryKey = () => {
+  return [`/api/v1/exercises/tracing/glyphs`] as const;
+};
+
+export const getTracingGlyphsApiV1ExercisesTracingGlyphsGetQueryOptions = <
+  TData = Awaited<
+    ReturnType<typeof tracingGlyphsApiV1ExercisesTracingGlyphsGet>
+  >,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof tracingGlyphsApiV1ExercisesTracingGlyphsGet>>,
+      TError,
+      TData
+    >
+  >;
+}) => {
+  const { query: queryOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getTracingGlyphsApiV1ExercisesTracingGlyphsGetQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof tracingGlyphsApiV1ExercisesTracingGlyphsGet>>
+  > = ({ signal }) => tracingGlyphsApiV1ExercisesTracingGlyphsGet(signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof tracingGlyphsApiV1ExercisesTracingGlyphsGet>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type TracingGlyphsApiV1ExercisesTracingGlyphsGetQueryResult =
+  NonNullable<
+    Awaited<ReturnType<typeof tracingGlyphsApiV1ExercisesTracingGlyphsGet>>
+  >;
+export type TracingGlyphsApiV1ExercisesTracingGlyphsGetQueryError = unknown;
+
+export function useTracingGlyphsApiV1ExercisesTracingGlyphsGet<
+  TData = Awaited<
+    ReturnType<typeof tracingGlyphsApiV1ExercisesTracingGlyphsGet>
+  >,
+  TError = unknown,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof tracingGlyphsApiV1ExercisesTracingGlyphsGet>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<
+            ReturnType<typeof tracingGlyphsApiV1ExercisesTracingGlyphsGet>
+          >,
+          TError,
+          Awaited<
+            ReturnType<typeof tracingGlyphsApiV1ExercisesTracingGlyphsGet>
+          >
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useTracingGlyphsApiV1ExercisesTracingGlyphsGet<
+  TData = Awaited<
+    ReturnType<typeof tracingGlyphsApiV1ExercisesTracingGlyphsGet>
+  >,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof tracingGlyphsApiV1ExercisesTracingGlyphsGet>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<
+            ReturnType<typeof tracingGlyphsApiV1ExercisesTracingGlyphsGet>
+          >,
+          TError,
+          Awaited<
+            ReturnType<typeof tracingGlyphsApiV1ExercisesTracingGlyphsGet>
+          >
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useTracingGlyphsApiV1ExercisesTracingGlyphsGet<
+  TData = Awaited<
+    ReturnType<typeof tracingGlyphsApiV1ExercisesTracingGlyphsGet>
+  >,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof tracingGlyphsApiV1ExercisesTracingGlyphsGet>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Tracing Glyphs
+ */
+
+export function useTracingGlyphsApiV1ExercisesTracingGlyphsGet<
+  TData = Awaited<
+    ReturnType<typeof tracingGlyphsApiV1ExercisesTracingGlyphsGet>
+  >,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof tracingGlyphsApiV1ExercisesTracingGlyphsGet>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions =
+    getTracingGlyphsApiV1ExercisesTracingGlyphsGetQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * Liste les exercices avec filtres optionnels (admin uniquement : la liste

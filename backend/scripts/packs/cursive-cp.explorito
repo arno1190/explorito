@@ -1,0 +1,487 @@
+{
+  "format_version": 1,
+  "pack": {
+    "title": "J'écris en attaché",
+    "emoji": "✍️",
+    "description": "Apprendre l'écriture cursive lettre par lettre : les ponts, les boucles, les ronds, puis écrire seul.",
+    "tags": [
+      "écriture",
+      "cursive",
+      "attaché",
+      "lettres"
+    ]
+  },
+  "lessons": [
+    {
+      "subject_slug": "francais",
+      "level": "cp",
+      "tier": 1,
+      "name": "Les ponts 🌉",
+      "description": "i, u, t, n, m et r en attaché.",
+      "exercises": [
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour écrire le i attaché.",
+          "content": {
+            "glyph": "i",
+            "style": "cursive",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour écrire le u attaché.",
+          "content": {
+            "glyph": "u",
+            "style": "cursive",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour écrire le t attaché.",
+          "content": {
+            "glyph": "t",
+            "style": "cursive",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour écrire le n attaché.",
+          "content": {
+            "glyph": "n",
+            "style": "cursive",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour écrire le m attaché.",
+          "content": {
+            "glyph": "m",
+            "style": "cursive",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour écrire le r attaché.",
+          "content": {
+            "glyph": "r",
+            "style": "cursive",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        }
+      ]
+    },
+    {
+      "subject_slug": "francais",
+      "level": "cp",
+      "tier": 1,
+      "name": "Les boucles ➰",
+      "description": "e, l, b, h, k et f en attaché.",
+      "exercises": [
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour écrire le e attaché.",
+          "content": {
+            "glyph": "e",
+            "style": "cursive",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour écrire le l attaché.",
+          "content": {
+            "glyph": "l",
+            "style": "cursive",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour écrire le b attaché.",
+          "content": {
+            "glyph": "b",
+            "style": "cursive",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour écrire le h attaché.",
+          "content": {
+            "glyph": "h",
+            "style": "cursive",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour écrire le k attaché.",
+          "content": {
+            "glyph": "k",
+            "style": "cursive",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour écrire le f attaché.",
+          "content": {
+            "glyph": "f",
+            "style": "cursive",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        }
+      ]
+    },
+    {
+      "subject_slug": "francais",
+      "level": "cp",
+      "tier": 2,
+      "name": "Les ronds ⭕",
+      "description": "c, a, o, d, g et q en attaché.",
+      "exercises": [
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour écrire le c attaché.",
+          "content": {
+            "glyph": "c",
+            "style": "cursive",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour écrire le a attaché.",
+          "content": {
+            "glyph": "a",
+            "style": "cursive",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour écrire le o attaché.",
+          "content": {
+            "glyph": "o",
+            "style": "cursive",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour écrire le d attaché.",
+          "content": {
+            "glyph": "d",
+            "style": "cursive",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour écrire le g attaché.",
+          "content": {
+            "glyph": "g",
+            "style": "cursive",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour écrire le q attaché.",
+          "content": {
+            "glyph": "q",
+            "style": "cursive",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        }
+      ]
+    },
+    {
+      "subject_slug": "francais",
+      "level": "cp",
+      "tier": 2,
+      "name": "Avec le modèle 👀",
+      "description": "a, e, i, l, o et u en regardant le modèle.",
+      "exercises": [
+        {
+          "type": "tracing",
+          "question": "Regarde le modèle et écris le a attaché.",
+          "content": {
+            "glyph": "a",
+            "style": "cursive",
+            "mode": "model"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Regarde le modèle et écris le e attaché.",
+          "content": {
+            "glyph": "e",
+            "style": "cursive",
+            "mode": "model"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Regarde le modèle et écris le i attaché.",
+          "content": {
+            "glyph": "i",
+            "style": "cursive",
+            "mode": "model"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Regarde le modèle et écris le l attaché.",
+          "content": {
+            "glyph": "l",
+            "style": "cursive",
+            "mode": "model"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Regarde le modèle et écris le o attaché.",
+          "content": {
+            "glyph": "o",
+            "style": "cursive",
+            "mode": "model"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Regarde le modèle et écris le u attaché.",
+          "content": {
+            "glyph": "u",
+            "style": "cursive",
+            "mode": "model"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        }
+      ]
+    },
+    {
+      "subject_slug": "francais",
+      "level": "cp",
+      "tier": 3,
+      "name": "Tout seul 🌟",
+      "description": "l, e, a, i, u et o sans modèle.",
+      "exercises": [
+        {
+          "type": "tracing",
+          "question": "Écris le l attaché tout seul.",
+          "content": {
+            "glyph": "l",
+            "style": "cursive",
+            "mode": "free"
+          },
+          "correct_answer": {},
+          "difficulty_level": 3,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Écris le e attaché tout seul.",
+          "content": {
+            "glyph": "e",
+            "style": "cursive",
+            "mode": "free"
+          },
+          "correct_answer": {},
+          "difficulty_level": 3,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Écris le a attaché tout seul.",
+          "content": {
+            "glyph": "a",
+            "style": "cursive",
+            "mode": "free"
+          },
+          "correct_answer": {},
+          "difficulty_level": 3,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Écris le i attaché tout seul.",
+          "content": {
+            "glyph": "i",
+            "style": "cursive",
+            "mode": "free"
+          },
+          "correct_answer": {},
+          "difficulty_level": 3,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Écris le u attaché tout seul.",
+          "content": {
+            "glyph": "u",
+            "style": "cursive",
+            "mode": "free"
+          },
+          "correct_answer": {},
+          "difficulty_level": 3,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Écris le o attaché tout seul.",
+          "content": {
+            "glyph": "o",
+            "style": "cursive",
+            "mode": "free"
+          },
+          "correct_answer": {},
+          "difficulty_level": 3,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        }
+      ]
+    }
+  ],
+  "self_check": {
+    "math_verified": true,
+    "facts_checked": true,
+    "no_personal_data": true,
+    "notes": "Cursive française : attaque depuis la ligne de base et sortie vers la droite. Progression ponts, boucles, ronds (comme en classe), puis modèle et écriture libre."
+  }
+}

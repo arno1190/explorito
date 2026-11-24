@@ -1,0 +1,394 @@
+{
+  "format_version": 1,
+  "pack": {
+    "title": "Je trace les capitales",
+    "emoji": "✏️",
+    "description": "Tracer les lettres capitales au stylet ou au doigt : d'abord les traits droits, puis les obliques et les ronds.",
+    "tags": [
+      "écriture",
+      "lettres",
+      "capitales",
+      "graphisme"
+    ]
+  },
+  "lessons": [
+    {
+      "subject_slug": "francais",
+      "level": "ms",
+      "tier": 1,
+      "name": "Les traits droits ✏️",
+      "description": "I, L, T, E, F et H en suivant les pointillés.",
+      "exercises": [
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le I.",
+          "content": {
+            "glyph": "I",
+            "style": "capitale",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le L.",
+          "content": {
+            "glyph": "L",
+            "style": "capitale",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le T.",
+          "content": {
+            "glyph": "T",
+            "style": "capitale",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le E.",
+          "content": {
+            "glyph": "E",
+            "style": "capitale",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le F.",
+          "content": {
+            "glyph": "F",
+            "style": "capitale",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le H.",
+          "content": {
+            "glyph": "H",
+            "style": "capitale",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        }
+      ]
+    },
+    {
+      "subject_slug": "francais",
+      "level": "ms",
+      "tier": 2,
+      "name": "Les obliques ↗️",
+      "description": "A, V, X, N, M et Z en suivant les pointillés.",
+      "exercises": [
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le A.",
+          "content": {
+            "glyph": "A",
+            "style": "capitale",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le V.",
+          "content": {
+            "glyph": "V",
+            "style": "capitale",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le X.",
+          "content": {
+            "glyph": "X",
+            "style": "capitale",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le N.",
+          "content": {
+            "glyph": "N",
+            "style": "capitale",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le M.",
+          "content": {
+            "glyph": "M",
+            "style": "capitale",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le Z.",
+          "content": {
+            "glyph": "Z",
+            "style": "capitale",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        }
+      ]
+    },
+    {
+      "subject_slug": "francais",
+      "level": "ms",
+      "tier": 2,
+      "name": "Les ronds ⭕",
+      "description": "O, C, U, D, P et B en suivant les pointillés.",
+      "exercises": [
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le O.",
+          "content": {
+            "glyph": "O",
+            "style": "capitale",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le C.",
+          "content": {
+            "glyph": "C",
+            "style": "capitale",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le U.",
+          "content": {
+            "glyph": "U",
+            "style": "capitale",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le D.",
+          "content": {
+            "glyph": "D",
+            "style": "capitale",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le P.",
+          "content": {
+            "glyph": "P",
+            "style": "capitale",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le B.",
+          "content": {
+            "glyph": "B",
+            "style": "capitale",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        }
+      ]
+    },
+    {
+      "subject_slug": "francais",
+      "level": "ms",
+      "tier": 3,
+      "name": "Avec le modèle 👀",
+      "description": "Écrire seul en regardant le modèle.",
+      "exercises": [
+        {
+          "type": "tracing",
+          "question": "Regarde le modèle et écris le I.",
+          "content": {
+            "glyph": "I",
+            "style": "capitale",
+            "mode": "model"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Regarde le modèle et écris le L.",
+          "content": {
+            "glyph": "L",
+            "style": "capitale",
+            "mode": "model"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Regarde le modèle et écris le T.",
+          "content": {
+            "glyph": "T",
+            "style": "capitale",
+            "mode": "model"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Regarde le modèle et écris le O.",
+          "content": {
+            "glyph": "O",
+            "style": "capitale",
+            "mode": "model"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Regarde le modèle et écris le A.",
+          "content": {
+            "glyph": "A",
+            "style": "capitale",
+            "mode": "model"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Regarde le modèle et écris le V.",
+          "content": {
+            "glyph": "V",
+            "style": "capitale",
+            "mode": "model"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        }
+      ]
+    }
+  ],
+  "self_check": {
+    "math_verified": true,
+    "facts_checked": true,
+    "no_personal_data": true,
+    "notes": "Tracés fournis par l'appli (prototype de Thomas). Ordre pédagogique : traits droits, obliques, ronds, puis écriture avec modèle."
+  }
+}

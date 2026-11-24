@@ -25,6 +25,7 @@ Types canoniques (voir :class:`app.models.content.ExerciseType`) :
     correct_answer : {"name": "sol"}
 """
 
+import math
 from datetime import datetime
 from typing import Any
 from uuid import UUID
@@ -33,6 +34,7 @@ from pydantic import BaseModel, Field, computed_field, model_validator
 
 from app.models.content import DifficultyEnum, ExerciseType
 from app.schemas.music import MusicRhythmContent, MusicSequenceContent, rhythm_beats
+from app.services.tracing_glyphs import GLYPHS
 
 
 # --------------------------------------------------------------------------- #
@@ -189,6 +191,70 @@ class MusicNoteAnswer(BaseModel):
     name: str = Field(..., pattern="^(do|ré|mi|fa|sol|la|si)$")
 
 
+class TracingContent(BaseModel):
+    """Contenu d'un exercice de tracé : un glyphe, son style d'écriture et le niveau d'aide.
+
+    - ``style`` : ``capitale`` (bâton), ``script`` (minuscules d'imprimerie),
+      ``cursive`` (écriture attachée) ou ``chiffre``.
+    - ``mode`` : ``guided`` (pointillés, point de départ, numéros et flèches),
+      ``model`` (modèle affiché à côté) ou ``free`` (sans modèle).
+
+    Les tracés de référence sont fournis par l'application
+    (:mod:`app.services.tracing_glyphs`) : l'auteur ne choisit que le glyphe.
+    """
+
+    glyph: str = Field(..., min_length=1, max_length=1)
+    style: str = Field(default="capitale", pattern="^(capitale|script|cursive|chiffre)$")
+    mode: str = Field(default="guided", pattern="^(guided|model|free)$")
+
+    @model_validator(mode="after")
+    def _glyph_exists(self) -> "TracingContent":
+        if self.glyph not in GLYPHS[self.style]:
+            available = "".join(GLYPHS[self.style])
+            raise ValueError(f"glyph « {self.glyph} » absent du style {self.style} (disponibles : {available})")
+        return self
+
+
+class TracingLine(BaseModel):
+    """Ligne du cahier à tracer sous la lettre (y dans la case 100 × 140)."""
+
+    y: float
+    role: str
+
+
+class TracingStyle(BaseModel):
+    """Tracés de référence d'un style : lignes du cahier et traits ordonnés de chaque glyphe."""
+
+    lines: list[TracingLine]
+    glyphs: dict[str, list[list[list[float]]]]
+
+
+#: Bornes de l'encre acceptée : un enfant ne trace pas 40 traits pour une lettre.
+TRACING_MAX_STROKES = 40
+TRACING_MAX_POINTS = 4000
+TRACING_MAX_INK_LENGTH = 20000.0
+
+
+class TracingAnswer(BaseModel):
+    """Encre envoyée par l'enfant : traits ordonnés, en coordonnées de la case 100 × 140."""
+
+    strokes: list[list[tuple[float, float]]] = Field(..., max_length=TRACING_MAX_STROKES)
+
+    @model_validator(mode="after")
+    def _bounded(self) -> "TracingAnswer":
+        if sum(len(stroke) for stroke in self.strokes) > TRACING_MAX_POINTS:
+            raise ValueError("trop de points d'encre")
+        length = 0.0
+        for stroke in self.strokes:
+            for x, y in stroke:
+                if not (math.isfinite(x) and math.isfinite(y)) or not (-100 <= x <= 250 and -100 <= y <= 290):
+                    raise ValueError("point d'encre hors de l'ardoise")
+            length += sum(math.dist(a, b) for a, b in zip(stroke, stroke[1:], strict=False))
+        if length > TRACING_MAX_INK_LENGTH:
+            raise ValueError("encre trop longue")
+        return self
+
+
 BLANK_MARKER = "___"
 
 
@@ -274,6 +340,11 @@ def validate_exercise_payload(
                 raise ValueError("Un seul choix doit reproduire events et correspondre à correct_answer.option_id.")
         elif correct_answer:
             raise ValueError("Le mode tap exige correct_answer: {} ; le serveur calcule les attaques.")
+
+    elif exercise_type == ExerciseType.TRACING:
+        TracingContent.model_validate(content)
+        if correct_answer:
+            raise ValueError("Un exercice tracing exige correct_answer: {} ; le serveur corrige sur l'encre.")
 
     elif exercise_type == ExerciseType.MUSIC_NOTE:
         note_content = MusicNoteContent.model_validate(content)

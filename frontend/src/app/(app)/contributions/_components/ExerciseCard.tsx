@@ -168,6 +168,32 @@ function ExerciseBody({ exercise }: { exercise: PackExercisePreview }) {
         </div>
       );
     }
+    case "tracing": {
+      const styles: Record<string, string> = {
+        capitale: "Capitale",
+        script: "Script",
+        cursive: "Cursive",
+        chiffre: "Chiffre",
+      };
+      const modes: Record<string, string> = {
+        guided: "pointillés",
+        model: "avec modèle",
+        free: "sans modèle",
+      };
+      return (
+        <p className="text-sm text-fun-text">
+          <span className="font-bold">
+            {styles[String(content.style ?? "capitale")] ??
+              String(content.style)}{" "}
+            · {modes[String(content.mode ?? "guided")] ?? String(content.mode)}
+            &nbsp;:{" "}
+          </span>
+          <span className="text-2xl font-extrabold">
+            {String(content.glyph ?? "—")}
+          </span>
+        </p>
+      );
+    }
     case "music_note": {
       return (
         <p className="text-sm text-fun-text">

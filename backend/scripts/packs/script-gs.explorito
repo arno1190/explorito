@@ -1,0 +1,395 @@
+{
+  "format_version": 1,
+  "pack": {
+    "title": "J'écris les lettres scriptes",
+    "emoji": "✏️",
+    "description": "Tracer les minuscules d'imprimerie entre les lignes : les rondes, les cannes, puis avec et sans modèle.",
+    "tags": [
+      "écriture",
+      "lettres",
+      "script",
+      "minuscules",
+      "graphisme"
+    ]
+  },
+  "lessons": [
+    {
+      "subject_slug": "francais",
+      "level": "gs",
+      "tier": 1,
+      "name": "Les lettres rondes ⭕",
+      "description": "c, o, a, d, g et q : on part en haut et on tourne vers la gauche.",
+      "exercises": [
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le c.",
+          "content": {
+            "glyph": "c",
+            "style": "script",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le o.",
+          "content": {
+            "glyph": "o",
+            "style": "script",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le a.",
+          "content": {
+            "glyph": "a",
+            "style": "script",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le d.",
+          "content": {
+            "glyph": "d",
+            "style": "script",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le g.",
+          "content": {
+            "glyph": "g",
+            "style": "script",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le q.",
+          "content": {
+            "glyph": "q",
+            "style": "script",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        }
+      ]
+    },
+    {
+      "subject_slug": "francais",
+      "level": "gs",
+      "tier": 1,
+      "name": "Les lettres à bâton ✏️",
+      "description": "i, l, t, u, n et m en suivant les pointillés.",
+      "exercises": [
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le i.",
+          "content": {
+            "glyph": "i",
+            "style": "script",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le l.",
+          "content": {
+            "glyph": "l",
+            "style": "script",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le t.",
+          "content": {
+            "glyph": "t",
+            "style": "script",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le u.",
+          "content": {
+            "glyph": "u",
+            "style": "script",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le n.",
+          "content": {
+            "glyph": "n",
+            "style": "script",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Suis les pointillés pour tracer le m.",
+          "content": {
+            "glyph": "m",
+            "style": "script",
+            "mode": "guided"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        }
+      ]
+    },
+    {
+      "subject_slug": "francais",
+      "level": "gs",
+      "tier": 2,
+      "name": "Avec le modèle 👀",
+      "description": "a, e, i, o, u et l en regardant le modèle.",
+      "exercises": [
+        {
+          "type": "tracing",
+          "question": "Regarde le modèle et écris le a.",
+          "content": {
+            "glyph": "a",
+            "style": "script",
+            "mode": "model"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Regarde le modèle et écris le e.",
+          "content": {
+            "glyph": "e",
+            "style": "script",
+            "mode": "model"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Regarde le modèle et écris le i.",
+          "content": {
+            "glyph": "i",
+            "style": "script",
+            "mode": "model"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Regarde le modèle et écris le o.",
+          "content": {
+            "glyph": "o",
+            "style": "script",
+            "mode": "model"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Regarde le modèle et écris le u.",
+          "content": {
+            "glyph": "u",
+            "style": "script",
+            "mode": "model"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Regarde le modèle et écris le l.",
+          "content": {
+            "glyph": "l",
+            "style": "script",
+            "mode": "model"
+          },
+          "correct_answer": {},
+          "difficulty_level": 1,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        }
+      ]
+    },
+    {
+      "subject_slug": "francais",
+      "level": "gs",
+      "tier": 3,
+      "name": "Tout seul 🌟",
+      "description": "a, o, l, i, e et u sans modèle.",
+      "exercises": [
+        {
+          "type": "tracing",
+          "question": "Écris le a tout seul.",
+          "content": {
+            "glyph": "a",
+            "style": "script",
+            "mode": "free"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Écris le o tout seul.",
+          "content": {
+            "glyph": "o",
+            "style": "script",
+            "mode": "free"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Écris le l tout seul.",
+          "content": {
+            "glyph": "l",
+            "style": "script",
+            "mode": "free"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Écris le i tout seul.",
+          "content": {
+            "glyph": "i",
+            "style": "script",
+            "mode": "free"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Écris le e tout seul.",
+          "content": {
+            "glyph": "e",
+            "style": "script",
+            "mode": "free"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        },
+        {
+          "type": "tracing",
+          "question": "Écris le u tout seul.",
+          "content": {
+            "glyph": "u",
+            "style": "script",
+            "mode": "free"
+          },
+          "correct_answer": {},
+          "difficulty_level": 2,
+          "media_urls": {
+            "emoji": "✏️"
+          }
+        }
+      ]
+    }
+  ],
+  "self_check": {
+    "math_verified": true,
+    "facts_checked": true,
+    "no_personal_data": true,
+    "notes": "Minuscules script, lignage Seyès simplifié (hauteur d'x, hampes, jambages). Rondes avant cannes, puis retrait progressif de l'aide."
+  }
+}

@@ -48,6 +48,15 @@ export interface SorobanContent {
   columns?: number | null;
 }
 
+export interface TracingContent {
+  /** Lettre ou chiffre à tracer (un caractère). */
+  glyph: string;
+  /** "capitale", "script" (minuscules d'imprimerie), "cursive" ou "chiffre". */
+  style?: "capitale" | "script" | "cursive" | "chiffre";
+  /** "guided" : pointillés ; "model" : modèle à côté ; "free" : sans modèle. */
+  mode?: "guided" | "model" | "free";
+}
+
 export type NoteName = "do" | "ré" | "mi" | "fa" | "sol" | "la" | "si";
 
 export interface MusicNoteContent {

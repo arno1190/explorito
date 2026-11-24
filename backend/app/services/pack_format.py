@@ -92,6 +92,9 @@ LEVEL_MAX_QUESTION_CHARS: dict[LevelEnum, int] = {
     LevelEnum.CM2: 400,
 }
 
+#: Niveaux où l'on apprend à tracer les lettres (exercice ``tracing``).
+TRACING_LEVELS: frozenset[LevelEnum] = frozenset({LevelEnum.PS, LevelEnum.MS, LevelEnum.GS, LevelEnum.CP})
+
 #: Pénalités du score de qualité, appliquées **une fois par code** (et non par
 #: occurrence) : un pack de dix leçons trop bavardes n'est pas dix fois pire
 #: qu'un pack d'une seule. Score = 100 − somme des pénalités, planché à 0.
@@ -99,6 +102,7 @@ DEDUCTIONS: dict[str, int] = {
     "flat_difficulty": 15,
     "no_type_mix": 15,
     "text_too_long_for_level": 10,
+    "tracing_level": 10,
     "self_check_missing": 10,
     "single_lesson": 5,
     "xp_ignored": 0,
@@ -775,6 +779,18 @@ def _validate_lesson(
         normalised = _validate_exercise(raw_exercise, lesson_index, idx, max_question_chars, errors, soft)
         if normalised is not None:
             exercises.append(normalised)
+            if normalised["type"] == ExerciseType.TRACING.value and level is not None and level not in TRACING_LEVELS:
+                soft.append(
+                    _issue(
+                        "warning",
+                        "tracing_level",
+                        f"leçon {lesson_index + 1}, exercice {idx + 1} : le tracé de lettres s'apprend de la PS au CP, "
+                        f"pas en {level.value.upper()}. Visez un niveau entre PS et CP.",
+                        lesson_index=lesson_index,
+                        exercise_index=idx,
+                        field="type",
+                    )
+                )
 
     if level is None:
         return None

@@ -40,7 +40,7 @@ Calé sur les leçons de maternelle `ps` d'Explorito (dénombrement, couleurs, f
 - **Français** : nommer des objets familiers (animaux, fruits, parties du corps, vêtements). Aucune lettre, aucun son.
 - **Autres** : couleurs de base (rouge, bleu, jaune, vert), formes rond / carré / triangle.
 - **Consigne** : impérative, ≤ 6 mots, forme « Appuie sur le chat. » Elle est lue par l'adulte.
-- **Types autorisés** : `multiple_choice` **uniquement**, 3 options, chacune portant un emoji ou une pastille de couleur (`content.options[].color`). L'enfant ne lit pas : l'option doit être identifiable sans texte.
+- **Types autorisés** : `multiple_choice`, 3 options, chacune portant un emoji ou une pastille de couleur (`content.options[].color`). L'enfant ne lit pas : l'option doit être identifiable sans texte. `tracing` en `capitale` ou `chiffre`, mode `guided`, lettres de traits droits (I, L, T, E, H).
 - **Interdits** : `math_problem` (saisie au clavier), `fill_blanks`, `reading`, `soroban`, `pythagore`.
 - **`difficulty_level`** : 1.
 
@@ -51,7 +51,7 @@ Calé sur les leçons de maternelle `ms` d'Explorito.
 - **Nombres** : quantités 1 à 5.
 - **Français** : vocabulaire du quotidien élargi (vêtements, aliments, animaux).
 - **Consigne** : ≤ 8 mots.
-- **Types autorisés** : `multiple_choice` uniquement, options visuelles. Mêmes interdits que `ps`.
+- **Types autorisés** : `multiple_choice`, options visuelles ; `tracing` en `capitale` ou `chiffre` (modes `guided` puis `model`). Mêmes interdits que `ps`.
 - **`difficulty_level`** : 1, exceptionnellement 2 sur la dernière leçon du pack.
 
 ## `gs` — Grande section (~5 ans, lecteur débutant)
@@ -62,7 +62,7 @@ Calé sur les leçons de maternelle `gs` d'Explorito : « Compter jusqu'à 10 »
 - **Français oral** : premier son d'un mot, compter les syllabes, contraires (grand/petit, chaud/froid).
 - **Autres** : météo et saisons, formes.
 - **Consigne** : ≤ 10 mots, un seul verbe.
-- **Types autorisés** : `multiple_choice`. `reveal` accepté comme carte de récompense. Toujours pas de texte à lire, pas de `math_problem`.
+- **Types autorisés** : `multiple_choice`. `reveal` accepté comme carte de récompense. `tracing` en `capitale`, `chiffre` ou `script` (minuscules d'imprimerie), tous modes. Toujours pas de texte à lire, pas de `math_problem`.
 - **`difficulty_level`** : 1 à 2.
 
 ## `cp` — Cours préparatoire (~6 ans, apprend à lire)
@@ -76,7 +76,7 @@ Calé sur les leçons `cp` de maths et de français d'Explorito.
 - **Français** : voyelles ; sons simples puis complexes (`ou`, `ch`, `on`, `an`, `oi`, `in`) ; syllabes consonne+voyelle ; mots-outils fréquents (le, la, un, et, est) ; majuscule et point ; ordre alphabétique.
 - **Phrase** : ≤ 10 mots par énoncé, présent de l'indicatif, vocabulaire concret du quotidien.
 - **Bloc `reading`** : 2 à 3 phrases, **≤ 30 mots au total**. Repère réel du contenu existant : « Le chat de Léa est noir. Il dort sur le lit. Léa aime beaucoup son chat. » (17 mots).
-- **Types autorisés** : `multiple_choice`, `math_problem` (résultat entier), `fill_blanks` (**un seul** `___`, un mot court), `reading` suivi de 2–3 questions, `reveal`, `soroban` (lire un nombre ≤ 100).
+- **Types autorisés** : `multiple_choice`, `math_problem` (résultat entier), `fill_blanks` (**un seul** `___`, un mot court), `reading` suivi de 2–3 questions, `reveal`, `soroban` (lire un nombre ≤ 100), `tracing` (surtout `cursive`, aussi `script` et `chiffre`).
 - **`difficulty_level`** : 1 à 3.
 
 ## `ce1` — Cours élémentaire 1 (~7 ans)

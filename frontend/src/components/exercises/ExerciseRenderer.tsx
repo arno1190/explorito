@@ -12,6 +12,7 @@ import { Pythagore } from "./Pythagore";
 import { Reading } from "./Reading";
 import { Reveal } from "./Reveal";
 import { Soroban } from "./Soroban";
+import { Tracing } from "./Tracing";
 import type {
   AnswerPayload,
   FillBlanksContent,
@@ -24,6 +25,7 @@ import type {
   ReadingContent,
   RevealContent,
   SorobanContent,
+  TracingContent,
 } from "./types";
 
 interface ExerciseRendererProps {
@@ -98,6 +100,8 @@ export function ExerciseRenderer({
             content={content as MusicSequenceContent}
           />
         );
+      case "tracing":
+        return <Tracing {...shared} content={content as TracingContent} />;
       case "music_note":
         return <MusicNote {...shared} content={content as MusicNoteContent} />;
       default:

@@ -55,6 +55,7 @@ Note : ``lesson.xp_reward`` est ignoré dans les deux formats — l'XP est déri
 des difficultés des exercices (``services.packs.derive_lesson_xp``).
 """
 
+import asyncio
 import json
 import sys
 from pathlib import Path
@@ -72,6 +73,7 @@ from app.models.content import (
 from app.models.pack import Pack, PackOrigin
 from app.schemas.exercise import validate_exercise_payload
 from app.services.contribution import ingest_pack, known_subject_slugs
+from app.services.narration import narrate_pack
 from app.services.pack_format import PackRejected, normalised_title, validate_pack
 from app.services.packs import derive_lesson_xp, ensure_official_pack
 
@@ -105,6 +107,8 @@ def seed_pack(pack_path: str) -> int:
             print(f"= pack '{title}' déjà présent — ignoré")
             return 0
 
+        # Même narration que les envois de parents : consignes audio de la PS au CP.
+        asyncio.run(narrate_pack(payload))
         pack = ingest_pack(
             db,
             payload=payload,

@@ -23,6 +23,9 @@ from app.schemas.exercise import (
     ExerciseSubmit,
     ExerciseSubmitResponse,
     ExerciseUpdate,
+    TracingAnswer,
+    TracingContent,
+    TracingStyle,
     UnlockedAchievement,
     normalize_note_name,
 )
@@ -30,6 +33,8 @@ from app.schemas.music import MusicRhythmContent, TapAnswer, rhythm_attacks
 from app.services.gamification import process_exercise_result
 from app.services.packs import pack_readable_by
 from app.services.progression import lesson_locked
+from app.services.tracing import evaluate as evaluate_tracing
+from app.services.tracing import glyph_catalogue
 
 router = APIRouter()
 
@@ -133,6 +138,15 @@ def check_answer_correctness(exercise: Exercise, user_answer: dict[str, Any]) ->
             for tap, attack in zip(taps, expected_attacks, strict=True)
         )
 
+    if exercise.type == ExerciseType.TRACING.value:
+        # Tracé : on corrige l'encre envoyée, jamais un score calculé par l'appareil.
+        try:
+            tracing = TracingContent.model_validate(exercise.content)
+            ink = TracingAnswer.model_validate(user_answer).strokes
+        except ValidationError:
+            return False
+        return evaluate_tracing(tracing.style, tracing.glyph, tracing.mode, ink).ok
+
     if exercise.type == ExerciseType.MUSIC_NOTE.value:
         # Portée : seul le nom compte (poser un sol sur n'importe quel sol est juste).
         expected = correct_answer.get("name")
@@ -165,6 +179,17 @@ def check_answer_correctness(exercise: Exercise, user_answer: dict[str, Any]) ->
 
     # Type inconnu : refus explicite plutôt que faux positif
     return False
+
+
+@router.get("/tracing/glyphs", response_model=dict[str, TracingStyle])
+async def tracing_glyphs() -> dict[str, dict[str, Any]]:
+    """Tracés de référence des exercices ``tracing`` (public, statique).
+
+    Pour chaque style : les lignes du cahier, puis chaque glyphe comme une liste
+    ordonnée de traits, chaque trait une polyligne parcourue dans le sens enseigné,
+    dans une case de 100 × 140.
+    """
+    return glyph_catalogue()
 
 
 @router.get("", response_model=list[ExerciseResponse])
