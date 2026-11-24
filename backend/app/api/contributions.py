@@ -6,6 +6,7 @@ validateur. Un jeton d'envoi ne peut jamais publier : il crée des brouillons.
 """
 
 import json
+import logging
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Annotated, Any
@@ -59,6 +60,8 @@ from app.services.contributor_legal import CONTRIBUTOR_TERMS, CONTRIBUTOR_TERMS_
 from app.services.narration import narrate_pack
 from app.services.pack_format import PackRejected, validate_pack
 from app.services.packs import log_pack_action, refresh_lesson_xp
+
+logger = logging.getLogger("explorito.contributions")
 
 router = APIRouter()
 
@@ -485,6 +488,9 @@ async def upload_pack(
     try:
         await narrate_pack(payload)
     except Exception as exc:
+        # Sans cette trace, une panne du fournisseur TTS (ex. 403 d'edge-tts
+        # quand Microsoft fait tourner sa version client) reste invisible.
+        logger.exception("Pack narration failed")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail={"code": "audio_generation_failed", "message": "La génération audio a échoué. Réessayez cet envoi."},
